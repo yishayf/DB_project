@@ -8,6 +8,46 @@ import traceback
 sparql = SPARQLWrapper("http://dbpedia.org/sparql")
 con = mdb.connect('localhost', 'root', '', 'db_project_test')
 
+
+def get_competition_medalists():
+    medalists = []
+    sparql.setQuery("""PREFIX dbp0: <http://dbpedia.org/ontology>
+    SELECT ?compname ?value
+    WHERE {
+    ?cn <http://dbpedia.org/ontology/goldMedalist>/rdfs:label ?value.
+    ?cn rdfs:label ?compname
+    FILTER(lang(?value)='en')
+    FILTER(lang(?compname)='en')
+    FILTER regex(?compname, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics', 'i')
+    }""")
+
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    results = results["results"]["bindings"]
+    for res in results:
+        tup = (res["compname"]["value"], res["value"]["value"])
+        medalists.append(tup)
+    return medalists
+
+
+def insert_to_competition_type(medals_tuples):
+    #TODO: make sure we dont have the same item twice while insert
+    with con:
+        cur = con.cursor()
+        cur.execute("TRUNCATE TABLE competition_type")
+        con.commit()
+        for tup in medals_tuples:
+            try:
+                field_name = tup[0].encode('latin-1', 'ignore').split('at')[0]
+                comp_name = tup[0].encode('latin-1', 'ignore').split('Olympics')[1]
+                field_and_comp = field_name + "-" + comp_name
+                cur.execute("INSERT IGNORE INTO competition_type (competition_name) VALUES (%s)", [field_and_comp])
+                con.commit()
+            except Exception as e:
+                traceback.print_exc(file=sys.stdout)
+                con.rollback()
+
 def get_olympic_years():
     sparql.setQuery("""
     PREFIX dbpedia0: <http://dbpedia.org/ontology/>
@@ -41,7 +81,7 @@ def query_and_insert_athletes():
         offset = 0;
         while True:
             print offset
-            if offset > 100:
+            if offset > 10000:
                 break
             athlete_list = get_athletes(offset)
             if athlete_list:
@@ -66,7 +106,7 @@ def get_athletes(offset):
     "FILTER(lang(?bp) = 'en')" \
     "FILTER(lang(?comment) = 'en') " \
     "} " \
-    "limit 30 offset %s" % (offset)
+    "limit 1000 offset %s" % (offset)
 
 
     sparql.setQuery(query_offset_string)
@@ -149,6 +189,9 @@ def run_query():
 # olympic_years = get_olympic_years()
 # print olympic_years
 # insert_olympic_years(olympic_years)
-query_and_insert_athletes()
+#query_and_insert_athletes()
 
-con.close()
+#con.close()
+
+comp_list = get_competition_medalists()
+insert_to_competition_type(comp_list)
