@@ -25,7 +25,7 @@ def query_and_insert_athlete_field_and_games():
             athlete_games_list = get_athletes_games(offset)
             if athlete_games_list:
                 offset += len(athlete_games_list)
-                insert_athletes_games_and_field(athlete_list, cur)
+                insert_athletes_games_and_field(athlete_games_list, cur)
             else:
                 break
 
