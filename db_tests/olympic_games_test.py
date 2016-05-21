@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 from SPARQLWrapper import SPARQLWrapper, JSON
 import MySQLdb as mdb
+import sys
+import traceback
 
 sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+con = mdb.connect('localhost', 'root', '', 'db_project_test')
 
 def get_olympic_years():
     sparql.setQuery("""
@@ -28,6 +31,71 @@ def get_olympic_years():
         olympic_games.append((olympic_game_arr[0].lower(), olympic_game_arr[1].lower()))
 
     return olympic_games
+
+
+def query_and_insert_athletes():
+    with con:
+        cur = con.cursor()
+        cur.execute("TRUNCATE TABLE athlete")
+        con.commit()
+        offset = 0;
+        while True:
+            print offset
+            if offset > 100:
+                break
+            athlete_list = get_athletes(offset)
+            if athlete_list:
+                offset += len(athlete_list)
+                insert_athletes(athlete_list, cur)
+            else:
+                break
+
+
+def get_athletes(offset):
+    athlete_list = []
+
+    query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
+    "SELECT ?label ?bd (group_concat(?bp; separator = ', ' as ?bpl)) as ?bpn ?comment WHERE { " \
+    "?at a dbpedia0:Athlete. " \
+    "?at rdfs:label ?label. " \
+    "?at dbpedia0:birthDate ?bd. " \
+    "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
+    "?at rdfs:comment ?comment " \
+    "FILTER(lang(?label) = 'en') " \
+    "FILTER(datatype(?bd) = xsd:date) " \
+    "FILTER(lang(?bp) = 'en')" \
+    "FILTER(lang(?comment) = 'en') " \
+    "} " \
+    "limit 30 offset %s" % (offset)
+
+
+    sparql.setQuery(query_offset_string)
+
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    results = results["results"]["bindings"]
+    for res in results:
+        tup = (res["label"]["value"], res["bd"]["value"], res["bpn"]["value"], res["comment"]["value"])
+        athlete_list.append(tup)
+
+    return athlete_list
+
+
+def insert_athletes(athlete_tuples, cur):
+    #TODO: make sure we dont have the same item twice while insert
+    for tup in athlete_tuples:
+        try:
+            label = tup[0].encode('latin-1', 'ignore')
+            name = tup[0].encode('latin-1', 'ignore').split('(')[0]
+            bd = tup[1].encode('latin-1', 'ignore')
+            bp = tup[2].encode('latin-1', 'ignore')
+            comment = tup[3].encode('latin-1', 'ignore')
+            cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date, birth_place, comment) VALUES (%s, %s, %s, %s, %s)",
+                        (label, name, bd, bp, comment))
+            con.commit()
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            con.rollback()
 
 
 def insert_olympic_years(olympic_game_tuples):
@@ -78,6 +146,9 @@ def run_query():
     print(len(results["results"]["bindings"]))
 
 
-olympic_years = get_olympic_years()
-print olympic_years
-insert_olympic_years(olympic_years)
+# olympic_years = get_olympic_years()
+# print olympic_years
+# insert_olympic_years(olympic_years)
+query_and_insert_athletes()
+
+con.close()
