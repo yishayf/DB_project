@@ -4,9 +4,88 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import MySQLdb as mdb
 import sys
 import traceback
+import re
+
 
 sparql = SPARQLWrapper("http://dbpedia.org/sparql")
 con = mdb.connect('localhost', 'root', '', 'db_project_test')
+
+
+def query_and_insert_athlete_field_and_games():
+    with con:
+        cur = con.cursor()
+        cur.execute("TRUNCATE TABLE AthleteGames")
+        cur.execute("TRUNCATE TABLE SportField")
+        con.commit()
+        offset = 0
+        while True:
+            print offset
+            if offset > 100: # todo: remove this
+                break
+            athlete_games_list = get_athletes_games(offset)
+            if athlete_games_list:
+                offset += len(athlete_games_list)
+                insert_athletes_games_and_field(athlete_list, cur)
+            else:
+                break
+
+
+def get_athletes_games(offset):
+    athlete_games_list = []
+
+    query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
+        "PREFIX dct: <http://purl.org/dc/terms/> " \
+        "SELECT ?personlabel ?gamelabel WHERE { " \
+        "?sw a dbpedia0:Athlete. " \
+        "?sw dbpedia0:birthDate ?bd. " \
+        "?sw rdfs:label ?personlabel. " \
+        "?sw dct:subject/rdfs:label ?gamelabel. " \
+        "FILTER(lang(?personlabel) = 'en') " \
+        "FILTER(lang(?gamelabel) = 'en') " \
+        "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
+        "}" \
+        "limit 30 offset %s" % offset
+
+    sparql.setQuery(query_offset_string)
+
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    results = results["results"]["bindings"]
+    for res in results:
+        tup = (res["personlabel"]["value"], res["gamelabel"]["value"])
+        athlete_games_list.append(tup)
+
+    return athlete_games_list
+
+
+def insert_athletes_games_and_field(athlete_game_tuple, cur):
+    #TODO: make sure we dont have the same item twice while insert
+    for tup in athlete_game_tuple:
+        try:
+            athlete_label = tup[0].encode('latin-1', 'ignore')
+            athlete_game = tup[1].encode('latin-1', 'ignore')
+            p = re.compile('(.*) at the (\d{4}) (summer|winter) Olympics', re.IGNORECASE)
+            match = p.match(athlete_game)
+            if match:
+                field = match.group(1)
+                year = match.group(2)
+                season = match.group(3)
+
+                #insert into sport field
+                cur.execute("INSERT IGNORE INTO SportField (field_name) VALUES (%s)", [field])
+
+                # insert into athlete games
+                cur.execute("")
+
+                #insert into athlete fields
+            cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date, birth_place, comment) VALUES (%s, %s, %s, %s, %s)",
+                        (label, name, bd, bp, comment))
+            con.commit()
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            con.rollback()
+
+
 
 def get_olympic_years():
     sparql.setQuery("""
