@@ -14,18 +14,19 @@ con = mdb.connect('localhost', 'root', '', 'db_project_test',unix_socket = '/opt
 def query_and_insert_athlete_field_and_games():
     with con:
         cur = con.cursor()
-        cur.execute("TRUNCATE TABLE AthleteGames")
-        cur.execute("TRUNCATE TABLE SportField")
-        con.commit()
+        # cur.execute("TRUNCATE TABLE AthleteSportField")
+        # cur.execute("TRUNCATE TABLE AthleteGames")
+        # cur.execute("TRUNCATE TABLE SportField")
+        # con.commit()
         offset = 0
         while True:
             print offset
-            if offset > 100: # todo: remove this
+            if offset > 10000: # todo: remove this
                 break
             athlete_games_list = get_athletes_games(offset)
             if athlete_games_list:
                 offset += len(athlete_games_list)
-                insert_athletes_games_and_field(athlete_games_list, cur)
+                insert_athletes_games_and_field(athlete_games_list, con)
             else:
                 break
 
@@ -44,7 +45,7 @@ def get_athletes_games(offset):
         "FILTER(lang(?gamelabel) = 'en') " \
         "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
         "}" \
-        "limit 30 offset %s" % offset
+        "limit 1000 offset %s" % offset
 
     sparql.setQuery(query_offset_string)
 
@@ -58,34 +59,41 @@ def get_athletes_games(offset):
     return athlete_games_list
 
 
-def insert_athletes_games_and_field(athlete_game_tuple, cur):
-    #TODO: make sure we dont have the same item twice while insert
+def insert_athletes_games_and_field(athlete_game_tuple, con):
     for tup in athlete_game_tuple:
+        athlete_label = tup[0].encode('latin-1', 'ignore')
+        athlete_game = tup[1].encode('latin-1', 'ignore')
+        p = re.compile('(.*) at the (\d{4}) (summer|winter) Olympics', re.IGNORECASE)
+        match = p.match(athlete_game)
+        if not match:
+            continue
+        field = match.group(1)
+        year = match.group(2)
+        season = match.group(3)
+        cur = con.cursor()
+
         try:
-            athlete_label = tup[0].encode('latin-1', 'ignore')
-            athlete_game = tup[1].encode('latin-1', 'ignore')
-            p = re.compile('(.*) at the (\d{4}) (summer|winter) Olympics', re.IGNORECASE)
-            match = p.match(athlete_game)
-            if match:
-                field = match.group(1)
-                year = match.group(2)
-                season = match.group(3)
-
-                #insert into sport field
-                cur.execute("INSERT IGNORE INTO SportField (field_name) VALUES (%s)", [field])
-
-                # insert into athlete field - this will fail if athlete is not found
-                # field is necessarily found because
-                cur.execute("select athlete_id into @aid from athlete where dbp_label = %s;"
-                            "select field_id into @fid from SportField where field_name = %s;"
-                            "insert IGNORE into AthleteSportField (athlete_id, field_id) values (@aid,@fid)",
-                            )
-
-                #insert into athlete games
-                cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date, birth_place, comment) VALUES (%s, %s, %s, %s, %s)",
-                        (label, name, bd, bp, comment))
+            #insert into sport field
+            cur.execute("INSERT IGNORE INTO SportField (field_name) VALUES (%s)", [field])
             con.commit()
-        except Exception as e:
+
+            # insert into athlete field - this will fail if athlete is not found
+            # field is necessarily found because
+            cur.execute("INSERT IGNORE INTO AthleteSportFields (athlete_id, field_id) "
+                        "SELECT a.athlete_id, f.field_id "
+                        "FROM athlete a, SportField f "
+                        "WHERE a.dbp_label = %s AND f.field_name = %s ",
+                        (athlete_label, field))
+            con.commit()
+
+            cur.execute("INSERT IGNORE INTO AthleteGames (athlete_id, game_id) "
+                        "SELECT a.athlete_id, g.game_id "
+                        "FROM athlete a, olympicgame g "
+                        "WHERE a.dbp_label = %s AND g.year = %s AND g.season = %s",
+                        (athlete_label, year, season))
+            con.commit()
+
+        except:
             traceback.print_exc(file=sys.stdout)
             con.rollback()
 
@@ -119,16 +127,13 @@ def get_olympic_years():
 def query_and_insert_athletes():
     with con:
         cur = con.cursor()
-        # ALTER TABLE AthleteSportField DROP FOREIGN KEY atleteidconst;
-        # ALTER TABLE AthleteSportField DROP FOREIGN KEY fieldidconst;
 
-        cur.execute(
-                    "TRUNCATE TABLE athlete;")
+        cur.execute("TRUNCATE TABLE athlete;")
         con.commit()
         offset = 0;
         while True:
             print offset
-            if offset > 100:
+            if offset > 10000:
                 break
             athlete_list = get_athletes(offset)
             if athlete_list:
@@ -142,19 +147,18 @@ def get_athletes(offset):
     athlete_list = []
 
     query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
-    "SELECT ?label ?bd (group_concat(?bp; separator = ', ' as ?bpl)) as ?bpn ?comment WHERE { " \
-    "?at a dbpedia0:Athlete. " \
-    "?at rdfs:label ?label. " \
-    "?at dbpedia0:birthDate ?bd. " \
-    "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
-    "?at rdfs:comment ?comment " \
-    "FILTER(lang(?label) = 'en') " \
-    "FILTER(datatype(?bd) = xsd:date) " \
-    "FILTER(lang(?bp) = 'en')" \
-    "FILTER(lang(?comment) = 'en') " \
-    "} " \
-    "limit 30 offset %s" % (offset)
-
+        "SELECT ?label ?bd (group_concat(?bp; separator = ', ' as ?bpl)) as ?bpn ?comment WHERE { " \
+        "?at a dbpedia0:Athlete. " \
+        "?at rdfs:label ?label. " \
+        "?at dbpedia0:birthDate ?bd. " \
+        "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
+        "?at rdfs:comment ?comment " \
+        "FILTER(lang(?label) = 'en') " \
+        "FILTER(datatype(?bd) = xsd:date) " \
+        "FILTER(lang(?bp) = 'en')" \
+        "FILTER(lang(?comment) = 'en') " \
+        "} " \
+        "limit 1000 offset %s" % (offset)
 
     sparql.setQuery(query_offset_string)
 
@@ -231,9 +235,91 @@ def run_query():
     print(len(results["results"]["bindings"]))
 
 
+def remove_foreign_keys():
+    cur = con.cursor()
+    try:
+        cur.execute("ALTER TABLE AthleteGames DROP FOREIGN KEY ahtleteidconst;")
+        con.commit()
+    except:
+        traceback.print_exc(file=sys.stdout)
+        con.rollback()
+    try:
+        cur.execute("ALTER TABLE AthleteGames DROP FOREIGN KEY gameidconst;")
+        con.commit()
+    except:
+        traceback.print_exc(file=sys.stdout)
+        con.rollback()
+    try:
+        cur.execute("ALTER TABLE AthleteSportFields DROP FOREIGN KEY athleteidconst;")
+        con.commit()
+    except:
+        traceback.print_exc(file=sys.stdout)
+        con.rollback()
+    try:
+        cur.execute("ALTER TABLE AthleteSportFields DROP FOREIGN KEY fieldidconst;")
+        con.commit()
+    except:
+        traceback.print_exc(file=sys.stdout)
+        con.rollback()
+
+
+def add_foreign_keys():
+    cur = con.cursor()
+    # add foreign keys for AthleteGames
+    try:
+        cur.execute("ALTER TABLE `AthleteGames` ADD CONSTRAINT `ahtleteidconst` FOREIGN KEY(`athlete_id`) "
+                    "REFERENCES `db_project_test`. `athlete`(`athlete_id`) ON DELETE CASCADE ON UPDATE CASCADE; ")
+        con.commit()
+    except:
+        traceback.print_exc(file=sys.stdout)
+        con.rollback()
+    try:
+        cur.execute("ALTER TABLE `AthleteGames` ADD CONSTRAINT `gameidconst` FOREIGN KEY(`game_id`) "
+                    "REFERENCES `db_project_test`. `olympicgame`(`game_id`) ON DELETE CASCADE ON UPDATE CASCADE;")
+        con.commit()
+    except:
+        traceback.print_exc(file=sys.stdout)
+        con.rollback()
+        # add foreign keys for AthleteSportFields
+    try:
+        cur.execute("ALTER TABLE `AthleteSportFields` ADD CONSTRAINT `athleteidconst` FOREIGN KEY (`athlete_id`) "
+        "REFERENCES `db_project_test`.`athlete`(`athlete_id`) ON DELETE CASCADE ON UPDATE CASCADE;")
+        con.commit()
+    except:
+        traceback.print_exc(file=sys.stdout)
+        con.rollback()
+    try:
+        cur.execute("ALTER TABLE `AthleteSportFields` ADD CONSTRAINT `fieldidconst` FOREIGN KEY(`field_id`) "
+                   "REFERENCES `db_project_test`. `SportField`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE;")
+        con.commit()
+    except:
+        traceback.print_exc(file=sys.stdout)
+        con.rollback()
+
+def truncate_all_dbpedia_data_tables():
+    return
+
+# remove foreign keys from tables
+# remove_foreign_keys()
+
+# truncate tables
+truncate_all_dbpedia_data_tables()
+
+
+# get all olympic years
 # olympic_years = get_olympic_years()
-# print olympic_years
+
+# insert olympic years
 # insert_olympic_years(olympic_years)
+
+# get and insert athletes
 # query_and_insert_athletes()
 
+# restore foreign keys
+# add_foreign_keys()
+
+# get and insert athlete games and sport field
+query_and_insert_athlete_field_and_games()
+
+#close the connection
 con.close()
