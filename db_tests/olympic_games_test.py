@@ -8,7 +8,7 @@ import re
 
 
 sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-con = mdb.connect('localhost', 'root', '', 'db_project_test')
+con = mdb.connect('localhost', 'root', '', 'db_project_test',unix_socket = '/opt/lampp/var/mysql/mysql.sock')
 
 
 def query_and_insert_athlete_field_and_games():
@@ -74,11 +74,15 @@ def insert_athletes_games_and_field(athlete_game_tuple, cur):
                 #insert into sport field
                 cur.execute("INSERT IGNORE INTO SportField (field_name) VALUES (%s)", [field])
 
-                # insert into athlete games
-                cur.execute("")
+                # insert into athlete field - this will fail if athlete is not found
+                # field is necessarily found because
+                cur.execute("select athlete_id into @aid from athlete where dbp_label = %s;"
+                            "select field_id into @fid from SportField where field_name = %s;"
+                            "insert IGNORE into AthleteSportField (athlete_id, field_id) values (@aid,@fid)",
+                            )
 
-                #insert into athlete fields
-            cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date, birth_place, comment) VALUES (%s, %s, %s, %s, %s)",
+                #insert into athlete games
+                cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date, birth_place, comment) VALUES (%s, %s, %s, %s, %s)",
                         (label, name, bd, bp, comment))
             con.commit()
         except Exception as e:
@@ -115,7 +119,11 @@ def get_olympic_years():
 def query_and_insert_athletes():
     with con:
         cur = con.cursor()
-        cur.execute("TRUNCATE TABLE athlete")
+        # ALTER TABLE AthleteSportField DROP FOREIGN KEY atleteidconst;
+        # ALTER TABLE AthleteSportField DROP FOREIGN KEY fieldidconst;
+
+        cur.execute(
+                    "TRUNCATE TABLE athlete;")
         con.commit()
         offset = 0;
         while True:
@@ -169,7 +177,7 @@ def insert_athletes(athlete_tuples, cur):
             bd = tup[1].encode('latin-1', 'ignore')
             bp = tup[2].encode('latin-1', 'ignore')
             comment = tup[3].encode('latin-1', 'ignore')
-            cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date, birth_place, comment) VALUES (%s, %s, %s, %s, %s)",
+            cur.execute("INSERT INTO athlete (dbp_label, name, birth_date, birth_place, comment) VALUES (%s, %s, %s, %s, %s)",
                         (label, name, bd, bp, comment))
             con.commit()
         except Exception as e:
@@ -179,19 +187,17 @@ def insert_athletes(athlete_tuples, cur):
 
 def insert_olympic_years(olympic_game_tuples):
     #TODO: make sure we dont have the same item twice while insert
-    con = mdb.connect('localhost', 'root', '', 'db_project_test')
     with con:
         cur = con.cursor()
-        cur.execute("TRUNCATE TABLE OlympicGame")
+        cur.execute("TRUNCATE TABLE olympicgame")
         con.commit()
         for tup in olympic_game_tuples:
             try:
                 print tup
-                cur.execute("INSERT INTO OlympicGame (year, season) VALUES (%s, %s)", (tup[0], tup[1]))
+                cur.execute("INSERT INTO olympicgame (year, season) VALUES (%s, %s)", (tup[0], tup[1]))
                 con.commit()
             except:
                 con.rollback()
-    con.close()
 
 
 def query_db():
@@ -228,6 +234,6 @@ def run_query():
 # olympic_years = get_olympic_years()
 # print olympic_years
 # insert_olympic_years(olympic_years)
-query_and_insert_athletes()
+# query_and_insert_athletes()
 
 con.close()
