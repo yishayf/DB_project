@@ -193,7 +193,7 @@ def get_athletes(offset):
     athlete_list = []
     #todo: we get more than one bd - maybe add sample!
     query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
-        "SELECT ?label sample(?bd) as ?bds (group_concat(?bp; separator = ', ' as ?bpl)) as ?bpn ?comment WHERE { " \
+        "SELECT ?label ?bd (group_concat(?bp; separator = ', ' as ?bpl)) as ?bpn ?comment WHERE { " \
         "?at a dbpedia0:Athlete. " \
         "?at rdfs:label ?label. " \
         "?at dbpedia0:birthDate ?bd. " \
@@ -212,7 +212,7 @@ def get_athletes(offset):
     results = sparql.query().convert()
     results = results["results"]["bindings"]
     for res in results:
-        tup = (res["label"]["value"], res["bds"]["value"], res["bpn"]["value"], res["comment"]["value"])
+        tup = (res["label"]["value"], res["bd"]["value"], res["bpn"]["value"], res["comment"]["value"])
         athlete_list.append(tup)
 
     return athlete_list
