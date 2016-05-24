@@ -29,7 +29,7 @@ def query_and_insert_athlete_competiotions_medals_by_color(medal_color):
             comp_list = get_competition_medalists(medal_color)
             if comp_list:
                 offset += len(comp_list)
-                insert_to_competition_type_and_athletemedals(comp_list, con)
+                insert_to_competition_type_and_athletemedals(comp_list, medal_color, con)
             else:
                 break
 
@@ -45,7 +45,7 @@ def get_competition_medalists(medal_color, offset):
     "FILTER(lang(?compname)='en') " \
     "FILTER regex(?compname, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics', 'i') " \
     "} " \
-    "limit 10  offset %s"  % (medal_color, offset)
+    "limit 1000  offset %s"  % (medal_color, offset)
     sparql.setQuery(query_string)
 
     sparql.setReturnFormat(JSON)
@@ -58,30 +58,39 @@ def get_competition_medalists(medal_color, offset):
     return medalists
 
 
-def insert_to_competition_type_and_athletemedals(medals_tuples, con):
+def insert_to_competition_type_and_athletemedals(medals_tuples, medal_color, con):
     #TODO: make sure we dont have the same item twice while insert - it's ok beacuse we have primary key
     cur = con.cursor()
-    con.commit()
     for tup in medals_tuples:
         try:
-            competition_info = tup[0].encode('latin-1', 'ignore')
+            competition_info = tup[0].encode('latin-1', 'ignore').lower()
             athlete_label = tup[1].encode('latin-1', 'ignore')
-            p = re.compile('(.*) at the (\d{4}) (summer|winter) Olympics - (.*)$', re.IGNORECASE)
+            p = re.compile('(.*) at the (\d{4}) (summer|winter) Olympics(  )?(.*)$', re.IGNORECASE)
             match = p.match(competition_info)
+
             comp_field = match.group(1)
             year = match.group(2)
             season = match.group(3)
-            comp_name = match.group(4)
-            field_and_comp = comp_field + "-" + comp_name
-            print comp_field, year, season, comp_name, field_and_comp
-            # cur.execute("INSERT IGNORE INTO competition_type (competition_name) VALUES (%s)", [field_and_comp])
-            # con.commit()
+            comp_name = match.group(5)
+            field_and_comp =  comp_field + "_" + comp_name if comp_name else comp_field
+
+            # insert into competition type
+            cur.execute("INSERT IGNORE INTO CompetitionType (competition_name) VALUES (%s)", [field_and_comp])
+            con.commit()
+
+            # insert into athlete medals
+            cur.execute("INSERT IGNORE INTO AthleteMedals (athlete_id, game_id, competition_id, medal_color) "
+                        "SELECT a.athlete_id, g.game_id, c.competition_id, %s "
+                        "FROM Athlete a, OlympicGame g,  CompetitionType c "
+                        "WHERE a.dbp_label = %s AND g.year = %s AND g.season = %s AND c.competition_name = %s",
+                        (medal_color, athlete_label, year, season, field_and_comp))
+            con.commit()
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             con.rollback()
 
 med = get_competition_medalists('gold', 0)
-print med
+insert_to_competition_type_and_athletemedals(med, con, 'gold')
 
 def query_and_insert_athlete_field_and_games():
     with con:
@@ -366,26 +375,26 @@ def run_mysql_query(my_sql_query):
             con.rollback()
 
 
-# # remove foreign keys from tables
-# remove_foreign_keys()
-#
-# # truncate tables
-# truncate_all_dbpedia_data_tables()
-#
-# # restore foreign keys
-# add_foreign_keys()
-#
-# # get all olympic years and insert to db
-# query_and_insert_olympic_games()
-#
-# # get and insert athletes
-# query_and_insert_athletes()
-#
-# # get and insert athlete games and sport field
-# query_and_insert_athlete_field_and_games()
-#
-# # ge and insert athlete medals and their competitions
-# query_and_insert_athlete_competiotions_medals()
-#
-# #close the connection
-# con.close()
+# remove foreign keys from tables
+remove_foreign_keys()
+
+# truncate tables
+truncate_all_dbpedia_data_tables()
+
+# restore foreign keys
+add_foreign_keys()
+
+# get all olympic years and insert to db
+query_and_insert_olympic_games()
+
+# get and insert athletes
+query_and_insert_athletes()
+
+# get and insert athlete games and sport field
+query_and_insert_athlete_field_and_games()
+
+# ge and insert athlete medals and their competitions
+query_and_insert_athlete_competiotions_medals()
+
+#close the connection
+con.close()
