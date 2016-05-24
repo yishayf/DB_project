@@ -38,6 +38,7 @@ def get_athletes_games(offset):
         "FILTER(lang(?personlabel) = 'en') " \
         "FILTER(lang(?gamelabel) = 'en') " \
         "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
+        "FILTER (!regex(?gamelabel, '^Medalists', 'i')) " \
         "}" \
         "limit 1000 offset %s" % offset
 
@@ -67,14 +68,14 @@ def insert_athletes_games_and_field(athlete_game_tuple, con):
         cur = con.cursor()
         try:
             #insert into sport field
-            cur.execute("INSERT IGNORE INTO SportField (field_name) VALUES (%s)", [field])
+            cur.execute("INSERT IGNORE INTO OlympicSportField (field_name) VALUES (%s)", [field])
             con.commit()
 
             # insert into athlete column - this will fail if athlete is not found
             # field is necessarily found because we already have it from previuos query
-            cur.execute("INSERT IGNORE INTO AthleteSportFields (athlete_id, field_id) "
+            cur.execute("INSERT IGNORE INTO AthleteOlympicSportFields (athlete_id, field_id) "
                         "SELECT a.athlete_id, f.field_id "
-                        "FROM Athlete a, SportField f "
+                        "FROM Athlete a, OlympicSportField f "
                         "WHERE a.dbp_label = %s AND f.field_name = %s ",
                         (athlete_label, field))
             con.commit()
@@ -82,7 +83,7 @@ def insert_athletes_games_and_field(athlete_game_tuple, con):
             # insert into game and field columns - this will fail if athlete is not found
             cur.execute("INSERT IGNORE INTO AthleteGames (athlete_id, game_id, field_id) "
                         "SELECT a.athlete_id, g.game_id, f.field_id "
-                        "FROM Athlete a, OlympicGame g, SportField f "
+                        "FROM Athlete a, OlympicGame g, OlympicSportField f "
                         "WHERE a.dbp_label = %s AND g.year = %s AND g.season = %s AND f.field_name = %s",
                         (athlete_label, year, season, field))
             con.commit()
@@ -151,9 +152,9 @@ def query_and_insert_athletes():
 
 def get_athletes(offset):
     athlete_list = []
-
+    #todo: we get more than one bd - maybe add sample!
     query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
-        "SELECT ?label ?bd (group_concat(?bp; separator = ', ' as ?bpl)) as ?bpn ?comment WHERE { " \
+        "SELECT ?label sample(?bd) as ?bds (group_concat(?bp; separator = ', ' as ?bpl)) as ?bpn ?comment WHERE { " \
         "?at a dbpedia0:Athlete. " \
         "?at rdfs:label ?label. " \
         "?at dbpedia0:birthDate ?bd. " \
@@ -172,7 +173,7 @@ def get_athletes(offset):
     results = sparql.query().convert()
     results = results["results"]["bindings"]
     for res in results:
-        tup = (res["label"]["value"], res["bd"]["value"], res["bpn"]["value"], res["comment"]["value"])
+        tup = (res["label"]["value"], res["bds"]["value"], res["bpn"]["value"], res["comment"]["value"])
         athlete_list.append(tup)
 
     return athlete_list
@@ -228,13 +229,12 @@ def insert_athletes(athlete_tuples, con):
 
 
 def remove_foreign_keys():
-    cur = con.cursor()
     drop_queries = [
         "ALTER TABLE AthleteGames DROP FOREIGN KEY ahtleteidconst;",
         "ALTER TABLE AthleteGames DROP FOREIGN KEY gameidconst;",
         "ALTER TABLE AthleteGames DROP FOREIGN KEY fieldidconst1;",
-        "ALTER TABLE AthleteSportFields DROP FOREIGN KEY athleteidconst;",
-        "ALTER TABLE AthleteSportFields DROP FOREIGN KEY fieldidconst;"
+        "ALTER TABLE AthleteOlympicSportFields DROP FOREIGN KEY athleteidconst;",
+        "ALTER TABLE AthleteOlympicSportFields DROP FOREIGN KEY fieldidconst;"
     ]
     run_mysql_queries_lst(drop_queries)
 
@@ -247,11 +247,11 @@ def add_foreign_keys():
         "ALTER TABLE `AthleteGames` ADD CONSTRAINT `gameidconst` FOREIGN KEY(`game_id`) "
         "REFERENCES `db_project_test`. `OlympicGame`(`game_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
         "ALTER TABLE `AthleteGames` ADD CONSTRAINT `fieldidconst1` FOREIGN KEY (`field_id`) "
-        "REFERENCES `db_project_test`.`SportField`(`field_id`) ON DELETE RESTRICT ON UPDATE RESTRICT;",
-        "ALTER TABLE `AthleteSportFields` ADD CONSTRAINT `athleteidconst` FOREIGN KEY (`athlete_id`) "
+        "REFERENCES `db_project_test`.`OlympicSportField`(`field_id`) ON DELETE RESTRICT ON UPDATE RESTRICT;",
+        "ALTER TABLE `AthleteOlympicSportFields` ADD CONSTRAINT `athleteidconst` FOREIGN KEY (`athlete_id`) "
         "REFERENCES `db_project_test`.`Athlete`(`athlete_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
-        "ALTER TABLE `AthleteSportFields` ADD CONSTRAINT `fieldidconst` FOREIGN KEY(`field_id`) "
-        "REFERENCES `db_project_test`. `SportField`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE;"
+        "ALTER TABLE `AthleteOlympicSportFields` ADD CONSTRAINT `fieldidconst` FOREIGN KEY(`field_id`) "
+        "REFERENCES `db_project_test`. `OlympicSportField`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE;"
     ]
     run_mysql_queries_lst(foreign_keys_add_queries)
 
@@ -260,8 +260,8 @@ def truncate_all_dbpedia_data_tables():
     queries_lst = [
         "TRUNCATE TABLE OlympicGame",
         "TRUNCATE TABLE Athlete;",
-        "TRUNCATE TABLE SportField",
-        "TRUNCATE TABLE AthleteSportFields",
+        "TRUNCATE TABLE OlympicSportField",
+        "TRUNCATE TABLE AthleteOlympicSportFields",
         "TRUNCATE TABLE AthleteGames"
     ]
     run_mysql_queries_lst(queries_lst)
@@ -284,19 +284,19 @@ def run_mysql_query(my_sql_query):
 
 
 # remove foreign keys from tables
-# remove_foreign_keys()
+remove_foreign_keys()
 
 # truncate tables
-# truncate_all_dbpedia_data_tables()
-
-# get all olympic years and insert to db
-# query_and_insert_olympic_games()
-
-# get and insert athletes
-# query_and_insert_athletes()
+truncate_all_dbpedia_data_tables()
 
 # restore foreign keys
-# add_foreign_keys()
+add_foreign_keys()
+
+# get all olympic years and insert to db
+query_and_insert_olympic_games()
+
+# get and insert athletes
+query_and_insert_athletes()
 
 # get and insert athlete games and sport field
 query_and_insert_athlete_field_and_games()
