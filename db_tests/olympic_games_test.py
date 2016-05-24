@@ -11,6 +11,45 @@ sparql = SPARQLWrapper("http://dbpedia.org/sparql")
 con = mdb.connect('localhost', 'root', '', 'db_project_test',unix_socket = '/opt/lampp/var/mysql/mysql.sock')
 
 
+def get_competition_medalists():
+    medalists = []
+    sparql.setQuery("""PREFIX dbp0: <http://dbpedia.org/ontology>
+    SELECT ?compname ?value
+    WHERE {
+    ?cn <http://dbpedia.org/ontology/goldMedalist>/rdfs:label ?value.
+    ?cn rdfs:label ?compname
+    FILTER(lang(?value)='en')
+    FILTER(lang(?compname)='en')
+    FILTER regex(?compname, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics', 'i')
+    }""")
+
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    results = results["results"]["bindings"]
+    for res in results:
+        tup = (res["compname"]["value"], res["value"]["value"])
+        medalists.append(tup)
+    return medalists
+
+
+def insert_to_competition_type(medals_tuples):
+    #TODO: make sure we dont have the same item twice while insert
+    with con:
+        cur = con.cursor()
+        cur.execute("TRUNCATE TABLE competition_type")
+        con.commit()
+        for tup in medals_tuples:
+            try:
+                field_name = tup[0].encode('latin-1', 'ignore').split('at')[0]
+                comp_name = tup[0].encode('latin-1', 'ignore').split('Olympics')[1]
+                field_and_comp = field_name + "-" + comp_name
+                cur.execute("INSERT IGNORE INTO competition_type (competition_name) VALUES (%s)", [field_and_comp])
+                con.commit()
+            except Exception as e:
+                traceback.print_exc(file=sys.stdout)
+                con.rollback()
+
 def query_and_insert_athlete_field_and_games():
     with con:
         offset = 0
@@ -303,3 +342,6 @@ query_and_insert_athlete_field_and_games()
 
 #close the connection
 con.close()
+
+comp_list = get_competition_medalists()
+insert_to_competition_type(comp_list)
