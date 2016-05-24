@@ -11,44 +11,77 @@ sparql = SPARQLWrapper("http://dbpedia.org/sparql")
 con = mdb.connect('localhost', 'root', '', 'db_project_test',unix_socket = '/opt/lampp/var/mysql/mysql.sock')
 
 
-def get_competition_medalists():
+def query_and_insert_athlete_competiotions_medals():
+    medal_color = ['gold', 'silver', 'bronze']
+    for color in medal_color:
+        query_and_insert_athlete_competiotions_medals_by_color(color)
+
+
+def query_and_insert_athlete_competiotions_medals_by_color(medal_color):
+    comp_list = get_competition_medalists()
+    insert_to_competition_type_and_athletemedals(comp_list)
+    with con:
+        offset = 0
+        while True:
+            print offset
+            if offset > 10000:  # todo: remove this
+                break
+            comp_list = get_competition_medalists(medal_color)
+            if comp_list:
+                offset += len(comp_list)
+                insert_to_competition_type_and_athletemedals(comp_list, con)
+            else:
+                break
+
+
+def get_competition_medalists(medal_color, offset):
     medalists = []
-    sparql.setQuery("""PREFIX dbp0: <http://dbpedia.org/ontology>
-    SELECT ?compname ?value
-    WHERE {
-    ?cn <http://dbpedia.org/ontology/goldMedalist>/rdfs:label ?value.
-    ?cn rdfs:label ?compname
-    FILTER(lang(?value)='en')
-    FILTER(lang(?compname)='en')
-    FILTER regex(?compname, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics', 'i')
-    }""")
+    query_string = "PREFIX dbp0: <http://dbpedia.org/ontology> " \
+    "SELECT ?compname ?personlabel " \
+    "WHERE { " \
+    "?cn <http://dbpedia.org/ontology/%sMedalist>/rdfs:label ?personlabel. " \
+    "?cn rdfs:label ?compname " \
+    "FILTER(lang(?personlabel)='en') " \
+    "FILTER(lang(?compname)='en') " \
+    "FILTER regex(?compname, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics', 'i') " \
+    "} " \
+    "limit 10  offset %s"  % (medal_color, offset)
+    sparql.setQuery(query_string)
 
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
 
     results = results["results"]["bindings"]
     for res in results:
-        tup = (res["compname"]["value"], res["value"]["value"])
+        tup = (res["compname"]["value"], res["personlabel"]["value"])
         medalists.append(tup)
     return medalists
 
 
-def insert_to_competition_type(medals_tuples):
-    #TODO: make sure we dont have the same item twice while insert
-    with con:
-        cur = con.cursor()
-        cur.execute("TRUNCATE TABLE competition_type")
-        con.commit()
-        for tup in medals_tuples:
-            try:
-                field_name = tup[0].encode('latin-1', 'ignore').split('at')[0]
-                comp_name = tup[0].encode('latin-1', 'ignore').split('Olympics')[1]
-                field_and_comp = field_name + "-" + comp_name
-                cur.execute("INSERT IGNORE INTO competition_type (competition_name) VALUES (%s)", [field_and_comp])
-                con.commit()
-            except Exception as e:
-                traceback.print_exc(file=sys.stdout)
-                con.rollback()
+def insert_to_competition_type_and_athletemedals(medals_tuples, con):
+    #TODO: make sure we dont have the same item twice while insert - it's ok beacuse we have primary key
+    cur = con.cursor()
+    con.commit()
+    for tup in medals_tuples:
+        try:
+            competition_info = tup[0].encode('latin-1', 'ignore')
+            athlete_label = tup[1].encode('latin-1', 'ignore')
+            p = re.compile('(.*) at the (\d{4}) (summer|winter) Olympics - (.*)$', re.IGNORECASE)
+            match = p.match(competition_info)
+            comp_field = match.group(1)
+            year = match.group(2)
+            season = match.group(3)
+            comp_name = match.group(4)
+            field_and_comp = comp_field + "-" + comp_name
+            print comp_field, year, season, comp_name, field_and_comp
+            # cur.execute("INSERT IGNORE INTO competition_type (competition_name) VALUES (%s)", [field_and_comp])
+            # con.commit()
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            con.rollback()
+
+med = get_competition_medalists('gold', 0)
+print med
 
 def query_and_insert_athlete_field_and_games():
     with con:
@@ -274,6 +307,9 @@ def remove_foreign_keys():
         "ALTER TABLE AthleteGames DROP FOREIGN KEY fieldidconst1;",
         "ALTER TABLE AthleteOlympicSportFields DROP FOREIGN KEY athleteidconst;",
         "ALTER TABLE AthleteOlympicSportFields DROP FOREIGN KEY fieldidconst;"
+        "ALTER TABLE AthleteMedals DROP FOREIGN KEY athleteidconst2;",
+        "ALTER TABLE AthleteMedals DROP FOREIGN KEY compidconst;",
+        "ALTER TABLE AthleteMedals DROP FOREIGN KEY gameidconst1;"
     ]
     run_mysql_queries_lst(drop_queries)
 
@@ -290,7 +326,13 @@ def add_foreign_keys():
         "ALTER TABLE `AthleteOlympicSportFields` ADD CONSTRAINT `athleteidconst` FOREIGN KEY (`athlete_id`) "
         "REFERENCES `db_project_test`.`Athlete`(`athlete_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
         "ALTER TABLE `AthleteOlympicSportFields` ADD CONSTRAINT `fieldidconst` FOREIGN KEY(`field_id`) "
-        "REFERENCES `db_project_test`. `OlympicSportField`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE;"
+        "REFERENCES `db_project_test`. `OlympicSportField`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
+        "ALTER TABLE `AthleteMedals` ADD CONSTRAINT `athleteidconst2` FOREIGN KEY (`athlete_id`) "
+        "REFERENCES `db_project_test`.`Athlete`(`athlete_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
+        "ALTER TABLE `AthleteMedals` ADD CONSTRAINT `gameidconst1` FOREIGN KEY (`game_id`) "
+        "REFERENCES `db_project_test`.`OlympicGame`(`game_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
+        "ALTER TABLE `AthleteMedals` ADD CONSTRAINT `compidconst` FOREIGN KEY (`competition_id`) "
+        "REFERENCES `db_project_test`.`CompetitionType`(`competition_id`) ON DELETE CASCADE ON UPDATE CASCADE;"
     ]
     run_mysql_queries_lst(foreign_keys_add_queries)
 
@@ -301,7 +343,9 @@ def truncate_all_dbpedia_data_tables():
         "TRUNCATE TABLE Athlete;",
         "TRUNCATE TABLE OlympicSportField",
         "TRUNCATE TABLE AthleteOlympicSportFields",
-        "TRUNCATE TABLE AthleteGames"
+        "TRUNCATE TABLE AthleteGames",
+        "TRUNCATE TABLE CompetitionType",
+        "TRUNCATE TABLE AthleteMedals"
     ]
     run_mysql_queries_lst(queries_lst)
 
@@ -322,26 +366,26 @@ def run_mysql_query(my_sql_query):
             con.rollback()
 
 
-# remove foreign keys from tables
-remove_foreign_keys()
-
-# truncate tables
-truncate_all_dbpedia_data_tables()
-
-# restore foreign keys
-add_foreign_keys()
-
-# get all olympic years and insert to db
-query_and_insert_olympic_games()
-
-# get and insert athletes
-query_and_insert_athletes()
-
-# get and insert athlete games and sport field
-query_and_insert_athlete_field_and_games()
-
-#close the connection
-con.close()
-
-comp_list = get_competition_medalists()
-insert_to_competition_type(comp_list)
+# # remove foreign keys from tables
+# remove_foreign_keys()
+#
+# # truncate tables
+# truncate_all_dbpedia_data_tables()
+#
+# # restore foreign keys
+# add_foreign_keys()
+#
+# # get all olympic years and insert to db
+# query_and_insert_olympic_games()
+#
+# # get and insert athletes
+# query_and_insert_athletes()
+#
+# # get and insert athlete games and sport field
+# query_and_insert_athlete_field_and_games()
+#
+# # ge and insert athlete medals and their competitions
+# query_and_insert_athlete_competiotions_medals()
+#
+# #close the connection
+# con.close()
