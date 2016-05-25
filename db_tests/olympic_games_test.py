@@ -281,7 +281,7 @@ def get_athletes(offset):
     results = sparql.query().convert()
     results = results["results"]["bindings"]
     for res in results:
-        tup = '' #(res["label"]["value"], res["bd"]["value"], res["bpn"]["value"], res["comment"]["value"])
+        tup = (res["label"]["value"], res["bds"]["value"])
         athlete_list.append(tup)
 
     return athlete_list
@@ -294,12 +294,12 @@ def insert_athletes(athlete_tuples, con):
         label = tup[0].encode('latin-1', 'ignore')
         name = tup[0].encode('latin-1', 'ignore').split('(')[0]
         bd = tup[1].encode('latin-1', 'ignore')
-        bp = tup[2].encode('latin-1', 'ignore')
-        comment = tup[3].encode('latin-1', 'ignore')
+        # bp = tup[2].encode('latin-1', 'ignore')
+        # comment = tup[3].encode('latin-1', 'ignore')
         try:
-            cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date, birth_place, comment) "
-                        "VALUES (%s, %s, %s, %s, %s)",
-                        (label, name, bd, bp, comment))
+            cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date) "
+                        "VALUES (%s, %s, %s)",
+                        (label, name, bd))
             con.commit()
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
@@ -416,7 +416,7 @@ def run_mysql_query(my_sql_query):
 
 # get and insert athletes
 query_and_insert_athletes()
-
+# TODO: add function to update birth place and comment
 # # get and insert athlete games and sport field
 # query_and_insert_athlete_field_and_games()
 #
