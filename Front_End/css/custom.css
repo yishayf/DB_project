@@ -1,0 +1,50 @@
+body {
+    background-image: url(../img/OlympicDay.jpg);
+    -webkit-background-size: cover
+}
+.intro {
+    /*display: table;*/
+    width: 100%;
+    height: auto;
+    padding: 100px 0;
+    text-align: center;
+    color: #09ff22;
+}
+
+#sub-left {
+    float: left;
+    text-align: center;
+    color: #09ff22;
+}
+#sub-right {
+    float: right;
+    text-align: center;
+    direction: rtl;
+    color: #09ff22;
+}
+
+.sub-title {
+    color: #09ff22;
+    height: 0px;
+    margin: 0;
+    position: fixed;
+    margin: 100px;
+    padding: 230px;
+}
+
+h1 {
+    font-family: "Comic Sans MS";
+    font-size: 55px;
+    margin-top: 100px;
+}
+
+a {
+    color: #09ff22;
+}
+
+h2 {
+    font-family: "Comic Sans MS";
+    font-size: 50px;
+    margin: 50px;
+    color: #09ff22;
+}
