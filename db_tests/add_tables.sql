@@ -16,8 +16,9 @@ CREATE TABLE `Athlete` (
  `birth_place` varchar(100) DEFAULT NULL,
  `comment` text,
  PRIMARY KEY (`athlete_id`),
- UNIQUE KEY `unique_label` (`dbp_label`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+ UNIQUE KEY `unique_label` (`dbp_label`),
+ KEY `dbp_label` (`dbp_label`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
 
 
 CREATE TABLE `CompetitionType` (
