@@ -224,7 +224,7 @@ def query_and_insert_athletes():
             athlete_list = get_athletes(offset)
             if athlete_list:
                 offset += len(athlete_list)
-                insert_athletes(athlete_list, con)
+                # insert_athletes(athlete_list, con)
             else:
                 break
 
@@ -305,6 +305,99 @@ def insert_athletes(athlete_tuples, con):
             traceback.print_exc(file=sys.stdout)
             con.rollback()
 
+
+
+ef query_and_insert_athletes():
+    # TODO: don't enter athlete qith too many words in label (e.g. Los Angeles Dodgers minor league players)
+    with con:
+        offset = 0;
+        while True:
+            print offset
+            # if offset > 10000:
+            #     break
+            athlete_list = get_athletes(offset)
+            if athlete_list:
+                offset += len(athlete_list)
+                # insert_athletes(athlete_list, con)
+            else:
+                break
+
+
+def get_athletes(offset):
+    athlete_list = []
+    #todo: we get more than one bd - maybe add sample!
+    # query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
+    #     "SELECT ?label sample(?bd) as ?bds sample(?gamelabel) as ?gl ?comment WHERE { " \
+    #     "?at a dbpedia0:Athlete. " \
+    #     "?at rdfs:label ?label. " \
+    #     "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
+    #     "?at rdfs:comment ?comment " \
+    #     "?at dct:subject/rdfs:label ?gamelabel. " \
+    #     "FILTER(lang(?label) = 'en') " \
+    #     "FILTER(datatype(?bd) = xsd:date) " \
+    #     "FILTER(lang(?bp) = 'en')" \
+    #     "FILTER(lang(?comment) = 'en') " \
+    #     "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
+    #     "} " \
+    #     "limit %s offset %s" % (LIMIT, offset)
+
+    # query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
+    #     "SELECT ?label ?comment (sample(?bd) as ?bds) sample(?gamelabel) as ?gl (group_concat(?bp; separator = ', ') as ?bpn) WHERE { " \
+    #     "?at a dbpedia0:Athlete. " \
+    #     "?at rdfs:label ?label. " \
+    #     "?at rdfs:comment ?comment. " \
+    #     "?at dbpedia0:birthDate ?bd. " \
+    #     "?at dct:subject/rdfs:label ?gamelabel. " \
+    #     "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
+    #     "FILTER(lang(?label) = 'en') " \
+    #     "FILTER(datatype(?bd) = xsd:date) " \
+    #     "FILTER(lang(?bp) = 'en')" \
+    #     "FILTER(lang(?comment) = 'en') " \
+    #     "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
+    #     "} " \
+    #     "limit %s offset %s" % (LIMIT, offset)
+
+    query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
+        "SELECT ?label (sample(?bd) as ?bds) sample(?gamelabel) as ?gl (group_concat(?bp; separator = ', ') as ?bpn) WHERE { " \
+        "?at a dbpedia0:Athlete. " \
+        "?at rdfs:label ?label. " \
+        "?at dbpedia0:birthDate ?bd. " \
+        "?at dct:subject/rdfs:label ?gamelabel. " \
+            "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
+            "FILTER(lang(?bp) = 'en') " \
+        "FILTER(lang(?label) = 'en') " \
+        "FILTER(datatype(?bd) = xsd:date) " \
+        "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
+        "} " \
+        "limit %s offset %s" % (LIMIT, offset)
+
+    sparql.setQuery(query_offset_string)
+
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    results = results["results"]["bindings"]
+    for res in results:
+        tup = (res["label"]["value"], res["bpn"]["value"])
+        athlete_list.append(tup)
+
+    return athlete_list
+
+
+def insert_athletes_birthplace(athlete_tuples, con):
+    #TODO: make sure we dont have the same item twice while insert
+    for tup in athlete_tuples:
+        cur = con.cursor()
+        label = tup[0].encode('latin-1', 'ignore')
+        # bp = tup[2].encode('latin-1', 'ignore')
+        # comment = tup[3].encode('latin-1', 'ignore')
+        try:
+            cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date) "
+                        "VALUES (%s, %s, %s)",
+                        (label, name, bd))
+            con.commit()
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            con.rollback()
 
 # def query_db():
 #     con = mdb.connect('localhost', 'root', '', 'db_project_test')
