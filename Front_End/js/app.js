@@ -56,6 +56,7 @@ app.directive('quiz', function(quizFactory) {
 });
 
 app.factory('quizFactory', function() {
+
     var questions = [
         //{
         //    question: "Which is the largest country in the world by population?",

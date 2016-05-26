@@ -6,7 +6,7 @@ body {
 
 
 h1 {
-    font-family: "Comic Sans MS";
+    font-family: "Andale Mono";
     font-size: 55px;
     margin-top: 100px;
 }
@@ -14,14 +14,27 @@ h1 {
 
 
 h2 {
-    font-family: "Comic Sans MS";
+    font-family: "Andale Mono";
     font-size: 30px;
-    margin: 50px;
-    color: #09ff22;
+    color:  #4CAF50;
+    text-align: center;
 }
 
-.button {
+li {
+    list-style: none;
+    font-family: "Andale Mono";
+    margin: 2%;
+}
 
+#score {
+    font-family: "Andale Mono";
+    text-align: end;
+    padding-right: 8%;
+}
+
+.button, #next-question {
+
+    font-family: "Andale Mono";
     background-color: #4CAF50;
     border: none;
     color: white;
@@ -32,5 +45,26 @@ h2 {
     font-size: 16px;
     margin: 4px 2px;
     border-radius: 8px;
+}
+
+
+.container {
+    border-radius: 8px;
+    background-color: whitesmoke;
+    align-self: center;
+    margin: 10%;
+    padding: 3%;
+}
+
+.correctness {
+    font-family: "Andale Mono"
+}
+
+
+.buttons-div{
+    text-align:center
+}
+
+#next-question{
 
 }

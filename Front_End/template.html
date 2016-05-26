@@ -1,34 +1,38 @@
-<div class="intro" ng-show="!inProgress">
-    <button id="startQuiz" ng-click="start()">Start the Quiz</button>
+<div class="buttons-div" ng-show="!inProgress">
+    <button class="button" ng-click="start()">Ready, Set, Go!</button>
 </div>
 
 <div class="quiz-area" ng-show="inProgress" >
+
+    <div id="score">
+        Score: {{score}}
+    </div>
 
     <div ng-show="!quizOver">
         <h2 id="question">{{question}}</h2>
         <ul id="options">
             <li ng-repeat="option in options">
                 <label>
-                    <input type="radio" name="answer" value="{{option}}">
+                    <input type="radio" name="answer" value="{{option}}" ng-disabled="!$parent.answerMode">
                     {{option}}
                 </label>
             </li>
         </ul>
-        <button ng-click="checkAnswer()" ng-show="answerMode">Submit</button>
-
-        <div ng-show="!answerMode">
-            <button ng-click="nextQuestion()" class="next-question">Next</button>
-            <span ng-show="correctAns">That is correct!</span>
-            <span ng-show="!correctAns">Sorry, that is an incorrect answer.</span>
+        <div class="buttons-div">
+            <button class=button ng-click="checkAnswer()" ng-show="answerMode">Submit</button>
+        </div>
+        <div class="buttons-div" ng-show="!answerMode">
+            <button ng-click="nextQuestion()" id="next-question">Next</button>
+            <div class="correctness" ng-show="correctAns">That is correct!</div>
+            <div class="correctness" ng-show="!correctAns">Sorry, that is an incorrect answer.</div>
         </div>
     </div>
 
-    <div ng-show="quizOver">
-        <h2>Quiz is over</h2>
-        <button ng-click="reset()">Play again</button>
+    <div ng-show="quizOver" class="buttons-div">
+        <h2>Quiz is over! Your score is {{score}}</h2>
+        <button class="button" ng-click="reset()">Play again</button>
+        <a href="welcome_page.html" class="button"> Back to home</a>
+
     </div>
 
-    <div id="score">
-        Score: {{score}}
-    </div>
 </div>

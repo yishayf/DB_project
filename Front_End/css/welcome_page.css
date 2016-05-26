@@ -9,23 +9,6 @@ body {
 
 
 
-h1 {
-    font-family: "Comic Sans MS";
-    font-size: 55px;
-    margin-top: 100px;
-}
-
-a {
-    color: #09ff22;
-}
-
-h2 {
-    font-family: "Comic Sans MS";
-    font-size: 50px;
-    margin: 50px;
-    color: #09ff22;
-}
-
 .button {
     background-color: #4CAF50;
     border: none;
@@ -39,5 +22,6 @@ h2 {
     cursor: pointer;
     font-size: 24px;
     border-radius: 8px;
+    font-family: Andale Mono;
 }
 
