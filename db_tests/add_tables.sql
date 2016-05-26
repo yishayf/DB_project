@@ -64,4 +64,4 @@ CREATE TABLE `AthleteMedals` (
  KEY `athlete_id` (`athlete_id`),
  KEY `game_id` (`game_id`),
  KEY `competition_id` (`competition_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

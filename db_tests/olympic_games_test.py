@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from SPARQLWrapper import SPARQLWrapper, JSON
+from SPARQLWrapper import SPARQLWrapper, JSON  # on nova - need to run: pip install --user SPARQLWrapper
 import MySQLdb as mdb
 import sys
 import traceback
@@ -15,12 +15,13 @@ LIMIT = 10000
 SPARQL_QUERY_RETRY_COUNT = 5
 
 # sparql connection setup
-sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+sparql = SPARQLWrapper("http://dbpedia.org/sparql") # live.dbpedia is also an option...
 sparql.setTimeout(300)
 
 # MySQL connection setup
-filterwarnings('ignore', category=mdb.Warning)
+filterwarnings('ignore', category=mdb.Warning) # supress warnings from MySQL
 con = mdb.connect('localhost', 'root', '', 'db_project_test') # unix_socket = '/opt/lampp/var/mysql/mysql.sock')
+# con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
 
 ################################################################################################################
 
@@ -522,7 +523,7 @@ def main():
     # get and insert athletes
     query_and_insert_athletes()
 
-    # get and insert athlete birth place
+    # get and insert athlete birth place # TODO: do we need this?
     ####query_and_update_athletes_birth_place()
 
     # get and insert athlete comment
@@ -533,6 +534,8 @@ def main():
 
     # get and insert athlete medals and their competitions
     query_and_insert_athlete_competiotions_medals()
+
+    logging.info("Done!")
 
 
 # setup logging
