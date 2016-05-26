@@ -518,7 +518,7 @@ def main():
     add_foreign_keys()
 
     # get all olympic years and insert to db
-    query_and_insert_olympic_games()
+    query_and_insert_olympic_games()  # todo: add comments for olympic game
 
     # get and insert athletes
     query_and_insert_athletes()
