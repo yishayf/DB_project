@@ -2,8 +2,7 @@ CREATE TABLE `OlympicGame` (
  `game_id` int(11) NOT NULL AUTO_INCREMENT,
  `year` varchar(4) NOT NULL,
  `season` varchar(6) NOT NULL,
- `City` varchar(40) DEFAULT NULL,
- `Country` varchar(40) DEFAULT NULL,
+ `City` varchar(60) DEFAULT NULL,
  PRIMARY KEY (`game_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -18,7 +17,7 @@ CREATE TABLE `Athlete` (
  PRIMARY KEY (`athlete_id`),
  UNIQUE KEY `unique_label` (`dbp_label`),
  KEY `dbp_label` (`dbp_label`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 CREATE TABLE `CompetitionType` (

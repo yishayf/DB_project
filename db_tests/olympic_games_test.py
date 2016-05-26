@@ -5,24 +5,39 @@ import MySQLdb as mdb
 import sys
 import traceback
 import re
+import logging
+from warnings import filterwarnings
 
+
+###############################################################################################################
+# globals initialization
 LIMIT = 10000
+SPARQL_QUERY_RETRY_COUNT = 5
 
+# sparql connection setup
 sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-con = mdb.connect('localhost', 'root', '', 'db_project_test', unix_socket = '/opt/lampp/var/mysql/mysql.sock')
+sparql.setTimeout(300)
+
+# MySQL connection setup
+filterwarnings('ignore', category=mdb.Warning)
+con = mdb.connect('localhost', 'root', '', 'db_project_test') # unix_socket = '/opt/lampp/var/mysql/mysql.sock')
+
+################################################################################################################
 
 
 def query_and_insert_athlete_competiotions_medals():
+    logging.info("Getting athletes all competition medals info from DBPedia and updating our DB")
     medal_color = ['gold', 'silver', 'bronze']
     for color in medal_color:
         query_and_insert_athlete_competiotions_medals_by_color(color)
 
 
 def query_and_insert_athlete_competiotions_medals_by_color(medal_color):
+    logging.info("Getting athletes competition %s medals info from DBPedia and updating our DB" % medal_color)
     with con:
         offset = 0
         while True:
-            print offset
+            logging.info("read %d records from DBPedia" % offset)
             # if offset > 10000:  # todo: remove this
             #     break
             comp_list = get_competition_medalists(medal_color, offset)
@@ -34,6 +49,7 @@ def query_and_insert_athlete_competiotions_medals_by_color(medal_color):
 
 
 def get_competition_medalists(medal_color, offset):
+    logging.info("Getting athletes competition %s medals info from DBPedia" % medal_color)
     medalists = []
     query_string = "PREFIX dbp0: <http://dbpedia.org/ontology> " \
     "SELECT ?compname ?personlabel " \
@@ -45,12 +61,11 @@ def get_competition_medalists(medal_color, offset):
     "FILTER regex(?compname, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics', 'i') " \
     "} " \
     "limit %s offset %s"  % (medal_color, LIMIT, offset)
-    sparql.setQuery(query_string)
-
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-
-    results = results["results"]["bindings"]
+    # sparql.setQuery(query_string)
+    #
+    # sparql.setReturnFormat(JSON)
+    # results = sparql.query().convert()=
+    results = run_sparql_query(query_string)
     for res in results:
         tup = (res["compname"]["value"], res["personlabel"]["value"])
         medalists.append(tup)
@@ -58,7 +73,7 @@ def get_competition_medalists(medal_color, offset):
 
 
 def insert_to_competition_type_and_athletemedals(medals_tuples, medal_color, con):
-    #TODO: make sure we dont have the same item twice while insert - it's ok beacuse we have primary key
+    logging.info("Inserting athletes competition %s medals info into our DB" % medal_color)
     cur = con.cursor()
     for tup in medals_tuples:
         try:
@@ -90,13 +105,14 @@ def insert_to_competition_type_and_athletemedals(medals_tuples, medal_color, con
 
 
 def query_and_insert_athlete_field_and_games():
+    logging.info("Getting athletes fields and games info from DBPedia and updating our DB")
     with con:
         offset = 0
         while True:
-            print offset
+            logging.info("read %d records from DBPedia" % offset)
             # if offset > 10000: # todo: remove this
             #     break
-            athlete_games_list = get_athletes_games(offset)
+            athlete_games_list = get_athletes_games_and_field(offset)
             if athlete_games_list:
                 offset += len(athlete_games_list)
                 insert_athletes_games_and_field(athlete_games_list, con)
@@ -104,7 +120,8 @@ def query_and_insert_athlete_field_and_games():
                 break
 
 
-def get_athletes_games(offset):
+def get_athletes_games_and_field(offset):
+    logging.info("Getting athletes fields and games info from DBPedia")
     athlete_games_list = []
     query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
         "PREFIX dct: <http://purl.org/dc/terms/> " \
@@ -119,20 +136,15 @@ def get_athletes_games(offset):
         "FILTER (!regex(?gamelabel, '^Medalists', 'i')) " \
         "}" \
         "limit %s offset %s" % (LIMIT, offset)
-
-    sparql.setQuery(query_offset_string)
-
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-    results = results["results"]["bindings"]
+    results = run_sparql_query(query_offset_string)
     for res in results:
         tup = (res["personlabel"]["value"], res["gamelabel"]["value"])
         athlete_games_list.append(tup)
-
     return athlete_games_list
 
 
 def insert_athletes_games_and_field(athlete_game_tuple, con):
+    logging.info("Inserting athletes fields and games into our DB")
     for tup in athlete_game_tuple:
         athlete_label = tup[0].encode('latin-1', 'ignore')
         athlete_game = tup[1].encode('latin-1', 'ignore')
@@ -172,97 +184,82 @@ def insert_athletes_games_and_field(athlete_game_tuple, con):
 
 
 def query_and_insert_olympic_games():
-    # todo: make sure we update the cities
+    logging.info("Getting olympic games info from DBPedia and updating our DB")
     olympic_game_tuples = get_olympic_games()
     insert_olympic_games(olympic_game_tuples)
 
 
 def get_olympic_games():
-    sparql.setQuery("""
-    PREFIX dbpedia0: <http://dbpedia.org/ontology/>
-
-    SELECT ?label WHERE {
-    ?og a dbpedia0:Olympics.
-    ?og rdfs:label ?label.
-    FILTER(lang(?label) = "en")
-    FILTER regex(?label, '^[1-2][0-9][0-9][0-9] .* olympics' , 'i')
-    }
-    ORDER BY ?label
-    """)
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-
-    results = results["results"]["bindings"]
+    logging.info("Getting olympic games data from DBPedia")
+    query_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
+        "PREFIX  dbpedia2: <http://dbpedia.org/property/> " \
+        "SELECT ?label (group_concat(?hc; separator = ', ') as ?hcn) WHERE { " \
+        "?og a dbpedia0:Olympics. " \
+        "?og rdfs:label ?label. " \
+        "optional { ?og dbpedia2:hostCity ?hc } " \
+        "FILTER(lang(?label) = 'en') " \
+        "FILTER regex(?label, '^[1-2][0-9][0-9][0-9] (summer|winter) olympics' , 'i') " \
+        "} " \
+        "ORDER BY ?label "
+    results = run_sparql_query(query_string)
     olympic_games = []
 
     for res in results:
-        olympic_game_arr = res["label"]["value"].split(' ')
-        olympic_games.append((olympic_game_arr[0].lower(), olympic_game_arr[1].lower()))
-
+        olympic_game_tup = (res["label"]["value"], res["hcn"]["value"])
+        olympic_games.append(olympic_game_tup)
     return olympic_games
 
 
+def get_host_city(text_from_dbp):
+    splitted_text = text_from_dbp.split(',')
+    text_parts = []
+    for part in splitted_text:
+        rspl = part.rsplit('/', 1)
+        if len(rspl) == 1:
+            text_parts.append(rspl[0])
+        else:
+            text_parts.append(rspl[1])
+    return ', '.join(text_parts)
+
+
 def insert_olympic_games(olympic_game_tuples):
+    logging.info("Inserting olympic games info to our DB")
     with con:
         cur = con.cursor()
         for tup in olympic_game_tuples:
+            game_label = tup[0].encode('latin-1', 'ignore')
+            host_city_text = tup[1].encode('latin-1', 'ignore')
+            game_label_arr = game_label.split(' ')
+            year = game_label_arr[0]
+            season = game_label_arr[1]
+            city = get_host_city(host_city_text)
             try:
-                cur.execute("INSERT INTO OlympicGame (year, season) VALUES (%s, %s)", (tup[0], tup[1]))
+                cur.execute("INSERT INTO OlympicGame (year, season, city) VALUES (%s, %s, %s)", (year, season, city))
                 con.commit()
             except:
                 con.rollback()
 
 
 def query_and_insert_athletes():
-    # TODO: don't enter athlete qith too many words in label (e.g. Los Angeles Dodgers minor league players)
+    # TODO: don't enter athlete with too many words in label (e.g. Los Angeles Dodgers minor league players)
+    logging.info("Getting athletes info from DBPedia and updating our DB")
     with con:
         offset = 0;
         while True:
-            print offset
+            logging.info("read %d records from DBPedia" % offset)
             # if offset > 10000:
             #     break
             athlete_list = get_athletes(offset)
             if athlete_list:
                 offset += len(athlete_list)
-                # insert_athletes(athlete_list, con)
+                insert_athletes(athlete_list, con)
             else:
                 break
 
 
 def get_athletes(offset):
+    logging.info("Getting athletes info from DBPedia")
     athlete_list = []
-    #todo: we get more than one bd - maybe add sample!
-    # query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
-    #     "SELECT ?label sample(?bd) as ?bds sample(?gamelabel) as ?gl ?comment WHERE { " \
-    #     "?at a dbpedia0:Athlete. " \
-    #     "?at rdfs:label ?label. " \
-    #     "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
-    #     "?at rdfs:comment ?comment " \
-    #     "?at dct:subject/rdfs:label ?gamelabel. " \
-    #     "FILTER(lang(?label) = 'en') " \
-    #     "FILTER(datatype(?bd) = xsd:date) " \
-    #     "FILTER(lang(?bp) = 'en')" \
-    #     "FILTER(lang(?comment) = 'en') " \
-    #     "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
-    #     "} " \
-    #     "limit %s offset %s" % (LIMIT, offset)
-
-    # query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
-    #     "SELECT ?label ?comment (sample(?bd) as ?bds) sample(?gamelabel) as ?gl (group_concat(?bp; separator = ', ') as ?bpn) WHERE { " \
-    #     "?at a dbpedia0:Athlete. " \
-    #     "?at rdfs:label ?label. " \
-    #     "?at rdfs:comment ?comment. " \
-    #     "?at dbpedia0:birthDate ?bd. " \
-    #     "?at dct:subject/rdfs:label ?gamelabel. " \
-    #     "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
-    #     "FILTER(lang(?label) = 'en') " \
-    #     "FILTER(datatype(?bd) = xsd:date) " \
-    #     "FILTER(lang(?bp) = 'en')" \
-    #     "FILTER(lang(?comment) = 'en') " \
-    #     "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
-    #     "} " \
-    #     "limit %s offset %s" % (LIMIT, offset)
-
     query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
         "SELECT ?label (sample(?bd) as ?bds) sample(?gamelabel) as ?gl WHERE { " \
         "?at a dbpedia0:Athlete. " \
@@ -275,11 +272,10 @@ def get_athletes(offset):
         "} " \
         "limit %s offset %s" % (LIMIT, offset)
 
-    sparql.setQuery(query_offset_string)
-
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-    results = results["results"]["bindings"]
+    # sparql.setQuery(query_offset_string)
+    # sparql.setReturnFormat(JSON)
+    # results = sparql.query().convert()
+    results = run_sparql_query(query_offset_string)#results["results"]["bindings"]
     for res in results:
         tup = (res["label"]["value"], res["bds"]["value"])
         athlete_list.append(tup)
@@ -288,7 +284,7 @@ def get_athletes(offset):
 
 
 def insert_athletes(athlete_tuples, con):
-    #TODO: make sure we dont have the same item twice while insert
+    logging.info("Inserting athletes info to our DB")
     for tup in athlete_tuples:
         cur = con.cursor()
         label = tup[0].encode('latin-1', 'ignore')
@@ -306,130 +302,125 @@ def insert_athletes(athlete_tuples, con):
             con.rollback()
 
 
+def query_and_update_athletes_birth_place():
+    logging.info("Getting athletes birth place from DBPedia and updating our DB")
+    with con:
+        offset = 0;
+        while True:
+            logging.info("read %d records from DBPedia" % offset)
+            # if offset > 10000:
+            #     break
+            athlete_list_with_bp = get_athletes_birth_place(offset)
+            if athlete_list_with_bp:
+                offset += len(athlete_list_with_bp)
+                update_athletes_birth_place(athlete_list_with_bp, con)
+            else:
+                break
 
-ef query_and_insert_athletes():
-    # TODO: don't enter athlete qith too many words in label (e.g. Los Angeles Dodgers minor league players)
+
+def get_athletes_birth_place(offset):
+    logging.info("getting athletes birth place from DBPedia")
+
+    athlete_list = []
+    query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
+        "SELECT ?label sample(?gamelabel) as ?gl (group_concat(?bp; separator = ', ') as ?bpn) WHERE { " \
+        "?at a dbpedia0:Athlete. " \
+        "?at rdfs:label ?label. " \
+        "?at dct:subject/rdfs:label ?gamelabel. " \
+        "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
+        "FILTER(lang(?label) = 'en') " \
+        "FILTER regex(?gamelabel, '^.* at the .* (summer|winter) Olympics$', 'i') " \
+        "FILTER(lang(?bp) = 'en') " \
+        "} " \
+        "limit %s offset %s" % (LIMIT, offset)
+
+    # sparql.setQuery(query_offset_string)
+    # sparql.setReturnFormat(JSON)
+    # results = sparql.query().convert()
+    results = run_sparql_query(query_offset_string)#results["results"]["bindings"]
+    for res in results:
+        tup = (res["label"]["value"], res["bpn"]["value"])
+        athlete_list.append(tup)
+    return athlete_list
+
+
+def update_athletes_birth_place(athlete_tuples, con):
+    logging.info("Updating athletes birth place in our DB")
+    for tup in athlete_tuples:
+        cur = con.cursor()
+        label = tup[0].encode('latin-1', 'ignore')
+        bp = tup[1].encode('latin-1', 'ignore')
+        try:
+            cur.execute("UPDATE Athlete "
+                        "set birth_place = %s "
+                        "WHERE dbp_label = %s",
+                        (bp, label))
+            con.commit()
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            con.rollback()
+
+
+def query_and_update_athletes_comment():
+    logging.info("Getting athletes short description from DBPedia and updating our DB")
     with con:
         offset = 0;
         while True:
             print offset
             # if offset > 10000:
             #     break
-            athlete_list = get_athletes(offset)
-            if athlete_list:
-                offset += len(athlete_list)
-                # insert_athletes(athlete_list, con)
+            athlete_list_with_comment = get_athletes_comment(offset)
+            if athlete_list_with_comment:
+                offset += len(athlete_list_with_comment)
+                update_athletes_comment(athlete_list_with_comment, con)
             else:
                 break
 
 
-def get_athletes(offset):
+def get_athletes_comment(offset):
+    logging.info("Getting athletes short description from DBPedia")
     athlete_list = []
-    #todo: we get more than one bd - maybe add sample!
-    # query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
-    #     "SELECT ?label sample(?bd) as ?bds sample(?gamelabel) as ?gl ?comment WHERE { " \
-    #     "?at a dbpedia0:Athlete. " \
-    #     "?at rdfs:label ?label. " \
-    #     "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
-    #     "?at rdfs:comment ?comment " \
-    #     "?at dct:subject/rdfs:label ?gamelabel. " \
-    #     "FILTER(lang(?label) = 'en') " \
-    #     "FILTER(datatype(?bd) = xsd:date) " \
-    #     "FILTER(lang(?bp) = 'en')" \
-    #     "FILTER(lang(?comment) = 'en') " \
-    #     "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
-    #     "} " \
-    #     "limit %s offset %s" % (LIMIT, offset)
-
-    # query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
-    #     "SELECT ?label ?comment (sample(?bd) as ?bds) sample(?gamelabel) as ?gl (group_concat(?bp; separator = ', ') as ?bpn) WHERE { " \
-    #     "?at a dbpedia0:Athlete. " \
-    #     "?at rdfs:label ?label. " \
-    #     "?at rdfs:comment ?comment. " \
-    #     "?at dbpedia0:birthDate ?bd. " \
-    #     "?at dct:subject/rdfs:label ?gamelabel. " \
-    #     "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
-    #     "FILTER(lang(?label) = 'en') " \
-    #     "FILTER(datatype(?bd) = xsd:date) " \
-    #     "FILTER(lang(?bp) = 'en')" \
-    #     "FILTER(lang(?comment) = 'en') " \
-    #     "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
-    #     "} " \
-    #     "limit %s offset %s" % (LIMIT, offset)
-
     query_offset_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
-        "SELECT ?label (sample(?bd) as ?bds) sample(?gamelabel) as ?gl (group_concat(?bp; separator = ', ') as ?bpn) WHERE { " \
+        "SELECT ?label sample(?gamelabel) as ?gl sample(?comment) as ?comm WHERE { " \
         "?at a dbpedia0:Athlete. " \
         "?at rdfs:label ?label. " \
-        "?at dbpedia0:birthDate ?bd. " \
         "?at dct:subject/rdfs:label ?gamelabel. " \
-            "?at dbpedia0:birthPlace/rdfs:label ?bp. " \
-            "FILTER(lang(?bp) = 'en') " \
+        "?at rdfs:comment ?comment." \
         "FILTER(lang(?label) = 'en') " \
-        "FILTER(datatype(?bd) = xsd:date) " \
         "FILTER regex(?gamelabel, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics$', 'i') " \
+        "FILTER(lang(?comment) = 'en') "   \
         "} " \
         "limit %s offset %s" % (LIMIT, offset)
 
-    sparql.setQuery(query_offset_string)
-
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-    results = results["results"]["bindings"]
+    # sparql.setQuery(query_offset_string)
+    # sparql.setReturnFormat(JSON)
+    # results = sparql.query().convert()
+    results = run_sparql_query(query_offset_string) #results["results"]["bindings"]
     for res in results:
-        tup = (res["label"]["value"], res["bpn"]["value"])
+        tup = (res["label"]["value"], res["comm"]["value"])
         athlete_list.append(tup)
-
     return athlete_list
 
 
-def insert_athletes_birthplace(athlete_tuples, con):
-    #TODO: make sure we dont have the same item twice while insert
+def update_athletes_comment(athlete_tuples, con):
+    logging.info("Updating athletes short description in our DB")
     for tup in athlete_tuples:
         cur = con.cursor()
         label = tup[0].encode('latin-1', 'ignore')
-        # bp = tup[2].encode('latin-1', 'ignore')
-        # comment = tup[3].encode('latin-1', 'ignore')
+        comment = tup[1].encode('latin-1', 'ignore')
         try:
-            cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date) "
-                        "VALUES (%s, %s, %s)",
-                        (label, name, bd))
+            cur.execute("UPDATE Athlete "
+                        "set comment = %s "
+                        "WHERE dbp_label = %s",
+                        (comment, label))
             con.commit()
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             con.rollback()
 
-# def query_db():
-#     con = mdb.connect('localhost', 'root', '', 'db_project_test')
-#     with con:
-#         cur = con.cursor()
-#         cur.execute("SELECT * FROM OlympicGame")
-#         for i in range(cur.rowcount):
-#             row = cur.fetchone()
-#             print row
-#
-#
-# def run_query():
-#     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-#     sparql.setQuery("""
-#     PREFIX dbpedia0: <http://dbpedia.org/ontology/>
-#
-#     SELECT ?sw ?bd ?label WHERE {
-#     ?sw a dbpedia0:Athlete.
-#     ?sw dbpedia0:birthDate ?bd.
-#     ?sw rdfs:label ?label.
-#     FILTER(lang(?label) = "en")
-#     FILTER(datatype(?bd) = xsd:date)
-#     FILTER regex(?label, '^ab' , 'i')
-#     }
-#     GROUP BY ?sw
-#     """)
-#     sparql.setReturnFormat(JSON)
-#     results = sparql.query().convert()
-#     print(len(results["results"]["bindings"]))
-
 
 def remove_foreign_keys():
+    logging.info("Removing Foreign keys before table trancation")
     drop_queries = [
         "ALTER TABLE AthleteGames DROP FOREIGN KEY ahtleteidconst;",
         "ALTER TABLE AthleteGames DROP FOREIGN KEY gameidconst;",
@@ -444,6 +435,7 @@ def remove_foreign_keys():
 
 
 def add_foreign_keys():
+    logging.info("Adding foreign keys")
     # add foreign keys for the needed tables
     foreign_keys_add_queries = [
         "ALTER TABLE `AthleteGames` ADD CONSTRAINT `ahtleteidconst` FOREIGN KEY(`athlete_id`) "
@@ -467,6 +459,7 @@ def add_foreign_keys():
 
 
 def truncate_all_dbpedia_data_tables():
+    logging.info("Truncation all tables containing data from DBPedia")
     queries_lst = [
         "TRUNCATE TABLE OlympicGame",
         "TRUNCATE TABLE Athlete;",
@@ -495,26 +488,58 @@ def run_mysql_query(my_sql_query):
             con.rollback()
 
 
-# # remove foreign keys from tables
-# remove_foreign_keys()
-#
-# # truncate tables
-# truncate_all_dbpedia_data_tables()
-#
-# # restore foreign keys
-# add_foreign_keys()
-#
-# # get all olympic years and insert to db
-# query_and_insert_olympic_games()
+def run_sparql_query(query):
+    for i in range(SPARQL_QUERY_RETRY_COUNT):
+        try:
+            sparql.setQuery(query)
+            sparql.setReturnFormat(JSON)
+            results = sparql.query().convert()
+            results = results["results"]["bindings"]
+            return results
+        except:
+            logging.warning("sparql query failed, retrying")
+            traceback.print_exc(file=sys.stdout)
+            continue
+    # if we got here there are no more reties
+    logging.error("sparql query failed, no more retries!\n"
+                  "The Query was:\n%s" % query)
 
-# get and insert athletes
-query_and_insert_athletes()
-# TODO: add function to update birth place and comment
-# # get and insert athlete games and sport field
-# query_and_insert_athlete_field_and_games()
-#
-# # get and insert athlete medals and their competitions
-# query_and_insert_athlete_competiotions_medals()
-#
-# #close the connection
-# con.close()
+
+def main():
+    logging.info("Started database update from DBPedia")
+    # remove foreign keys from tables
+    remove_foreign_keys()
+
+    # truncate tables
+    truncate_all_dbpedia_data_tables()
+
+    # restore foreign keys
+    add_foreign_keys()
+
+    # get all olympic years and insert to db
+    query_and_insert_olympic_games()
+
+    # get and insert athletes
+    query_and_insert_athletes()
+
+    # get and insert athlete birth place
+    ####query_and_update_athletes_birth_place()
+
+    # get and insert athlete comment
+    query_and_update_athletes_comment()
+
+    # get and insert athlete games and sport field
+    query_and_insert_athlete_field_and_games()
+
+    # get and insert athlete medals and their competitions
+    query_and_insert_athlete_competiotions_medals()
+
+
+# setup logging
+logging.basicConfig(level=logging.INFO)
+
+# run main function
+main()
+
+# close the connection to MySQL
+con.close()
