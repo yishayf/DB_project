@@ -53,19 +53,16 @@ def get_competition_medalists(medal_color, offset):
     logging.info("Getting athletes competition %s medals info from DBPedia" % medal_color)
     medalists = []
     query_string = "PREFIX dbp0: <http://dbpedia.org/ontology> " \
-    "SELECT ?compname ?personlabel " \
-    "WHERE { " \
-    "?cn <http://dbpedia.org/ontology/%sMedalist>/rdfs:label ?personlabel. " \
-    "?cn rdfs:label ?compname " \
-    "FILTER(lang(?personlabel)='en') " \
-    "FILTER(lang(?compname)='en') " \
-    "FILTER regex(?compname, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics', 'i') " \
-    "} " \
-    "limit %s offset %s"  % (medal_color, LIMIT, offset)
-    # sparql.setQuery(query_string)
-    #
-    # sparql.setReturnFormat(JSON)
-    # results = sparql.query().convert()=
+        "SELECT ?compname ?personlabel " \
+        "WHERE { " \
+        "?cn <http://dbpedia.org/ontology/%sMedalist>/rdfs:label ?personlabel. " \
+        "?cn rdfs:label ?compname " \
+        "FILTER(lang(?personlabel)='en') " \
+        "FILTER(lang(?compname)='en') " \
+        "FILTER regex(?compname, '^.* at the [1-2][0-9][0-9][0-9] (summer|winter) Olympics', 'i') " \
+        "} " \
+        "limit %s offset %s"  % (medal_color, LIMIT, offset)
+
     results = run_sparql_query(query_string)
     for res in results:
         tup = (res["compname"]["value"], res["personlabel"]["value"])
@@ -273,9 +270,6 @@ def get_athletes(offset):
         "} " \
         "limit %s offset %s" % (LIMIT, offset)
 
-    # sparql.setQuery(query_offset_string)
-    # sparql.setReturnFormat(JSON)
-    # results = sparql.query().convert()
     results = run_sparql_query(query_offset_string)#results["results"]["bindings"]
     for res in results:
         tup = (res["label"]["value"], res["bds"]["value"])
@@ -291,8 +285,6 @@ def insert_athletes(athlete_tuples, con):
         label = tup[0].encode('latin-1', 'ignore')
         name = tup[0].encode('latin-1', 'ignore').split('(')[0]
         bd = tup[1].encode('latin-1', 'ignore')
-        # bp = tup[2].encode('latin-1', 'ignore')
-        # comment = tup[3].encode('latin-1', 'ignore')
         try:
             cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date) "
                         "VALUES (%s, %s, %s)",
@@ -335,10 +327,7 @@ def get_athletes_birth_place(offset):
         "} " \
         "limit %s offset %s" % (LIMIT, offset)
 
-    # sparql.setQuery(query_offset_string)
-    # sparql.setReturnFormat(JSON)
-    # results = sparql.query().convert()
-    results = run_sparql_query(query_offset_string)#results["results"]["bindings"]
+    results = run_sparql_query(query_offset_string)
     for res in results:
         tup = (res["label"]["value"], res["bpn"]["value"])
         athlete_list.append(tup)
@@ -393,9 +382,6 @@ def get_athletes_comment(offset):
         "} " \
         "limit %s offset %s" % (LIMIT, offset)
 
-    # sparql.setQuery(query_offset_string)
-    # sparql.setReturnFormat(JSON)
-    # results = sparql.query().convert()
     results = run_sparql_query(query_offset_string) #results["results"]["bindings"]
     for res in results:
         tup = (res["label"]["value"], res["comm"]["value"])
