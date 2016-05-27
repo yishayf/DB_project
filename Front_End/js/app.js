@@ -2,15 +2,15 @@ var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.p
 
 var app = angular.module('quizApp', []);
 
-app.directive('quiz', function(quizFactory, questionsFactory) {
+app.directive('quiz', function(quizFactory) {
     return {
         restrict: 'AE',
         scope: {},
         templateUrl: 'template.html',
-        link: function(scope, elem, attrs) {
+        link: function(scope) {
             scope.start = function() {
                 scope.id = 0;
-                scope.getQuestion().then(function(q) {
+                scope.getQuestion().then(function() {
                     scope.quizOver = false;
                     scope.inProgress = true;
                 });
@@ -64,51 +64,8 @@ app.directive('quiz', function(quizFactory, questionsFactory) {
 
 
 
-app.factory('questionsFactory', function($http) {
-    return {
-        serverCall: function() {
-           return  $http.get(questions_http).then(function(data) {
-               console.log("from php:");
-               questions = data.data;
-               console.log(questions);
-               var questions = questions;
-               return questions;
-           });
-        }
-    }
-});
 
 app.factory('quizFactory', function($http) {
-
-
-    //var questions = [
-    //    {
-    //        question: "Which is the largest country in the world by population?",
-    //        options: ["India", "USA", "China", "Russia"],
-    //        answer: 2
-    //    },
-    //    {
-    //        question: "When did the second world war end?",
-    //        options: ["1945", "1939", "1944", "1942"],
-    //        answer: 0
-    //    },
-    //    {
-    //        question: "Which was the first country to issue paper currency?",
-    //        options: ["USA", "France", "Italy", "China"],
-    //        answer: 3
-    //    },
-    //    {
-    //        question: "Which city hosted the 1996 Summer Olympics?",
-    //        options: ["Atlanta", "Sydney", "Athens", "Beijing"],
-    //        answer: 0
-    //    },
-    //    {
-    //        question: "Who invented telephone?",
-    //        options: ["Albert Einstein", "Alexander Graham Bell", "Isaac Newton", "Marie Curie"],
-    //        answer: 1
-    //    }
-    //
-    //];
 
     var fQuestions = $http.get(questions_http);
 
@@ -118,16 +75,12 @@ app.factory('quizFactory', function($http) {
             return fQuestions.then(function(questions) {
                 questions = questions.data;
                 if(id < questions.length) {
-                    console.log(questions);
                     return questions[id];
                 } else {
-                    console.log("returning false\n");
-                    console.log(questions);
                     return false;
                  }
 
             });
-            console.log(fQuestions);
         }
     };
 });
