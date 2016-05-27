@@ -1,6 +1,8 @@
+var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
+
 var app = angular.module('quizApp', []);
 
-app.directive('quiz', function(quizFactory) {
+app.directive('quiz', function(quizFactory, questionsFactory) {
     return {
         restrict: 'AE',
         scope: {},
@@ -55,24 +57,41 @@ app.directive('quiz', function(quizFactory) {
     }
 });
 
-app.factory('quizFactory', function() {
+
+
+app.factory('questionsFactory', function($http) {
+    return {
+        serverCall: function() {
+           return  $http.get(questions_http).then(function(data) {
+               console.log("from php:");
+               questions = data.data;
+               console.log(questions);
+               var questions = questions;
+               return questions;
+           });
+        }
+    }
+});
+
+app.factory('quizFactory', function($http) {
+
 
     var questions = [
-        //{
-        //    question: "Which is the largest country in the world by population?",
-        //    options: ["India", "USA", "China", "Russia"],
-        //    answer: 2
-        //},
-        //{
-        //    question: "When did the second world war end?",
-        //    options: ["1945", "1939", "1944", "1942"],
-        //    answer: 0
-        //},
-        //{
-        //    question: "Which was the first country to issue paper currency?",
-        //    options: ["USA", "France", "Italy", "China"],
-        //    answer: 3
-        //},
+        {
+            question: "Which is the largest country in the world by population?",
+            options: ["India", "USA", "China", "Russia"],
+            answer: 2
+        },
+        {
+            question: "When did the second world war end?",
+            options: ["1945", "1939", "1944", "1942"],
+            answer: 0
+        },
+        {
+            question: "Which was the first country to issue paper currency?",
+            options: ["USA", "France", "Italy", "China"],
+            answer: 3
+        },
         {
             question: "Which city hosted the 1996 Summer Olympics?",
             options: ["Atlanta", "Sydney", "Athens", "Beijing"],
@@ -83,7 +102,10 @@ app.factory('quizFactory', function() {
             options: ["Albert Einstein", "Alexander Graham Bell", "Isaac Newton", "Marie Curie"],
             answer: 1
         }
+
     ];
+
+
 
     return {
         getQuestion: function(id) {
@@ -95,3 +117,7 @@ app.factory('quizFactory', function() {
         }
     };
 });
+
+
+
+
