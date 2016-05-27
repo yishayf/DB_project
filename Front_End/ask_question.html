@@ -1,10 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html ng-app="askQuestion" ng-controller="askController">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="utf-8" />
+    <title>addQuestion</title>
+    <link rel="stylesheet" href="css/ask_question.css" />
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
+    <script src="js/ask_question.js"></script>
 </head>
+
 <body>
 
+<div class="container">
+
+    <div id = chooseFormat>
+
+        <h2> Choose A Format: </h2>
+        <select ng-model="selectedName" ng-options="x for x in formats" ng-change="updateTemplateSelection()" ng-disabled="DropDownDiabled">
+        </select>
+
+    </div>
+
+
+</div>
 </body>
+
 </html>

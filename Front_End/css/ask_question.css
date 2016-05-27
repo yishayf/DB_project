@@ -1,0 +1,38 @@
+body {
+    background-image: url(../img/OlympicDay.jpg);
+    background-color: darksalmon;
+    -webkit-background-size: cover;
+}
+
+h2 {
+    font-family: "Andale Mono";
+    font-size: 30px;
+    color:  #4CAF50;
+    text-align: center;
+}
+
+
+.container {
+    border-radius: 8px;
+    background-color: whitesmoke;
+    opacity: 0.95;
+    align-self: center;
+    margin: 10%;
+    padding: 3%;
+}
+
+.button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 5px 3px;
+    cursor: pointer;
+    font-size: 24px;
+    border-radius: 8px;
+    font-family: Andale Mono;
+}

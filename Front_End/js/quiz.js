@@ -1,4 +1,5 @@
 var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
+var questions_http = "http://cs.tau.ac.il/~naftaly1/generate_trivia_questions.php";
 
 var app = angular.module('quizApp', []);
 
@@ -84,6 +85,7 @@ app.factory('quizFactory', function($http) {
         }
     };
 });
+
 
 
 
