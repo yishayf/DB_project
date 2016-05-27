@@ -6,7 +6,7 @@ $db = new mysqli("localhost", 'root', '', 'db_project_test');
 //$db = new mysqli('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08');  # for nova
 
 
-function get_type1_question_with_answers($num_questions){
+function get_type1_question_with_answers($num_questions=1){
     global $db;
 
     $out_json = "";
@@ -21,7 +21,6 @@ function get_type1_question_with_answers($num_questions){
         FROM OlympicGame
         WHERE year = %s AND
         season = '%s'";
-
     $sql_wrong_answer_format = "
         SELECT city
         FROM OlympicGame
@@ -29,14 +28,14 @@ function get_type1_question_with_answers($num_questions){
         season != '%s') AND city != '' AND city != '%s'
         LIMIT 3"; // TODO: city != '' should be city != null   !!!!
 
-    // get the question parameters:
+    // insert the num_question parameters:
     $sql_query = sprintf($sql_question_format, $num_questions);
 
     if(!$result = $db->query($sql_query)){
-        die('There was an error running the query [' . $db->error . ']');
+        die('ERROR: There was an error running the query [' . $db->error . ']');
     }
     else if ($result->num_rows < $num_questions){
-        die('Not enough questions in table Question_type1');
+        die('ERROR: Not enough questions in table Question_type1');
     }
 
     $type1_questions_array =  array();
@@ -65,10 +64,16 @@ function get_type1_question_with_answers($num_questions){
         while ($row = $result2->fetch_assoc()) {
             array_push($answer_array, $row['city']);
         }
+
+        // put the correct answer in the answer array in a random place
+        $place = mt_rand(0, 3);
+        array_splice($answer_array, $place, 0, $correct_answer);
+        echo $correct_answer;
+        $question_dict["options"] = $answer_array;
+        $question_dict["answer"] = $place;
+
         array_push($type1_questions_array, $question_dict); // TODO: what should we do if array is not of size 3 ???
 
-        // put the correct answer in the answer array
-        
     }
     return $type1_questions_array;
 }
