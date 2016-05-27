@@ -1,7 +1,7 @@
 body {
-    /*background-image: url(../img/OlympicDay.jpg);*/
+    background-image: url(../img/OlympicDay.jpg);
     background-color: darksalmon;
-    -webkit-background-size: cover
+    -webkit-background-size: cover;
 }
 
 
@@ -51,6 +51,7 @@ li {
 .container {
     border-radius: 8px;
     background-color: whitesmoke;
+    opacity: 0.95;
     align-self: center;
     margin: 10%;
     padding: 3%;
