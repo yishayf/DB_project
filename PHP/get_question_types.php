@@ -1,26 +1,21 @@
 <?php
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
+
+function insert_question_type(&$question_types, $table_name, $q_format, $num_args){
+    $q_dict = array(
+        "table" => $table_name,
+        "question_format" => $q_format,
+        "num_args" => $num_args
+    );
+    array_push($question_types, $q_dict);
+}
 
 $question_types = array();
 
-$q1_dict = array(
-    "table" => "Question_type1",
-    "question_format" => "Where did the (YEAR) (SEASON) Olympic games take place?",
-    "num_args" => 2
-);
-
-$q2_dict = array(
-    "table" => "Question_type2",
-    "question_format" => "Which athlete won a (COLOR) Olympic medal?",
-    "num_args" => 1
-);
-
-$q3_dict = array(
-    "table" => "Question_type3",
-    "question_format" => "How old is (athlete)?", // or when was he born
-    "num_args" => 1
-);
-
-array_push($question_types, $q1_dict, $q2_dict, $q3_dict);
+insert_question_type($question_types, "Question_type1", "Where did the (YEAR) (SEASON) Olympic games take place?", 2);
+insert_question_type($question_types, "Question_type2", "Which athlete won a (COLOR) Olympic medal?", 1);
+insert_question_type($question_types, "Question_type3", "How old is (athlete)?", 1);
 
 echo json_encode($question_types);
 ?>
