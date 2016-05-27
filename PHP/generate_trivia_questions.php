@@ -17,10 +17,10 @@ function get_type1_question_with_answers($num_questions){
         ORDER BY RAND()
         LIMIT %d";
     $sql_correct_answer_format = "
-SELECT city 
-FROM OlympicGame 
-WHERE year = %s AND 
-season = '%s'";
+        SELECT city
+        FROM OlympicGame
+        WHERE year = %s AND
+        season = '%s'";
 
     $sql_wrong_answer_format = "
         SELECT city
@@ -55,19 +55,20 @@ season = '%s'";
             die('There was an error running the query [' . $db->error . ']');
         }
         $correct_answer = $result1->fetch_assoc()['city'];
-        $question_dict["answer"] = $correct_answer;
 
         // get 3 wrong answers
         $sql_query2 = sprintf($sql_wrong_answer_format, $year, $season, $correct_answer);
         if(!$result2 = $db->query($sql_query2)){
             die('There was an error running the query [' . $db->error . ']');
         }
-        $wrong_answer_array = array();
+        $answer_array = array();
         while ($row = $result2->fetch_assoc()) {
-            array_push($wrong_answer_array, $row['city']);
+            array_push($answer_array, $row['city']);
         }
-        $question_dict['wrong_answers'] = $wrong_answer_array;
-        array_push($type1_questions_array, $question_dict);
+        array_push($type1_questions_array, $question_dict); // TODO: what should we do if array is not of size 3 ???
+
+        // put the correct answer in the answer array
+        
     }
     return $type1_questions_array;
 }
@@ -78,4 +79,5 @@ echo json_encode($type1_q_array);
 $db->close();
 
 ?>
+
 
