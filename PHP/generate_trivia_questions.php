@@ -19,6 +19,34 @@ function get_question_format($q_type){
     }
 }
 
+function build_question_from_args($q_type, $args_row){
+    // get the question format for q_type
+    $question_format = get_question_format($q_type);
+
+    // build the question
+    switch ($q_type) {
+        case 1:
+            $year = $args_row['year'];
+            $season = $args_row['season'];
+            $question = sprintf($question_format, $year, $season);
+            break;
+        case 2:
+            $name = $args_row['name'];
+            $question = sprintf($question_format, $name);
+            break;
+        case 3:
+            $field_name = $args_row['field_name'];
+            $question = sprintf($question_format, $field_name);
+            break;
+        case 4:
+            return '';
+        case 5:
+            return '';
+    }
+    return $question;
+}
+
+
 function get_questions_args_sql_query($q_type, $num_questions){
     switch ($q_type) {
         case 1:
@@ -34,7 +62,11 @@ function get_questions_args_sql_query($q_type, $num_questions){
                 LIMIT %d";
             break;
         case 3:
-            return '';
+            $sql_query_format = "SELECT field_name
+                FROM Question_type3
+                ORDER BY RAND()
+                LIMIT %d";
+            break;
         case 4:
             return '';
         case 5:
@@ -58,7 +90,13 @@ function get_correct_answer_sql_query_format($q_type){
                 WHERE ag.athlete_id = a.athlete_id 
                 AND a.dbp_label = '%s'"; // TODO: add index to name !! add foreign key to dbp_label?
         case 3:
-            return '';
+            return "SELECT a.dbp_label FROM 
+                Athlete a, AthleteOlympicSportFields af, OlympicSportField f 
+                WHERE  a.athlete_id = af.athlete_id AND
+                af.field_id = f.field_id AND
+                f.field_name = '%s'
+                ORDER BY RAND()
+                LIMIT 1";
         case 4:
             return '';
         case 5:
@@ -84,7 +122,15 @@ function get_wrong_answer_sql_query_format($q_type){
                 HAVING cnt != %d
                 LIMIT 3";
         case 3:
-            return '';
+            return "SELECT a.dbp_label FROM 
+                 Athlete a
+                 WHERE  a.name not in (SELECT a1.name FROM 
+                 Athlete a1, AthleteOlympicSportFields af, OlympicSportField f 
+                 WHERE a1.athlete_id = af.athlete_id AND
+                 af.field_id = f.field_id AND
+                 f.field_name = '%s')
+                 ORDER BY RAND()
+                 LIMIT 3";
         case 4:
             return '';
         case 5:
@@ -92,31 +138,6 @@ function get_wrong_answer_sql_query_format($q_type){
     }
 
 
-}
-
-function build_question_from_args($q_type, $args_row){
-    // get the question format for q_type
-    $question_format = get_question_format($q_type);
-
-    // build the question
-    switch ($q_type) {
-        case 1:
-            $year = $args_row['year'];
-            $season = $args_row['season'];
-            $question = sprintf($question_format, $year, $season);
-            break;
-        case 2:
-            $name = $args_row['name'];
-            $question = sprintf($question_format, $name);
-            break;
-        case 3:
-            return '';
-        case 4:
-            return '';
-        case 5:
-            return '';
-    }
-    return $question;
 }
 
 function get_correct_answer($q_type, $args_row){
@@ -137,7 +158,11 @@ function get_correct_answer($q_type, $args_row){
             $correct_answer = $result->fetch_assoc()['num_games'];
             return $correct_answer;
         case 3:
-            return '';
+            $field_name = $args_row['field_name'];
+            $sql_query = sprintf($correct_answer_sql_query_format, $field_name);
+            $result = run_sql_select_query($sql_query);
+            $correct_answer = $result->fetch_assoc()['dbp_label'];
+            return $correct_answer;
         case 4:
             return '';
         case 5:
@@ -168,7 +193,13 @@ function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
             }
             break;
         case 3:
-            return '';
+            $field = $args_row['field_name'];
+            $sql_query = sprintf($wrong_answer_sql_query_format, $field);
+            $result = run_sql_select_query($sql_query);
+            while ($row = $result->fetch_assoc()) {
+                array_push($answer_array, $row['dbp_label']);
+            }
+            break;
         case 4:
             return '';
         case 5:
@@ -222,7 +253,7 @@ $questions_arr = array();
 
 $num_q_for_type = 1;
 
-add_type_x_questions_with_answers($questions_arr, 2, $num_q_for_type);
+add_type_x_questions_with_answers($questions_arr, 3, $num_q_for_type);
 
 echo json_encode($questions_arr);
 

@@ -24,6 +24,10 @@ function get_sql_query_for_args_by_q_type($q_type){
                 LIMIT %d;";
             break;
         case 3;
+            $format = "SELECT field_name
+                FROM OlympicSportField
+                WHERE field_name NOT IN (SELECT field_name FROM Question_type3)
+                LIMIT %d;";
             break;
         case 4;
             break;
@@ -46,6 +50,11 @@ function get_1st_arg_options_by_q_type($q_type){
         case 2:
             while ($row = $result->fetch_assoc()) {
                 array_push($res_array, $row['dbp_label']);
+            }
+            break;
+        case 3:
+            while ($row = $result->fetch_assoc()) {
+                array_push($res_array, $row['field_name']);
             }
             break;
     }
