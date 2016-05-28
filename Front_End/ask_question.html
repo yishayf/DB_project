@@ -18,20 +18,24 @@
         <h2> Choose A Format: </h2>
         <select ng-model="selectedFormat" ng-options="x for x in formats" ng-change="recreateArgs()" ng-disabled="formats == null"></select>
 
-        <h2 ng-show = dropDownArr[0] ng-disabled = firstArgOptions> Choose {{dropDownArr[0]}}: </h2>
-        <select ng-model="selectedFirstArg" ng-options="x for x in firstArgOptions" ng-change="firstUpdated()" ng-show="dropDownArr[0]"></select>
+        <h2 ng-show = dropDownArr[0]> Choose {{dropDownArr[0]}}: </h2>
+        <select ng-model="selectedFirstArg" ng-options="x for x in firstArgOptions" ng-change="firstUpdated()" ng-show="dropDownArr[0]" ng-disabled = "!firstArgOptions"></select>
 
 
         <h2  ng-show = dropDownArr[1]> Choose {{dropDownArr[1]}}: </h2>
-        <select ng-model="selectedSecondArg" ng-options="x for x in secondArgOptions" ng-change="secondUpdated()" ng-show="dropDownArr[1]"></select>
+        <select ng-model="selectedSecondArg" ng-options="x for x in secondArgOptions" ng-change="secondUpdated()" ng-show="dropDownArr[1]" ng-disabled = "!secondArgOptions"></select>
 
 
         <h2  ng-show = dropDownArr[2]> Choose {{dropDownArr[2]}}: </h2>
-        <select ng-model="selectedThirdArg" ng-options="x for x in thirdArgOptions" ng-change="thirdUpdated()" ng-show="dropDownArr[2]"></select>
-
+        <select ng-model="selectedThirdArg" ng-options="x for x in thirdArgOptions" ng-change="thirdUpdated()" ng-show="dropDownArr[2]" ng-disabled = "!thirdArgOptions"></select>
 
 
     </div>
+
+    <div id = generatedQuestion>
+        <h2> {{generated_question}} </h2>
+    </div>
+
 
 
 </div>
