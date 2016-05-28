@@ -7,14 +7,29 @@ app.controller('askController', function($scope, $http) {
     $scope.DropDownDiabled = true;
 
     $scope.createFormatsDropDown = function() {
-        $scope.DropDownDisabled = true;
         $http.get(formats_http).then(function(d) {
             $scope.parseJason(d.data);
-            $scope.DropDownDisabled = false;
         });
     }
-    
+
+
     $scope.recreateArgs  = function () {
+        var i = $scope.formats.indexOf($scope.selectedFormat);
+        var numOfBlanks = $scope.numsOfBlanks[i];
+        $scope.showArgsDropDowns(numOfBlanks);
+    }
+
+    $scope.showArgsDropDowns = function(numOfArgs) {
+        var i;
+        $scope.dropDownArr = new Array(3);
+        for (i = 0; i < 3; i++){
+            if (i < numOfArgs){
+                $scope.dropDownArr[i] = true;
+            }
+            else {
+                $scope.dropDownArr[i] = false;
+            }
+        }
     }
 
 
