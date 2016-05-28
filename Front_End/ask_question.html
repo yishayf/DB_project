@@ -13,6 +13,8 @@
 
 <div class="container">
 
+    <h1> Build your own question: </h1>
+
     <div id = chooseFormat>
 
         <h2> Choose A Format: </h2>
@@ -30,9 +32,15 @@
         <select ng-model="selectedThirdArg" ng-options="x for x in thirdArgOptions" ng-change="thirdUpdated()" ng-show="dropDownArr[2]" ng-disabled = "!thirdArgOptions"></select>
     </div>
 
-    <div id = generatedQuestion>
-        <h2> {{selectedFormat.replace("(YEAR)",selectedFirstArg) }} </h2>
+    <div id=generatedQuestionDiv>
+        <h2 id=generatedQuestion> {{ selectedFormatWithNumbers.replace("#1",selectedFirstArg || "___" ).replace("#2",selectedSecondArg || "___" ).replace("#3",selectedThirdArg || "___") }}</h2>
     </div>
+
+    <div class = buttons>
+        <button id="submit_button" ng-disabled="!allArgsSelected" ng-click="submit">Submit</button>
+        <a href="welcome_page.html" class="button">Go Back</a>
+    </div>
+
 
 
 
