@@ -1,4 +1,5 @@
 formats_http = "http://cs.tau.ac.il/~naftaly1/get_question_types.php";
+sharons_script = "http://cs.tau.ac.il/~naftaly1/get_question_types.php/?format-selected=1"
 
 var app = angular.module('askQuestion', []);
 
