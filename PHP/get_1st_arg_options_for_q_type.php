@@ -35,13 +35,12 @@ function get_1st_arg_options_by_q_type($q_type){
     return $res_array;
 }
 
-//if ($_SERVER["REQUEST_METHOD"] == "GET"){
-//    $q_type = $_GET["q_type"];
-//    $options_arr = get_1st_arg_options_by_q_type($q_type);
-//    echo json_encode($options_arr);
-//}
-
-$options_arr = get_1st_arg_options_by_q_type(1);
-echo json_encode($options_arr);
+if ($_SERVER["REQUEST_METHOD"] == "GET"){
+    if (!empty($_GET["q_type"])) {
+        $q_type = $_GET["q_type"];
+        $options_arr = get_1st_arg_options_by_q_type($q_type);
+        echo json_encode($options_arr);
+    }
+}
 
 ?>
