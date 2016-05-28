@@ -37,6 +37,9 @@ app.controller('askController', function($scope, $http) {
         
         
     $scope.recreateArgs  = function () {
+        $scope.selectedFirstArg = null;
+        $scope.selectedSecondArg = null;
+        $scope.selectedThirdArg = null;
         $scope.questionTypeIndex = $scope.formats.indexOf($scope.selectedFormat);
         var numOfBlanks = $scope.numsOfBlanks[$scope.questionTypeIndex];
         $scope.showArgsDropDowns(numOfBlanks);
