@@ -5,7 +5,7 @@ var app = angular.module('askQuestion', []);
 app.controller('askController', function($scope, $http) {
 
 
-    $scope.createFormats = function() {
+    $scope.createFormatsDropDown = function() {
         $scope.DropDownDisabled = true;
         $http.get(formats_http).then(function(d) {
             $scope.parseJason(d.data);
@@ -14,9 +14,6 @@ app.controller('askController', function($scope, $http) {
     }
     
     $scope.recreateArgs  = function () {
-    }
-
-    $scope.updateTemplateSelection = function(){
     }
 
 
@@ -32,8 +29,7 @@ app.controller('askController', function($scope, $http) {
         $scope.numsOfBlanks = numsOfBlanks;
     }
 
-    $scope.createFormats();
-    $scope.recreateArgs();
+    $scope.createFormatsDropDown();
 
 
 });
