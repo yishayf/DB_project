@@ -12,8 +12,6 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
                 concat(year, season) not in (select concat(year, season) from Question_type1)) AS valid
                 WHERE valid.year = %d";
             $query = sprintf($query_format, $arg1);
-        case 2:
-            break;
         case 3;
             break;
         case 4;
