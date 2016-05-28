@@ -7,10 +7,11 @@ require_once 'mysql_general.php';
 function get_sql_query_for_args_by_q_type($q_type, $arg1){
     switch ($q_type){
         case 1:
-            return "SELECT DISTINCT og.year FROM 
-                OlympicGame og, (SELECT year, season from OlympicGame WHERE
-                concat(year, season) not in (select concat(year, season) from Question_type1)) as VALID 
-                WHERE og.year = valid.year AND og.City != '';";
+            $query_format = "SELECT valid.season
+                FROM (SELECT year, season from OlympicGame WHERE
+                concat(year, season) not in (select concat(year, season) from Question_type1)) AS valid
+                WHERE valid.year = %d";
+            $query = sprintf($query_format, $arg1);
         case 2:
             break;
         case 3;
@@ -19,6 +20,7 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
             break;
         case 5;
     }
+    return $query;
 }
 
 
@@ -29,7 +31,7 @@ function get_2nd_arg_options_by_q_type($q_type, $arg1){
     switch ($q_type){
         case 1:
             while ($row = $result->fetch_assoc()) {
-                array_push($res_array, $row['year']);
+                array_push($res_array, $row['season']);
             }
     }
     return $res_array;

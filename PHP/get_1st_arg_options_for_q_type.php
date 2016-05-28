@@ -9,7 +9,7 @@ function get_sql_query_for_args_by_q_type($q_type){
         case 1:
             return "SELECT DISTINCT og.year FROM 
                 OlympicGame og, (SELECT year, season from OlympicGame WHERE
-                concat(year, season) not in (select concat(year, season) from Question_type1)) as VALID 
+                concat(year, season) not in (select concat(year, season) from Question_type1)) AS valid 
                 WHERE og.year = valid.year AND og.City != '';";
         case 2:
             break;
