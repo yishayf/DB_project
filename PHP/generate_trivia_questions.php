@@ -4,11 +4,6 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 
 require_once 'mysql_general.php';
 
-$db = new mysqli("localhost", 'root', '', 'db_project_test');
-//$db = new mysqli('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08');  # for nova
-
-
-
 function get_question_format($q_type){
     switch ($q_type) {
         case 1:
@@ -141,7 +136,6 @@ function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
             // get the correct answer
             $sql_query = sprintf($wrong_answer_sql_query_format, $year, $season, $correct_answer);
             $result = run_sql_select_query($sql_query);
-            $answer_array = array();
             while ($row = $result->fetch_assoc()) {
                 array_push($answer_array, $row['city']);
             }
