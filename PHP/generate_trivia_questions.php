@@ -1,4 +1,6 @@
 <?php
+
+// TOdO change sprintf to something more secure
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
@@ -31,7 +33,7 @@ function build_question_from_args($q_type, $args_row){
             $question = sprintf($question_format, $year, $season);
             break;
         case 2:
-            $name = $args_row['name'];
+            $name = $args_row['dbp_label'];
             $question = sprintf($question_format, $name);
             break;
         case 3:
@@ -56,7 +58,7 @@ function get_questions_args_sql_query($q_type, $num_questions){
                 LIMIT %d";
             break;
         case 2:
-            $sql_query_format = "SELECT dbp_label, name
+            $sql_query_format = "SELECT dbp_label
                 FROM Question_type2
                 ORDER BY RAND()
                 LIMIT %d";
@@ -124,7 +126,7 @@ function get_wrong_answer_sql_query_format($q_type){
         case 3:
             return "SELECT a.dbp_label FROM 
                  Athlete a
-                 WHERE  a.name not in (SELECT a1.name FROM 
+                 WHERE  a.dbp_label not in (SELECT a1.dbp_label FROM 
                  Athlete a1, AthleteOlympicSportFields af, OlympicSportField f 
                  WHERE a1.athlete_id = af.athlete_id AND
                  af.field_id = f.field_id AND
@@ -261,4 +263,17 @@ $db->close();
 
 ?>
 
+
+<!--1)	Where did the (YEAR) (SEASON) Olympic games take place? V-->
+<!--2)	How many Olympic games did (athlete) participated in?-->
+<!--3)	Which of the following was part of the (sport field) competitors at the Olympic games?-->
+<!--4)	How many (color) medals did (athlete) win at the Olympic games?-->
+<!--5)	Who won most medals at the (year) (season) Olympic games?-->
+<!---->
+<!---->
+<!--6)	In which of the following competition type did (athlete) participated?-->
+<!--7)	Which Athlete won a (COLOR) medal in the competition of (COMPETITION TYPE) at the (YEAR) (SEASON) Olympics?-->
+<!--8)	Who won most (color) medals at the Olympic games?-->
+<!--9)	How old is (athlete)?-->
+<!--10)	Which athlete won a (COLOR) Olympic medal?-->
 
