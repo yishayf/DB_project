@@ -2,16 +2,12 @@
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
+require_once 'mysql_general.php';
+
 $db = new mysqli("localhost", 'root', '', 'db_project_test');
 //$db = new mysqli('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08');  # for nova
 
-function run_sql_select_query($sql_query){
-    global $db;
-    if(!$result = $db->query($sql_query)){
-        die('There was an error running the query [' . $db->error . ']');
-    }
-    return $result;
-}
+
 
 function get_question_format($q_type){
     switch ($q_type) {
