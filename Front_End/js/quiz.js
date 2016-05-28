@@ -32,8 +32,6 @@ app.directive('quiz', function(quizFactory) {
                         scope.answerMode = true;
                     } else {
                         scope.quizOver = true;
-                        console.log("no q");
-                        console.log(q);
                     }
                 });
             };
