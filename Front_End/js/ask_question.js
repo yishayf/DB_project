@@ -12,20 +12,31 @@ app.controller('askController', function($scope, $http) {
         $scope.DropDownDiabled = false;
     });
 
+    $scope.parseJason = function(data) {
+        var formats = [];
+        var numsOfBlanks = [];
+        var i;
+        for (i = 0; i < data.length; i++) {
+            formats.push(data[i].question_format);
+            numsOfBlanks.push(data[i].num_args);
+        }
+        $scope.formats = formats;
+        $scope.numsOfBlanks = numsOfBlanks;
+    }
     $scope.updateTemplateSelection = function(){
         console.log("YESSSS");
     }
 
 });
-
-function getText(data) {
-    var result = [];
-    var i;
-    for (i=0; i<data.length; i++) {
-        var string = data[i].question_format;
-        result.push(string);
-    }
-    return result;
-}
+//
+// function getText(data) {
+//     var result = [];
+//     var i;
+//     for (i=0; i<data.length; i++) {
+//         var string = data[i].question_format;
+//         result.push(string);
+//     }
+//     return result;
+// }
 
 
