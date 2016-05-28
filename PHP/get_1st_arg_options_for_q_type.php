@@ -7,7 +7,7 @@ require_once 'mysql_general.php';
 function get_sql_query_for_args_by_q_type($q_type){
     switch ($q_type){
         case 1:
-            return "SELECT DISTINCT year 
+            return "SELECT DISTINCT a.year 
                 FROM OlympicGame
                 WHERE city != ''; "; //TODO: change to != null ?
         case 2:

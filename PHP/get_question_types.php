@@ -15,7 +15,7 @@ function insert_question_type(&$question_types, $q_type, $q_format, $num_args, $
 $question_types = array();
 
 insert_question_type($question_types, 1, "Where did the (YEAR) (SEASON) Olympic games take place?", 2,
-    array('arg1' => 'year', 'arg2' => 'season'));
+    array('year', 'season'));
 insert_question_type($question_types, 2, "Which athlete won a (COLOR) Olympic medal?", 1);
 insert_question_type($question_types, 3, "When was (athlete) born?", 1);
 
