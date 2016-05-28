@@ -28,16 +28,18 @@
         <select ng-model="selectedSecondArg" ng-options="x for x in secondArgOptions" ng-change="secondUpdated()" ng-show="dropDownArr[1]" ng-disabled = "!secondArgOptions"></select>
 
 
-        <h2  ng-show = dropDownArr[2]> Choose {{dropDownArr[2]}}: </h2>
-        <select ng-model="selectedThirdArg" ng-options="x for x in thirdArgOptions" ng-change="thirdUpdated()" ng-show="dropDownArr[2]" ng-disabled = "!thirdArgOptions"></select>
+        <!--<h2  ng-show = dropDownArr[2]> Choose {{dropDownArr[2]}}: </h2>-->
+        <!--<select ng-model="selectedThirdArg" ng-options="x for x in thirdArgOptions" ng-change="thirdUpdated()" ng-show="dropDownArr[2]" ng-disabled = "!thirdArgOptions"></select>-->
     </div>
 
     <div id=generatedQuestionDiv>
-        <h2 id=generatedQuestion> {{ selectedFormatWithNumbers.replace("#1",selectedFirstArg || "___" ).replace("#2",selectedSecondArg || "___" ).replace("#3",selectedThirdArg || "___") }}</h2>
+        <h2 id=generatedQuestion> {{ selectedFormatWithNumbers.replace("#1",selectedFirstArg || "___" ).replace("#2",selectedSecondArg || "___" ) }}</h2>
+        <!--.replace("#3",selectedThirdArg || "___")-->
+
     </div>
 
     <div class = buttons>
-        <button id="submit_button" ng-disabled="!allArgsSelected" ng-click="submit">Submit</button>
+        <button id="submit_button" ng-disabled="!allArgsSelected" ng-click="submit()">Submit</button>
         <a href="welcome_page.html" class="button">Go Back</a>
     </div>
 

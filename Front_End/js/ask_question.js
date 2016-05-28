@@ -4,6 +4,7 @@ server_sharon = "http://192.168.14.37/phpTest"
 formats_http = server_sharon + "/get_question_types.php";
 firstArg_http = server_sharon + "/get_1st_arg_options_for_q_type.php/?q_type=";
 secondArg_http = server_sharon + "/get_2nd_arg_options_for_q_type.php/?q_type=";
+post_question = server_sharon + "/add_question_from_user.php/" //?q_type=num_args, arg1, arg2
 
 var app = angular.module('askQuestion', []);
 
@@ -38,9 +39,8 @@ app.controller('askController', function($scope, $http) {
         var numArgs = $scope.numsOfBlanks[$scope.questionTypeIndex];
         var one = (numArgs == 1 && ($scope.selectedFirstArg!=null));
         var two = (numArgs == 2 && ($scope.selectedFirstArg!=null) && ($scope.selectedSecondArg!=null));
-        var three = (numArgs == 3 && ($scope.selectedFirstArg!=null) && ($scope.selectedSecondArg!=null) && ($scope.selectedThirdArg!=null));
-        console.log(one || two || three);
-        $scope.allArgsSelected =  one || two || three;
+        //var three = (numArgs == 3 && ($scope.selectedFirstArg!=null) && ($scope.selectedSecondArg!=null) && ($scope.selectedThirdArg!=null));
+        $scope.allArgsSelected =  one || two; // || three;
     }
 
 
@@ -58,7 +58,7 @@ app.controller('askController', function($scope, $http) {
     $scope.recreateArgs  = function () {
         $scope.selectedFirstArg = null;
         $scope.selectedSecondArg = null;
-        $scope.selectedThirdArg = null;
+        //$scope.selectedThirdArg = null;
         $scope.allArgsSelected = false;
         $scope.questionTypeIndex = $scope.formats.indexOf($scope.selectedFormat);
         var numOfBlanks = $scope.numsOfBlanks[$scope.questionTypeIndex];
@@ -70,8 +70,8 @@ app.controller('askController', function($scope, $http) {
 
     $scope.showArgsDropDowns = function(numOfArgs) {
         var i;
-        $scope.dropDownArr = new Array(3);
-        for (i = 0; i < 3; i++) {
+        $scope.dropDownArr = new Array(2); //3
+        for (i = 0; i < 2; i++) { // i<3
             if (i < numOfArgs) {
                 $scope.dropDownArr[i] = $scope.args[$scope.questionTypeIndex][i];
             }
@@ -82,7 +82,17 @@ app.controller('askController', function($scope, $http) {
     }
 
     $scope.submit = function() {
-
+        var qtype = parseInt($scope.questionTypeIndex)+1;
+        var numArgs = $scope.numsOfBlanks[$scope.questionTypeIndex];
+        var arg1 = $scope.selectedFirstArg;
+        var arg2 = $scope.selectedSecondArg;
+        console.log(qtype, numArgs, arg1, arg2);
+        $http({method: 'POST',
+            url: post_question,
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            data: {"q_typ":qtype, "num_args":numArgs, "arg1":arg1, "arg2":arg2} }).then(function(r) {
+            console.log(r);
+        });
     }
 
     $scope.wordsToNumbers = function() {
@@ -120,7 +130,7 @@ app.controller('askController', function($scope, $http) {
         $scope.numsOfBlanks = numsOfBlanks;
         $scope.args = args;
     }
-    
+
 
     $scope.createFormatsDropDown();
 });
