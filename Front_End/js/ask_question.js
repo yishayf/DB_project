@@ -6,11 +6,17 @@ app.controller('askController', function($scope, $http) {
 
     $scope.DropDownDiabled = true;
 
-    $http.get(formats_http).then(function(d) {
-        $scope.formats = getText(d.data);
-        $scope.formatsJson = d.data;
-        $scope.DropDownDiabled = false;
-    });
+    $scope.createFormatsDropDown = function() {
+        $scope.DropDownDisabled = true;
+        $http.get(formats_http).then(function(d) {
+            $scope.parseJason(d.data);
+            $scope.DropDownDisabled = false;
+        });
+    }
+    
+    $scope.recreateArgs  = function () {
+    }
+
 
     $scope.parseJason = function(data) {
         var formats = [];
@@ -23,20 +29,9 @@ app.controller('askController', function($scope, $http) {
         $scope.formats = formats;
         $scope.numsOfBlanks = numsOfBlanks;
     }
-    $scope.updateTemplateSelection = function(){
-        console.log("YESSSS");
-    }
+
+    $scope.createFormatsDropDown();
+
 
 });
-//
-// function getText(data) {
-//     var result = [];
-//     var i;
-//     for (i=0; i<data.length; i++) {
-//         var string = data[i].question_format;
-//         result.push(string);
-//     }
-//     return result;
-// }
-
 
