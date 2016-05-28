@@ -28,12 +28,10 @@
 
         <h2  ng-show = dropDownArr[2]> Choose {{dropDownArr[2]}}: </h2>
         <select ng-model="selectedThirdArg" ng-options="x for x in thirdArgOptions" ng-change="thirdUpdated()" ng-show="dropDownArr[2]" ng-disabled = "!thirdArgOptions"></select>
-
-
     </div>
 
     <div id = generatedQuestion>
-        <h2> {{generated_question}} </h2>
+        <h2> {{selectedFormat.replace("(YEAR)",selectedFirstArg) }} </h2>
     </div>
 
 
