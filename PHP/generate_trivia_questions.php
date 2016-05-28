@@ -8,7 +8,6 @@ $db = new mysqli("localhost", 'root', '', 'db_project_test');
 
 function get_type1_question_with_answers($num_questions=1){
     global $db;
-
     $out_json = "";
     // return a question for type 1:
     $question_format = 'Where did the %s %s olympic games take place?';
@@ -26,7 +25,7 @@ function get_type1_question_with_answers($num_questions=1){
         FROM OlympicGame
         WHERE (year != '%s' OR
         season != '%s') AND city != '' AND city != '%s'
-        LIMIT 3"; // TODO: city != '' should be city != null   !!!!
+        LIMIT 3";
 
     // insert the num_question parameters:
     $sql_query = sprintf($sql_question_format, $num_questions);
@@ -35,7 +34,7 @@ function get_type1_question_with_answers($num_questions=1){
         die('ERROR: There was an error running the query [' . $db->error . ']');
     }
     else if ($result->num_rows < $num_questions){
-        die('ERROR: Not enough questions in table Question_type1');
+        die('ERROR: Not enough questions for type 1');
     }
 
     $type1_questions_array =  array();
@@ -68,7 +67,6 @@ function get_type1_question_with_answers($num_questions=1){
         // put the correct answer in the answer array in a random place
         $place = mt_rand(0, 3);
         array_splice($answer_array, $place, 0, $correct_answer);
-        echo $correct_answer;
         $question_dict["options"] = $answer_array;
         $question_dict["answer"] = $place;
 
@@ -78,8 +76,13 @@ function get_type1_question_with_answers($num_questions=1){
     return $type1_questions_array;
 }
 
-$type1_q_array = get_type1_question_with_answers(2);
-echo json_encode($type1_q_array);
+
+
+$ten_questions_arr = array();
+
+$ten_questions_arr = $ten_questions_arr + get_type1_question_with_answers(2);
+
+echo json_encode($ten_questions_arr);
 
 $db->close();
 
