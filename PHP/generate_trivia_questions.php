@@ -5,64 +5,192 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 $db = new mysqli("localhost", 'root', '', 'db_project_test');
 //$db = new mysqli('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08');  # for nova
 
-
-function get_type1_question_with_answers($num_questions=1){
+function run_sql_select_query($sql_query){
     global $db;
-    $out_json = "";
-    // return a question for type 1:
-    $question_format = 'Where did the %s %s olympic games take place?';
-    $sql_question_format = "SELECT year, season
-        FROM `Question_type1`
-        ORDER BY RAND()
-        LIMIT %d";
-    $sql_correct_answer_format = "
-        SELECT city
-        FROM OlympicGame
-        WHERE year = %s AND
-        season = '%s'";
-    $sql_wrong_answer_format = "
-        SELECT city
-        FROM OlympicGame
-        WHERE (year != '%s' OR
-        season != '%s') AND city != '' AND city != '%s'
-        LIMIT 3";
-
-    // insert the num_question parameters:
-    $sql_query = sprintf($sql_question_format, $num_questions);
-
     if(!$result = $db->query($sql_query)){
+        die('There was an error running the query [' . $db->error . ']');
+    }
+    return $result;
+}
+
+function get_question_format($q_type){
+    switch ($q_type) {
+        case 1:
+            return 'Where did the %s %s olympic games take place?';
+        case 2:
+            return '';
+        case 3:
+            return '';
+        case 4:
+            return '';
+        case 5:
+            return '';
+    }
+}
+
+function get_questions_args_sql_query($q_type, $num_questions){
+    switch ($q_type) {
+        case 1:
+            $sql_query_format = "SELECT year, season
+                FROM `Question_type1`
+                ORDER BY RAND()
+                LIMIT %d";
+            break;
+        case 2:
+            return '';
+        case 3:
+            return '';
+        case 4:
+            return '';
+        case 5:
+            return '';
+    }
+    // insert the num_question parameters:
+    $sql_query = sprintf($sql_query_format, $num_questions);
+    return $sql_query;
+}
+
+function get_correct_answer_sql_query_format($q_type){
+    switch ($q_type) {
+        case 1:
+            return "SELECT city
+                FROM OlympicGame
+                WHERE year = %s AND
+                      season = '%s'";
+        case 2:
+            return '';
+        case 3:
+            return '';
+        case 4:
+            return '';
+        case 5:
+            return '';
+    }
+}
+
+function get_wrong_answer_sql_query_format($q_type){
+    switch ($q_type) {
+        case 1:
+            return "SELECT city
+                FROM OlympicGame
+                WHERE (year != '%s' OR
+                    season != '%s') AND 
+                    city != '' AND 
+                    city != '%s'
+                LIMIT 3";
+        case 2:
+            return '';
+        case 3:
+            return '';
+        case 4:
+            return '';
+        case 5:
+            return '';
+    }
+
+
+}
+
+function build_question_from_args($q_type, $args_row){
+    // get the question format for q_type
+    $question_format = get_question_format($q_type);
+
+    // build the question
+    switch ($q_type) {
+        case 1:
+            $year = $args_row['year'];
+            $season = $args_row['season'];
+            $question = sprintf($question_format, $year, $season);
+            return $question;
+        case 2:
+            return '';
+        case 3:
+            return '';
+        case 4:
+            return '';
+        case 5:
+            return '';
+    }
+}
+
+function get_correct_answer($q_type, $args_row){
+    $correct_answer_sql_query_format = get_correct_answer_sql_query_format($q_type);
+    switch ($q_type) {
+        case 1:
+            $year = $args_row['year'];
+            $season = $args_row['season'];
+            // get the correct answer
+            $sql_query = sprintf($correct_answer_sql_query_format, $year, $season);
+            $result = run_sql_select_query($sql_query);
+            $correct_answer = $result->fetch_assoc()['city'];
+            return $correct_answer;
+        case 2:
+            return '';
+        case 3:
+            return '';
+        case 4:
+            return '';
+        case 5:
+            return '';
+    }
+}
+
+function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
+    $wrong_answer_sql_query_format = get_wrong_answer_sql_query_format($q_type);
+    $answer_array = array();
+    switch ($q_type) {
+        case 1:
+            $year = $args_row['year'];
+            $season = $args_row['season'];
+            // get the correct answer
+            $sql_query = sprintf($wrong_answer_sql_query_format, $year, $season, $correct_answer);
+            $result = run_sql_select_query($sql_query);
+            $answer_array = array();
+            while ($row = $result->fetch_assoc()) {
+                array_push($answer_array, $row['city']);
+            }
+            return $answer_array;
+        case 2:
+            return '';
+        case 3:
+            return '';
+        case 4:
+            return '';
+        case 5:
+            return '';
+    }
+}
+
+
+
+function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_questions){
+    global $db;
+
+    // get sql query for getting the q_type blank filling for num_questions
+    $sql_args_query = get_questions_args_sql_query($q_type, $num_questions);
+
+    // run the query for getting the questions args
+    if(!$result = $db->query($sql_args_query)){
         die('ERROR: There was an error running the query [' . $db->error . ']');
     }
     else if ($result->num_rows < $num_questions){
-        die('ERROR: Not enough questions for type 1');
+        die(sprintf('ERROR: Not enough questions for question type %d', $q_type));
     }
 
-    $type1_questions_array =  array();
 
-    while ($row = $result->fetch_assoc()){
+    while ($args_row = $result->fetch_assoc()){
         $question_dict = array();
 
-        $year = $row['year'];
-        $season = $row['season'];
-        $question = sprintf($question_format, $year, $season);
+        // build the question
+        $question = build_question_from_args($q_type, $args_row);
+        // add to question dict
         $question_dict["question"] = $question;
 
         // get the correct answer
-        $sql_query1 = sprintf($sql_correct_answer_format, $year, $season);
-        if(!$result1 = $db->query($sql_query1)){
-            die('There was an error running the query [' . $db->error . ']');
-        }
-        $correct_answer = $result1->fetch_assoc()['city'];
+        $correct_answer = get_correct_answer($q_type, $args_row);
 
-        // get 3 wrong answers
-        $sql_query2 = sprintf($sql_wrong_answer_format, $year, $season, $correct_answer);
-        if(!$result2 = $db->query($sql_query2)){
-            die('There was an error running the query [' . $db->error . ']');
-        }
-        $answer_array = array();
-        while ($row = $result2->fetch_assoc()) {
-            array_push($answer_array, $row['city']);
-        }
+        // get 3 wrong answers to answer array
+        $answer_array = get_wrong_answers_arr($q_type, $args_row, $correct_answer);
 
         // put the correct answer in the answer array in a random place
         $place = mt_rand(0, 3);
@@ -70,19 +198,18 @@ function get_type1_question_with_answers($num_questions=1){
         $question_dict["options"] = $answer_array;
         $question_dict["answer"] = $place;
 
-        array_push($type1_questions_array, $question_dict); // TODO: what should we do if array is not of size 3 ???
-
+        // put the dict in the question array
+        array_push($questions_array, $question_dict); // TODO: what should we do if array is not of size 3 ???
     }
-    return $type1_questions_array;
 }
 
+$questions_arr = array();
 
+$num_q_for_type = 1;
 
-$ten_questions_arr = array();
+add_type_x_questions_with_answers($questions_arr, 1, $num_q_for_type);
 
-$ten_questions_arr = $ten_questions_arr + get_type1_question_with_answers(2);
-
-echo json_encode($ten_questions_arr);
+echo json_encode($questions_arr);
 
 $db->close();
 
