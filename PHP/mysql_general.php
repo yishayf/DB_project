@@ -28,5 +28,17 @@ function run_sql_insert_query($sql_query){
     }
 }
 
+function run_sql_update_query($sql_query){
+    global $db;
+    if($db->query($sql_query) === TRUE){
+        return true;
+    }
+    else {
+        echo nl2br($db->errno."\r\n");
+        echo nl2br('There was an error running the query [' . $db->error . ']')."\r\n";
+        return false;
+    }
+}
+
 ?>
 

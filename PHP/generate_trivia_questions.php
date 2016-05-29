@@ -12,7 +12,7 @@ function get_question_format($q_type){
         case 1:
             return 'Where did the %s %s olympic games take place?';
         case 2:
-            return 'How many Olympic games did %s participated in?';
+            return 'How many olympic games did %s participated in?';
         case 3:
             return 'Which of the following was part of the %s competitors at the olympic games?';
         case 4:
@@ -24,34 +24,36 @@ function get_question_format($q_type){
     }
 }
 
-function build_question_from_args($q_type, $args_row){
+function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$arg2){
     // get the question format for q_type
     $question_format = get_question_format($q_type);
 
     // build the question
     switch ($q_type) {
         case 1:
-            $year = $args_row['year'];
-            $season = $args_row['season'];
-            $question = sprintf($question_format, $year, $season);
+            $arg1 = $args_row['year'];
+            $arg2 = $args_row['season'];
+            $question = sprintf($question_format, $arg1, $arg2);
             break;
         case 2:
-            $name = $args_row['dbp_label'];
-            $question = sprintf($question_format, $name);
+            $arg1 = $args_row['dbp_label'];
+            $arg2 = null;
+            $question = sprintf($question_format, $arg1);
             break;
         case 3:
-            $field_name = $args_row['field_name'];
-            $question = sprintf($question_format, $field_name);
+            $arg1 = $args_row['field_name'];
+            $arg2 = null;
+            $question = sprintf($question_format, $arg1);
             break;
         case 4:
-            $medal_color = $args_row['medal_color'];
-            $name = $args_row['dbp_label'];
-            $question = sprintf($question_format, $medal_color, $name);
+            $arg1 = $args_row['medal_color'];
+            $arg2 = $args_row['dbp_label'];
+            $question = sprintf($question_format, $arg1, $arg2);
             break;
         case 5:
-            $year = $args_row['year'];
-            $season = $args_row['season'];
-            $question = sprintf($question_format, $year, $season);
+            $arg1 = $args_row['year'];
+            $arg2 = $args_row['season'];
+            $question = sprintf($question_format, $arg1, $arg2);
             break;
     }
     return $question;
@@ -61,31 +63,31 @@ function build_question_from_args($q_type, $args_row){
 function get_questions_args_sql_query($q_type, $num_questions){
     switch ($q_type) {
         case 1:
-            $sql_query_format = "SELECT year, season
+            $sql_query_format = "SELECT year, season, num_correct, num_wrong
                 FROM Question_type1
                 ORDER BY RAND()
                 LIMIT %d";
             break;
         case 2:
-            $sql_query_format = "SELECT dbp_label
+            $sql_query_format = "SELECT dbp_label, num_correct, num_wrong
                 FROM Question_type2
                 ORDER BY RAND()
                 LIMIT %d";
             break;
         case 3:
-            $sql_query_format = "SELECT field_name
+            $sql_query_format = "SELECT field_name, num_correct, num_wrong
                 FROM Question_type3
                 ORDER BY RAND()
                 LIMIT %d";
             break;
         case 4:
-            $sql_query_format = "SELECT medal_color, dbp_label
+            $sql_query_format = "SELECT medal_color, dbp_label, num_correct, num_wrong
                 FROM Question_type4
                 ORDER BY RAND()
                 LIMIT %d";
             break;
         case 5:
-            $sql_query_format = "SELECT year, season
+            $sql_query_format = "SELECT year, season, num_correct, num_wrong
                 FROM Question_type5
                 ORDER BY RAND()
                 LIMIT %d";
@@ -151,20 +153,20 @@ function get_wrong_answer_sql_query_format($q_type){
                 FROM OlympicGame
                 WHERE (year != '%s' OR
                     season != '%s') AND 
-                    wrong_answer != '' AND 
-                    wrong_answer != '%s'
+                    city != '' AND 
+                    city != '%s'
                 LIMIT 3";
         case 2:
-            return "select DISTINCT count(athlete_id) as AS wrong_answer
+            return "select DISTINCT count(athlete_id) AS wrong_answer
                 FROM (SELECT DISTINCT game_id, athlete_id
                     FROM AthleteGames) as bla
                 group by athlete_id
-                HAVING wrong_answer != %d
+                HAVING count(athlete_id) != %d
                 LIMIT 3";
         case 3:
             return "SELECT a.dbp_label AS wrong_answer 
                 FROM Athlete a
-                WHERE  wrong_answer not in (SELECT a1.dbp_label FROM 
+                WHERE  a.dbp_label not in (SELECT a1.dbp_label FROM 
                 Athlete a1, AthleteOlympicSportFields af, OlympicSportField f 
                 WHERE a1.athlete_id = af.athlete_id AND
                 af.field_id = f.field_id AND
@@ -176,7 +178,7 @@ function get_wrong_answer_sql_query_format($q_type){
                 FROM AthleteMedals am
                 WHERE am.medal_color = '%s'
                 GROUP BY(am.athlete_id)
-                HAVING wrong_answer != %d
+                HAVING COUNT(*) != %d
                 ORDER BY RAND()
                 LIMIT 3";
         case 5:
@@ -287,15 +289,25 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
         die(sprintf('ERROR: Not enough questions for question type %d', $q_type));
     }
 
-
+    $arg1 = null;
+    $arg2 = null;
     while ($args_row = $result->fetch_assoc()){
         $question_dict = array();
 
         // build the question
-        $question = build_question_from_args($q_type, $args_row);
+        $question = build_question_from_args_and_update_args($q_type, $args_row, $arg1, $arg2);
 
         // add to question dict
         $question_dict["question"] = $question;
+
+        // put the arguments the question format gets (info inside blanks)
+        $question_dict["q_type"] = $q_type;
+        $question_dict["arg1"] = $arg1;
+        $question_dict["arg2"] = $arg2;
+
+        // put num correct and num wrong in dict
+        $question_dict["num_correct"] = $args_row['num_correct'];
+        $question_dict["num_wrong"] = $args_row['num_wrong'];
 
         // get the correct answer
         $correct_answer = get_correct_answer($q_type, $args_row);
@@ -317,26 +329,32 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 $questions_arr = array();
 
 $num_q_for_type = 1;
+// TODO : handle not enough questions in client side
+add_type_x_questions_with_answers($questions_arr, 1, $num_q_for_type);
+//add_type_x_questions_with_answers($questions_arr, 2, $num_q_for_type);
+//add_type_x_questions_with_answers($questions_arr, 3, $num_q_for_type);
+//add_type_x_questions_with_answers($questions_arr, 4, $num_q_for_type);
+//add_type_x_questions_with_answers($questions_arr, 5, $num_q_for_type);
 
-add_type_x_questions_with_answers($questions_arr, 5, $num_q_for_type);
+shuffle($questions_arr);
 
 echo json_encode($questions_arr);
 
-$db->close();
-
+// TODO: remove:
+//1)	Where did the (YEAR) (SEASON) Olympic games take place? V
+//    2)	How many Olympic games did (athlete) participated in?
+//    3)	Which of the following was part of the (sport field) competitors at the Olympic games?
+//    4)	How many (color) medals did (athlete) win at the Olympic games?
+//    5)	Who won most medals at the (year) (season) Olympic games?
+//
+//
+//    6)	In which of the following competition type did (athlete) participated?
+//    7)	Which Athlete won a (COLOR) medal in the competition of (COMPETITION TYPE) at the (YEAR) (SEASON) Olympics?
+//    8)	Who won most (color) medals at the Olympic games?
+//    9)	How old is (athlete)?
+//    10)	Which athlete won a (COLOR) Olympic medal?
 ?>
 
 
-<!--1)	Where did the (YEAR) (SEASON) Olympic games take place? V-->
-<!--2)	How many Olympic games did (athlete) participated in?-->
-<!--3)	Which of the following was part of the (sport field) competitors at the Olympic games?-->
-<!--4)	How many (color) medals did (athlete) win at the Olympic games?-->
-<!--5)	Who won most medals at the (year) (season) Olympic games?-->
-<!---->
-<!---->
-<!--6)	In which of the following competition type did (athlete) participated?-->
-<!--7)	Which Athlete won a (COLOR) medal in the competition of (COMPETITION TYPE) at the (YEAR) (SEASON) Olympics?-->
-<!--8)	Who won most (color) medals at the Olympic games?-->
-<!--9)	How old is (athlete)?-->
-<!--10)	Which athlete won a (COLOR) Olympic medal?-->
+
 
