@@ -20,6 +20,7 @@ app.directive('quiz', function(quizFactory) {
             scope.reset = function() {
                 scope.inProgress = false;
                 scope.score = 0;
+                scope.start();
             }
 
             scope.getQuestion = function() {
@@ -58,6 +59,7 @@ app.directive('quiz', function(quizFactory) {
 
             scope.reset();
         }
+
     }
 });
 
@@ -83,6 +85,7 @@ app.factory('quizFactory', function($http) {
         }
     };
 });
+
 
 
 

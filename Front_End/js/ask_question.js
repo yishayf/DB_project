@@ -85,12 +85,12 @@ app.controller('askController', function($scope, $http) {
         var qtype = parseInt($scope.questionTypeIndex)+1;
         var numArgs = $scope.numsOfBlanks[$scope.questionTypeIndex];
         var arg1 = $scope.selectedFirstArg;
-        var arg2 = $scope.selectedSecondArg;
-        console.log(qtype, numArgs, arg1, arg2);
-        $http({method: 'POST',
-            url: post_question,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: {"q_typ":qtype, "num_args":numArgs, "arg1":arg1, "arg2":arg2} }).then(function(r) {
+        var arg2 = null;//$scope.selectedSecondArg;
+        var requestData = {"q_type":qtype, "num_args":numArgs, "arg1":arg1, "arg2":arg2};
+        console.log(requestData);
+        $http.post(post_question, requestData, {
+            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+            transformRequest: transform}).success(function(r) {
             console.log(r);
         });
     }
@@ -114,7 +114,9 @@ app.controller('askController', function($scope, $http) {
         return result;
     }
 
-
+    var transform = function(data){
+        return $.param(data);
+    }
 
     $scope.parseJason = function(data) {
         var formats = [];
@@ -134,4 +136,5 @@ app.controller('askController', function($scope, $http) {
 
     $scope.createFormatsDropDown();
 });
+
 
