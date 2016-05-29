@@ -1,9 +1,10 @@
-var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
-var questions_http = "http://cs.tau.ac.il/~naftaly1/generate_trivia_questions.php";
+//var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
+var questions_http = "http://192.168.14.37/phpTest/generate_trivia_questions.php";
+var post_statistics = "http://192.168.14.37/phpTest/update_questions_stats.php";
 
 var app = angular.module('quizApp', []);
 
-app.directive('quiz', function(quizFactory) {
+app.directive('quiz', function(quizFactory, $http) {
 
     return {
         restrict: 'AE',
@@ -13,12 +14,11 @@ app.directive('quiz', function(quizFactory) {
 
 
             scope.start = function() {
+                scope.history = [];
                 scope.id = 0;
                 scope.getQuestion().then(function() {
-                    console.log(scope.inProgress);
                     scope.quizOver = false;
                     scope.inProgress = true;
-                    console.log(scope.inProgress);
                 });
             };
 
@@ -38,6 +38,14 @@ app.directive('quiz', function(quizFactory) {
                         scope.options = q.options;
                         scope.answer = q.answer;
                         scope.answerMode = true;
+                        var denominator = parseInt(q.num_correct) + parseInt(q.num_wrong);
+                        if (denominator == 0) {
+                            denominator = 1;
+                        }
+                        scope.correctRatio = parseInt(q.num_correct)/denominator;
+                        scope.arg1 = q.arg1;
+                        scope.arg2 = q.arg2;
+                        scope.format = q.q_type;
                     } else {
                         scope.quizOver = true;
                     }
@@ -45,7 +53,6 @@ app.directive('quiz', function(quizFactory) {
             };
 
             scope.checkAnswer = function() {
-                console.log(scope.inProgress);
                 if(!$('input[name=answer]:checked').length) return;
 
                 var ans = $('input[name=answer]:checked').val();
@@ -56,13 +63,28 @@ app.directive('quiz', function(quizFactory) {
                 } else {
                     scope.correctAns = false;
                 }
-
+                scope.history.push({'q_type':scope.format, 'arg1':scope.arg1, 'arg2':scope.arg2, 'correct':scope.correctAns}) ;
                 scope.answerMode = false;
             };
 
             scope.nextQuestion = function() {
                 scope.id++;
                 scope.getQuestion();
+            }
+
+            scope.done = function() {
+                console.log(scope.history);
+                $http.post(post_statistics, {'stats': scope.history}, {
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                    transformRequest: transform}).then(function(r) {
+                    console.log("Statistics sent succesfully");
+                    console.log(r);
+                });
+
+            }
+
+            var transform = function(data){
+                return $.param(data);
             }
 
             scope.reset();

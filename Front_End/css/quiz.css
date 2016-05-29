@@ -26,17 +26,22 @@ li {
     margin: 2%;
 }
 
+#loading {
+    align-items: center;
+    align-content: center;
+    text-align: center;
+}
+
+
 #score {
     font-family: "Andale Mono";
     text-align: end;
     padding-right: 8%;
 }
 
-/*#progressBarImage {*/
-    /*position: absolute;*/
-    /*left: 50%;*/
-    /*margin-left: -60px;*/
-/*}*/
+#progressBarImage {
+    align-self: center;
+}
 
 .button, #next-question {
 
