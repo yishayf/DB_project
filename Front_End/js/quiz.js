@@ -42,15 +42,24 @@ app.directive('quiz', function(quizFactory, $http) {
                         if (denominator == 0) {
                             denominator = 1;
                         }
-                        scope.correctRatio = parseInt(q.num_correct)/denominator;
+                        scope.correctRatio = Math.round(100*parseInt(q.num_correct)/denominator);
                         scope.arg1 = q.arg1;
                         scope.arg2 = q.arg2;
                         scope.format = q.q_type;
+                        scope.info =  q.more_info; //TODO ((q.more_info == "") ? null :
                     } else {
                         scope.quizOver = true;
                     }
                 });
             };
+
+            scope.moreInfo = function() {
+                scope.infoPopupRunning = true;
+            }
+
+            scope.doneInfo = function() {
+                scope.infoPopupRunning = false;
+            }
 
             scope.checkAnswer = function() {
                 if(!$('input[name=answer]:checked').length) return;

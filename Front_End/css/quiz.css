@@ -43,7 +43,7 @@ li {
     align-self: center;
 }
 
-.button, #next-question {
+.button, #next-question, #closeInfo {
 
     font-family: "Andale Mono";
     background-color: #4CAF50;
@@ -58,6 +58,26 @@ li {
     border-radius: 8px;
 }
 
+#infoButton {
+    background-image: url(../img/infoButton.png);
+    background-color: transparent;
+    height: 40px;
+    width: 40px;
+    -webkit-background-size: cover;
+    border: none;
+
+    padding: 14px 15px;
+    margin: 1px 1px;
+
+}
+
+#infoTextBox {
+    border: none;
+    overflow: scroll;
+    font-family: "Andale Mono";
+    padding: 7px;
+    height: 145px;
+}
 
 .container {
     border-radius: 8px;
@@ -66,6 +86,10 @@ li {
     align-self: center;
     margin: 10%;
     padding: 3%;
+}
+
+.container[disabled] {
+    background-color: lightgray
 }
 
 .correctness {
@@ -77,6 +101,27 @@ li {
     text-align:center
 }
 
-#next-question{
+#next-question[disabled]{
+    background-color: gray;
+}
+
+#closeInfo{
+    margin-top: 10%;
+}
+
+.popup {
+    background-color: whitesmoke;
+    border: dashed;
+    border-radius: 8px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 300px;
+    width: 600px;
+    margin-top: -150px;
+    margin-left: -300px;
+    /*padding: 5%;*/
+    text-align: center;
+    padding-top: 50px;
 
 }
