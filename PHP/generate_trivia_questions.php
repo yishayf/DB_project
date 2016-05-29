@@ -1,6 +1,7 @@
 <?php
 
 // TOdO change sprintf to something more secure
+// TODO: handle errors on client side
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
@@ -13,11 +14,13 @@ function get_question_format($q_type){
         case 2:
             return 'How many Olympic games did %s participated in?';
         case 3:
-            return 'Which of the following was part of the %s competitors at the Olympic games?';
+            return 'Which of the following was part of the %s competitors at the olympic games?';
         case 4:
-            return '';
+            return 'How many %s medals did %s win at the olympic games?';
         case 5:
-            return '';
+            return 'Who won most medals at the %s %s olympic games?';
+        case 6:
+            return 'In which of the following competition type did %s participated?';
     }
 }
 
@@ -41,9 +44,15 @@ function build_question_from_args($q_type, $args_row){
             $question = sprintf($question_format, $field_name);
             break;
         case 4:
-            return '';
+            $medal_color = $args_row['medal_color'];
+            $name = $args_row['dbp_label'];
+            $question = sprintf($question_format, $medal_color, $name);
+            break;
         case 5:
-            return '';
+            $year = $args_row['year'];
+            $season = $args_row['season'];
+            $question = sprintf($question_format, $year, $season);
+            break;
     }
     return $question;
 }
@@ -70,9 +79,17 @@ function get_questions_args_sql_query($q_type, $num_questions){
                 LIMIT %d";
             break;
         case 4:
-            return '';
+            $sql_query_format = "SELECT medal_color, dbp_label
+                FROM Question_type4
+                ORDER BY RAND()
+                LIMIT %d";
+            break;
         case 5:
-            return '';
+            $sql_query_format = "SELECT year, season
+                FROM Question_type5
+                ORDER BY RAND()
+                LIMIT %d";
+            break;
     }
     // insert the num_question parameters:
     $sql_query = sprintf($sql_query_format, $num_questions);
@@ -92,54 +109,96 @@ function get_correct_answer_sql_query_format($q_type){
                 WHERE ag.athlete_id = a.athlete_id 
                 AND a.dbp_label = '%s'"; // TODO: add index to name !! add foreign key to dbp_label?
         case 3:
-            return "SELECT a.dbp_label FROM 
-                Athlete a, AthleteOlympicSportFields af, OlympicSportField f 
+            return "SELECT a.dbp_label 
+                FROM Athlete a, AthleteOlympicSportFields af, OlympicSportField f 
                 WHERE  a.athlete_id = af.athlete_id AND
                 af.field_id = f.field_id AND
                 f.field_name = '%s'
                 ORDER BY RAND()
                 LIMIT 1";
         case 4:
-            return '';
+            return "SELECT COUNT(*) AS cnt
+                FROM  Athlete a, AthleteMedals am
+                WHERE a.dbp_label = '%s'
+                AND a.athlete_id = am.athlete_id
+                AND am.medal_color = '%s'";
         case 5:
-            return '';
+            return "SELECT a.dbp_label
+                    FROM Athlete a, (SELECT temp.medal_count AS medal_count, temp.athlete_id AS athlete_id
+                            FROM (SELECT COUNT(*) AS medal_count, am.athlete_id
+                            FROM AthleteMedals am, OlympicGame og
+                            WHERE og.year = %s
+                            AND og.season = '%s'
+                            AND og.game_id = am.game_id
+                            GROUP BY(am.athlete_id)) AS temp
+                            WHERE temp.medal_count = (SELECT MAX(medal_count) 
+                                                      FROM (SELECT COUNT(*) AS medal_count, am.athlete_id
+                                                            FROM AthleteMedals am, OlympicGame og
+                                                            WHERE og.year = %s
+                                                            AND og.season = '%s'
+                                                            AND og.game_id = am.game_id
+                                                            GROUP BY(am.athlete_id)) AS temp)
+                            ORDER BY RAND()
+                            LIMIT 1) AS maxAthleteForGame
+                    Where a.athlete_id =  maxAthleteForGame.athlete_id";
     }
 }
 
 function get_wrong_answer_sql_query_format($q_type){
     switch ($q_type) {
         case 1:
-            return "SELECT city
+            return "SELECT city AS wrong_answer
                 FROM OlympicGame
                 WHERE (year != '%s' OR
                     season != '%s') AND 
-                    city != '' AND 
-                    city != '%s'
+                    wrong_answer != '' AND 
+                    wrong_answer != '%s'
                 LIMIT 3";
         case 2:
-            return "select DISTINCT count(athlete_id) as cnt
+            return "select DISTINCT count(athlete_id) as AS wrong_answer
                 FROM (SELECT DISTINCT game_id, athlete_id
                     FROM AthleteGames) as bla
                 group by athlete_id
-                HAVING cnt != %d
+                HAVING wrong_answer != %d
                 LIMIT 3";
         case 3:
-            return "SELECT a.dbp_label FROM 
-                 Athlete a
-                 WHERE  a.dbp_label not in (SELECT a1.dbp_label FROM 
-                 Athlete a1, AthleteOlympicSportFields af, OlympicSportField f 
-                 WHERE a1.athlete_id = af.athlete_id AND
-                 af.field_id = f.field_id AND
-                 f.field_name = '%s')
-                 ORDER BY RAND()
-                 LIMIT 3";
+            return "SELECT a.dbp_label AS wrong_answer 
+                FROM Athlete a
+                WHERE  wrong_answer not in (SELECT a1.dbp_label FROM 
+                Athlete a1, AthleteOlympicSportFields af, OlympicSportField f 
+                WHERE a1.athlete_id = af.athlete_id AND
+                af.field_id = f.field_id AND
+                f.field_name = '%s')
+                ORDER BY RAND()
+                LIMIT 3";
         case 4:
-            return '';
+            return "SELECT DISTINCT COUNT(*) AS wrong_answer
+                FROM AthleteMedals am
+                WHERE am.medal_color = '%s'
+                GROUP BY(am.athlete_id)
+                HAVING wrong_answer != %d
+                ORDER BY RAND()
+                LIMIT 3";
         case 5:
-            return '';
+            return "SELECT a.dbp_label AS wrong_answer
+                FROM Athlete a
+                WHERE a.athlete_id not in (SELECT temp.athlete_id AS athlete_id
+                                            FROM (SELECT COUNT(*) AS medal_count, am.athlete_id
+                                            FROM AthleteMedals am, OlympicGame og
+                                            WHERE og.year = %s
+                                            AND og.season = '%s'
+                                            AND og.game_id = am.game_id
+                                            GROUP BY(am.athlete_id)) AS temp
+                                            WHERE temp.medal_count = (SELECT MAX(medal_count) 
+                                                                      FROM (SELECT COUNT(*) AS medal_count, am.athlete_id
+                                                                            FROM AthleteMedals am, OlympicGame og
+                                                                            WHERE og.year = %s
+                                                                            AND og.season = '%s'
+                                                                            AND og.game_id = am.game_id
+                                                                            GROUP BY(am.athlete_id)) AS temp)) 
+                ORDER BY RAND()
+                LIMIT 3";
     }
-
-
 }
 
 function get_correct_answer($q_type, $args_row){
@@ -148,7 +207,6 @@ function get_correct_answer($q_type, $args_row){
         case 1:
             $year = $args_row['year'];
             $season = $args_row['season'];
-            // get the correct answer
             $sql_query = sprintf($correct_answer_sql_query_format, $year, $season);
             $result = run_sql_select_query($sql_query);
             $correct_answer = $result->fetch_assoc()['city'];
@@ -166,11 +224,20 @@ function get_correct_answer($q_type, $args_row){
             $correct_answer = $result->fetch_assoc()['dbp_label'];
             return $correct_answer;
         case 4:
-            return '';
+            $medal_color = $args_row['medal_color'];
+            $name = $args_row['dbp_label'];
+            $sql_query = sprintf($correct_answer_sql_query_format, $name, $medal_color);
+            $result = run_sql_select_query($sql_query);
+            $correct_answer = $result->fetch_assoc()['cnt'];
+            return $correct_answer;
         case 5:
-            return '';
+            $year = $args_row['year'];
+            $season = $args_row['season'];
+            $sql_query = sprintf($correct_answer_sql_query_format, $year, $season, $year, $season);
+            $result = run_sql_select_query($sql_query);
+            $correct_answer = $result->fetch_assoc()['dbp_label'];
+            return $correct_answer;
     }
-
 }
 
 function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
@@ -180,32 +247,28 @@ function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
         case 1:
             $year = $args_row['year'];
             $season = $args_row['season'];
-            // get the correct answer
             $sql_query = sprintf($wrong_answer_sql_query_format, $year, $season, $correct_answer);
-            $result = run_sql_select_query($sql_query);
-            while ($row = $result->fetch_assoc()) {
-                array_push($answer_array, $row['city']);
-            }
             break;
         case 2:
             $sql_query = sprintf($wrong_answer_sql_query_format, $correct_answer);
-            $result = run_sql_select_query($sql_query);
-            while ($row = $result->fetch_assoc()) {
-                array_push($answer_array, $row['cnt']);
-            }
             break;
         case 3:
             $field = $args_row['field_name'];
             $sql_query = sprintf($wrong_answer_sql_query_format, $field);
-            $result = run_sql_select_query($sql_query);
-            while ($row = $result->fetch_assoc()) {
-                array_push($answer_array, $row['dbp_label']);
-            }
             break;
         case 4:
-            return '';
+            $medal_color = $args_row['medal_color'];
+            $sql_query = sprintf($wrong_answer_sql_query_format, $medal_color, $correct_answer);
+            break;
         case 5:
-            return '';
+            $year = $args_row['year'];
+            $season = $args_row['season'];
+            $sql_query = sprintf($wrong_answer_sql_query_format, $year, $season, $year, $season);
+            break;
+    }
+    $result = run_sql_select_query($sql_query);
+    while ($row = $result->fetch_assoc()) {
+        array_push($answer_array, $row['wrong_answer']);
     }
     return $answer_array;
 }
@@ -255,7 +318,7 @@ $questions_arr = array();
 
 $num_q_for_type = 1;
 
-add_type_x_questions_with_answers($questions_arr, 3, $num_q_for_type);
+add_type_x_questions_with_answers($questions_arr, 5, $num_q_for_type);
 
 echo json_encode($questions_arr);
 

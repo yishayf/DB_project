@@ -22,7 +22,11 @@ function run_sql_insert_query($sql_query){
         return true;
     }
     else {
-        die('There was an error running the query [' . $db->error . ']');
+        echo nl2br($db->errno."\r\n");
+        echo nl2br('There was an error running the query [' . $db->error . ']')."\r\n";
+        return false;
     }
 }
+
 ?>
+
