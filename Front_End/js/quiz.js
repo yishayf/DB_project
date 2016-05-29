@@ -63,7 +63,16 @@ app.directive('quiz', function(quizFactory, $http) {
                 } else {
                     scope.correctAns = false;
                 }
-                scope.history.push({'q_type':scope.format, 'arg1':scope.arg1, 'arg2':scope.arg2, 'correct':scope.correctAns}) ;
+
+                var correct;
+
+                if (scope.correctAns) {
+                    correct = 1;
+                } else {
+                    correct = 0;
+                }
+
+                scope.history.push({'q_type':scope.format, 'arg1':scope.arg1, 'arg2':scope.arg2, 'correct':correct}) ;
                 scope.answerMode = false;
             };
 
