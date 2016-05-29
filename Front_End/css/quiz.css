@@ -32,6 +32,12 @@ li {
     padding-right: 8%;
 }
 
+/*#progressBarImage {*/
+    /*position: absolute;*/
+    /*left: 50%;*/
+    /*margin-left: -60px;*/
+/*}*/
+
 .button, #next-question {
 
     font-family: "Andale Mono";

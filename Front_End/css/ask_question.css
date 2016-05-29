@@ -18,6 +18,13 @@ h2 {
     text-align: left;
 }
 
+h3 {
+    font-family: "Andale Mono";
+    font-size: 25px;
+    color:  #4CAF50;
+    text-align: center;
+    margin: 30px;
+}
 
 .container {
     border-radius: 8px;
@@ -28,7 +35,11 @@ h2 {
     padding: 3%;
 }
 
-.button , #submit_button{
+.container[disabled] {
+    background-color: lightgray;
+}
+
+.button , #submit_button, #cancel_button{
     background-color: #4CAF50;
     border: none;
     color: white;
@@ -48,6 +59,11 @@ h2 {
     background-color: gray;
 }
 
+#cancel_button[disabled] {
+    background-color: gray;
+}
+
+
 #generatedQuestionDiv {
     margin-top: 5%;
     text-align: center;
@@ -62,4 +78,20 @@ h2 {
 .buttons {
     text-align: center;
 
+}
+
+.popup {
+    background-color: whitesmoke;
+    border: dashed;
+    border-radius: 8px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 200px;
+    width: 500px;
+    margin-top: -100px;
+    margin-left: -250px;
+    /*padding: 5%;*/
+    text-align: center;
+    padding-top: 50px;
 }

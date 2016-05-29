@@ -8,7 +8,7 @@ post_question = server_sharon + "/add_question_from_user.php/" //?q_type=num_arg
 
 var app = angular.module('askQuestion', []);
 
-app.controller('askController', function($scope, $http) {
+app.controller('askController', function($scope, $http, $location) {
 
 
     $scope.createFormatsDropDown = function() {
@@ -30,7 +30,7 @@ app.controller('askController', function($scope, $http) {
     }
 
     $scope.secondUpdated = function() {
-        $scope.selectedThirdArg = null;
+        //$scope.selectedThirdArg = null;
         $scope.updateAllArgsSelected();
     }
 
@@ -85,13 +85,15 @@ app.controller('askController', function($scope, $http) {
         var qtype = parseInt($scope.questionTypeIndex)+1;
         var numArgs = $scope.numsOfBlanks[$scope.questionTypeIndex];
         var arg1 = $scope.selectedFirstArg;
-        var arg2 = null;//$scope.selectedSecondArg;
+        var arg2 = $scope.selectedSecondArg;
         var requestData = {"q_type":qtype, "num_args":numArgs, "arg1":arg1, "arg2":arg2};
         console.log(requestData);
+        $scope.allArgsSelected  = false; //disable submit button
         $http.post(post_question, requestData, {
             headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-            transformRequest: transform}).success(function(r) {
-            console.log(r);
+            transformRequest: transform}).then(function(r) {
+            console.log("Submit succeded");
+            $scope.showPopop();
         });
     }
 
@@ -114,6 +116,7 @@ app.controller('askController', function($scope, $http) {
         return result;
     }
 
+
     var transform = function(data){
         return $.param(data);
     }
@@ -134,7 +137,24 @@ app.controller('askController', function($scope, $http) {
     }
 
 
+    $scope.showPopop = function() {
+        $scope.showPopUp = true;
+        $scope.firstArgOptions = null;
+        $scope.secondArgOptions = null;
+        //$scope.thirdArgOptions = null;
+        $scope.formats = null;
+        $scope.popupRunning = true;
+
+    }
+
+    $scope.go = function(hash) {
+        $location.path(hash);
+        console.log(hash);
+    }
+
     $scope.createFormatsDropDown();
+
+
 });
 
 

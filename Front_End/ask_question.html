@@ -11,14 +11,14 @@
 
 <body>
 
-<div class="container">
+<div class="container" ng-disabled="popupRunning">
 
     <h1> Build your own question: </h1>
 
     <div id = chooseFormat>
 
         <h2> Choose A Format: </h2>
-        <select ng-model="selectedFormat" ng-options="x for x in formats" ng-change="recreateArgs()" ng-disabled="formats == null"></select>
+        <select ng-model="selectedFormat" ng-options="x for x in formats" ng-change="recreateArgs()" ng-disabled="!formats"></select>
 
         <h2 ng-show = dropDownArr[0]> Choose {{dropDownArr[0]}}: </h2>
         <select ng-model="selectedFirstArg" ng-options="x for x in firstArgOptions" ng-change="firstUpdated()" ng-show="dropDownArr[0]" ng-disabled = "!firstArgOptions"></select>
@@ -40,13 +40,19 @@
 
     <div class = buttons>
         <button id="submit_button" ng-disabled="!allArgsSelected" ng-click="submit()">Submit</button>
-        <a href="welcome_page.html" class="button">Cancel</a>
+        <a href="welcome_page.html" class="button" ng-disabled="popupRunning">Cancel</a>
+        <!--<button id="cancel_button" ng-disabled="cancelDisabled" ng-click="go('/welcome_page.html')">Cancel</button>-->
+
     </div>
 
 
-
-
 </div>
+
+<div class='popup' ng-show = 'showPopUp'>
+    <h3> Question was submited! </h3>
+    <a href="welcome_page.html" class="button">Done</a>
+</div>
+
 </body>
 
 </html>

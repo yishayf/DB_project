@@ -4,16 +4,21 @@ var questions_http = "http://cs.tau.ac.il/~naftaly1/generate_trivia_questions.ph
 var app = angular.module('quizApp', []);
 
 app.directive('quiz', function(quizFactory) {
+
     return {
         restrict: 'AE',
         scope: {},
         templateUrl: 'template.html',
         link: function(scope) {
+
+
             scope.start = function() {
                 scope.id = 0;
                 scope.getQuestion().then(function() {
+                    console.log(scope.inProgress);
                     scope.quizOver = false;
                     scope.inProgress = true;
+                    console.log(scope.inProgress);
                 });
             };
 
@@ -21,6 +26,8 @@ app.directive('quiz', function(quizFactory) {
                 scope.inProgress = false;
                 scope.score = 0;
                 scope.start();
+
+
             }
 
             scope.getQuestion = function() {
@@ -38,6 +45,7 @@ app.directive('quiz', function(quizFactory) {
             };
 
             scope.checkAnswer = function() {
+                console.log(scope.inProgress);
                 if(!$('input[name=answer]:checked').length) return;
 
                 var ans = $('input[name=answer]:checked').val();
@@ -69,7 +77,6 @@ app.directive('quiz', function(quizFactory) {
 app.factory('quizFactory', function($http) {
 
     var fQuestions = $http.get(questions_http);
-
 
     return {
         getQuestion: function(id) {
