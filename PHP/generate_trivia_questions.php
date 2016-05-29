@@ -366,7 +366,7 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 
 $questions_arr = array();
 
-$num_q_for_type = 2;
+$num_q_for_type = 1;
 // TODO : handle not enough questions in client side
 add_type_x_questions_with_answers($questions_arr, 1, $num_q_for_type);
 add_type_x_questions_with_answers($questions_arr, 2, $num_q_for_type);
