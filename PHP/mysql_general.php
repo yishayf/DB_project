@@ -11,6 +11,7 @@ $db->set_charset('utf8');
 function run_sql_select_query($sql_query){
     global $db;
     if(!$result = $db->query($sql_query)){
+        http_response_code(500);
         die('There was an error running the query [' . $db->error . ']');
     }
     return $result;
@@ -28,6 +29,7 @@ function run_sql_insert_query($sql_query){
     }
 }
 
+// TODO: code duplication
 function run_sql_update_query($sql_query){
     global $db;
     if($db->query($sql_query) === TRUE){

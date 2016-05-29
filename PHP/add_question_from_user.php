@@ -24,37 +24,6 @@ function get_insert_query_by_q_type($q_type){
 function add_question_by_type($q_type, $arg1, $arg2=null){
     $insert_query_format = get_insert_query_by_q_type($q_type);
     $insert_query = sprintf($insert_query_format, $q_type, $arg1, $arg2);
-
-//    if ($num_args == 1){
-//        $insert_query_format = get_insert_query_by_q_type($q_type);
-//        $insert_query = sprintf($insert_query_format, $q_type, $arg1);
-//    }
-//    else if ($num_args == 2){
-//        $insert_query_format = get_insert_query_by_q_type($q_type);
-//        $insert_query = sprintf($insert_query_format, $q_type, $arg1, $arg2);
-//    }
-//    switch ($q_type){
-//        case 1:
-//            $insert_query_format = get_insert_query_by_q_type($q_type);
-//            $insert_query = sprintf($insert_query_format, $q_type, $arg1, $arg2);
-//            break;
-//        case 2:
-//            $insert_query_format = get_insert_query_by_q_type($q_type);
-//            $insert_query = sprintf($insert_query_format, $q_type, $arg1);
-//            break;
-//        case 3:
-//            $insert_query_format = get_insert_query_by_q_type($q_type);
-//            $insert_query = sprintf($insert_query_format, $q_type, $arg1);
-//            break;
-//        case 4:
-//            $insert_query_format = get_insert_query_by_q_type($q_type);
-//            $insert_query = sprintf($insert_query_format, $q_type, $arg1, $arg2);
-//            break;
-//        case 5:
-//            $insert_query_format = get_insert_query_by_q_type($q_type);
-//            $insert_query = sprintf($insert_query_format, $q_type, $arg1, $arg2);
-//            break;
-//    }
     return run_sql_insert_query($insert_query);
 }
 
@@ -77,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             $result = add_question_by_type($q_type, $arg1, $arg2);
         }
         else {
-            http_response_code(418);
+            http_response_code(400);
             die("Error: invalid arguments");
         }
 
@@ -91,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
         }
     }
     else {
-        http_response_code(413);
+        http_response_code(400);
         die("Error: invalid arguments");
     }
 }

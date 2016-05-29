@@ -12,7 +12,7 @@ function get_question_format($q_type){
         case 1:
             return 'Where did the %s %s olympic games take place?';
         case 2:
-            return 'How many olympic games did %s participated in?';
+            return 'How many olympic games did %s participate in?';
         case 3:
             return 'Which of the following was part of the %s competitors at the olympic games?';
         case 4:
@@ -22,6 +22,40 @@ function get_question_format($q_type){
         case 6:
             return 'In which of the following competition type did %s participated?';
     }
+}
+
+function get_info_for_q_type($q_type, $args_row, $correct_answer){
+    switch ($q_type) {
+        case 1:
+            return ""; //TODO: add comments for olympic games
+        case 2:
+            $dbp_label = $args_row['dbp_label'];
+            $query_format = "SELECT comment AS more_info 
+                  FROM Athlete WHERE dbp_label = '%s'";
+            $sql_query = sprintf($query_format, $dbp_label);
+            break;
+        case 3:
+            $query_format = "SELECT comment AS more_info 
+                  FROM Athlete WHERE dbp_label = '%s'";
+            $sql_query = sprintf($query_format, $correct_answer);
+            break;
+        case 4:
+            $dbp_label = $args_row['dbp_label'];
+            $query_format = "SELECT comment AS more_info 
+                  FROM Athlete WHERE dbp_label = '%s'";
+            $sql_query = sprintf($query_format, $dbp_label);
+            break;
+        case 5:
+            $query_format = "SELECT comment AS more_info 
+                  FROM Athlete WHERE dbp_label = '%s'";
+            $sql_query = sprintf($query_format, $correct_answer);
+            break;
+        case 6:
+            return "";
+    }
+    $result = run_sql_select_query($sql_query);
+    $info = $result->fetch_assoc()['more_info'];
+    return $info;
 }
 
 function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$arg2){
@@ -315,6 +349,10 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
         // get 3 wrong answers to answer array
         $answer_array = get_wrong_answers_arr($q_type, $args_row, $correct_answer);
 
+        // get info:
+        $info = get_info_for_q_type($q_type, $args_row, $correct_answer);
+        $question_dict["more_info"] = $info;
+
         // put the correct answer in the answer array in a random place
         $place = mt_rand(0, 3);
         array_splice($answer_array, $place, 0, $correct_answer);
@@ -328,13 +366,13 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 
 $questions_arr = array();
 
-$num_q_for_type = 1;
+$num_q_for_type = 2;
 // TODO : handle not enough questions in client side
 add_type_x_questions_with_answers($questions_arr, 1, $num_q_for_type);
-//add_type_x_questions_with_answers($questions_arr, 2, $num_q_for_type);
-//add_type_x_questions_with_answers($questions_arr, 3, $num_q_for_type);
-//add_type_x_questions_with_answers($questions_arr, 4, $num_q_for_type);
-//add_type_x_questions_with_answers($questions_arr, 5, $num_q_for_type);
+add_type_x_questions_with_answers($questions_arr, 2, $num_q_for_type);
+add_type_x_questions_with_answers($questions_arr, 3, $num_q_for_type);
+add_type_x_questions_with_answers($questions_arr, 4, $num_q_for_type);
+add_type_x_questions_with_answers($questions_arr, 5, $num_q_for_type);
 
 shuffle($questions_arr);
 
