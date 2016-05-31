@@ -19,7 +19,7 @@ sparql = SPARQLWrapper("http://dbpedia.org/sparql") # live.dbpedia is also an op
 sparql.setTimeout(300)
 
 # MySQL connection setup
-filterwarnings('ignore', category=mdb.Warning) # supress warnings from MySQL
+# filterwarnings('ignore', category=mdb.Warning) # supress warnings from MySQL
 con = mdb.connect('localhost', 'root', '', 'db_project_test') # unix_socket = '/opt/lampp/var/mysql/mysql.sock')
 # con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
 
@@ -191,11 +191,13 @@ def get_olympic_games():
     logging.info("Getting olympic games data from DBPedia")
     query_string = "PREFIX dbpedia0: <http://dbpedia.org/ontology/> " \
         "PREFIX  dbpedia2: <http://dbpedia.org/property/> " \
-        "SELECT ?label (group_concat(?hc; separator = ', ') as ?hcn) WHERE { " \
+        "SELECT ?label (group_concat(?hc; separator = ', ') as ?hcn) sample(?comment) as ?comm WHERE { " \
         "?og a dbpedia0:Olympics. " \
         "?og rdfs:label ?label. " \
         "optional { ?og dbpedia2:hostCity ?hc } " \
+        "optional { ?og rdfs:comment ?comment }" \
         "FILTER(lang(?label) = 'en') " \
+        "FILTER(lang(?comment) = 'en') " \
         "FILTER regex(?label, '^[1-2][0-9][0-9][0-9] (summer|winter) olympics' , 'i') " \
         "} " \
         "ORDER BY ?label "
@@ -203,7 +205,7 @@ def get_olympic_games():
     olympic_games = []
 
     for res in results:
-        olympic_game_tup = (res["label"]["value"], res["hcn"]["value"])
+        olympic_game_tup = (res["label"]["value"], res["hcn"]["value"], res["comm"]["value"])
         olympic_games.append(olympic_game_tup)
     return olympic_games
 
@@ -227,12 +229,19 @@ def insert_olympic_games(olympic_game_tuples):
         for tup in olympic_game_tuples:
             game_label = tup[0].encode('latin-1', 'ignore')
             host_city_text = tup[1].encode('latin-1', 'ignore')
+            comment = tup[2].encode('latin-1', 'ignore')
             game_label_arr = game_label.split(' ')
             year = game_label_arr[0]
             season = game_label_arr[1]
             city = get_host_city(host_city_text)
             try:
-                cur.execute("INSERT INTO OlympicGame (year, season, city) VALUES (%s, %s, %s)", (year, season, city))
+                cur.execute("INSERT IGNORE INTO OlympicGame (year, season, city) VALUES (%s, %s, %s)", (year, season, city))
+                con.commit()
+
+                cur.execute("UPDATE OlympicGame "
+                            "set comment = %s "
+                            "WHERE year = %s AND season = %s",
+                            (comment, year, season))
                 con.commit()
             except:
                 con.rollback()
@@ -286,9 +295,15 @@ def insert_athletes(athlete_tuples, con):
         name = tup[0].encode('latin-1', 'ignore').split('(')[0]
         bd = tup[1].encode('latin-1', 'ignore')
         try:
-            cur.execute("INSERT INTO Athlete (dbp_label, name, birth_date) "
-                        "VALUES (%s, %s, %s)",
-                        (label, name, bd))
+            cur.execute("INSERT INTO Athlete (dbp_label, name) "
+                        "VALUES (%s, %s)",
+                        (label, name))
+            con.commit()
+
+            cur.execute("UPDATE Athlete "
+                        "set birth_date = %s "
+                        "WHERE dbp_label = %s",
+                        (bd, label))
             con.commit()
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
@@ -495,30 +510,30 @@ def run_sparql_query(query):
 def main():
     logging.info("Started database update from DBPedia")
     # remove foreign keys from tables
-    remove_foreign_keys()
+    # remove_foreign_keys()
 
     # truncate tables
-    truncate_all_dbpedia_data_tables()
+    # truncate_all_dbpedia_data_tables()
 
     # restore foreign keys
-    add_foreign_keys()
+    # add_foreign_keys()
 
     # get all olympic years and insert to db
     query_and_insert_olympic_games()  # todo: add comments for olympic game
 
-    # get and insert athletes
+    # # get and insert athletes
     query_and_insert_athletes()
-
-    # get and insert athlete birth place # TODO: do we need this?
-    ####query_and_update_athletes_birth_place()
-
-    # get and insert athlete comment
+    #
+    # # get and insert athlete birth place # TODO: do we need this?
+    # ####query_and_update_athletes_birth_place()
+    #
+    # # get and insert athlete comment
     query_and_update_athletes_comment()
-
-    # get and insert athlete games and sport field
+    #
+    # # get and insert athlete games and sport field
     query_and_insert_athlete_field_and_games()
-
-    # get and insert athlete medals and their competitions
+    #
+    # # get and insert athlete medals and their competitions
     query_and_insert_athlete_competiotions_medals()
 
     logging.info("Done!")
