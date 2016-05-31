@@ -1,6 +1,6 @@
 server_local = "http://localhost/DB_php"
 server_nova = "http://cs.tau.ac.il/~naftaly1"
-server_sharon = "http://192.168.14.37/phpTest"
+server_sharon = "http://172.16.20.204/phpTest"
 formats_http = server_sharon + "/get_question_types.php";
 firstArg_http = server_sharon + "/get_1st_arg_options_for_q_type.php/?q_type=";
 secondArg_http = server_sharon + "/get_2nd_arg_options_for_q_type.php/?q_type=";

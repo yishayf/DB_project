@@ -1,6 +1,6 @@
 //var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
-var questions_http = "http://192.168.14.37/phpTest/generate_trivia_questions.php";
-var post_statistics = "http://192.168.14.37/phpTest/update_questions_stats.php";
+var questions_http = "http://172.16.20.204/phpTest/generate_trivia_questions.php";
+var post_statistics = "http://172.16.20.204/phpTest/update_questions_stats.php";
 
 var app = angular.module('quizApp', []);
 
