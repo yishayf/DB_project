@@ -14,7 +14,6 @@ CREATE TABLE `Athlete` (
  `dbp_label` varchar(100) NOT NULL,
  `name` varchar(100) NOT NULL,
  `birth_date` date DEFAULT NULL,
- `birth_place` varchar(100) DEFAULT NULL,
  `comment` text,
  PRIMARY KEY (`athlete_id`),
  UNIQUE KEY `unique_label` (`dbp_label`),
