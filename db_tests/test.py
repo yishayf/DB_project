@@ -1,8 +1,8 @@
-from SPARQLWrapper import SPARQLWrapper, JSON
-import MySQLdb as mdb
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
-import re
-str = "Cyclists at the 1984 Summer Olympics"
-p = re.compile('(.*) at the (\d{4}) (summer|winter) Olympics', re.IGNORECASE)
-m = p.match(str)
-print m.group(3)
+import time
+
+for i in range(5):
+    print i
+    time.sleep(1)
