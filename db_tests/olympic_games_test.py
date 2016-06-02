@@ -353,7 +353,7 @@ def update_athletes_birth_place(athlete_tuples, con):
     logging.info("Updating athletes birth place in our DB")
     for tup in athlete_tuples:
         cur = con.cursor()
-        label = tup[0].encode('latin-1', 'ignore')
+        label = tup[0].encode('latin-1', 'ignore') // TODO: change everywhere to utf8
         bp = tup[1].encode('latin-1', 'ignore')
         try:
             cur.execute("UPDATE Athlete "

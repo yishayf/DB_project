@@ -1,0 +1,27 @@
+body {
+    background-image: url(../img/OlympicDay.jpg);
+    -webkit-background-size: cover;
+    text-align: center;
+    height: 50%;
+    margin-top:200px ;
+
+}
+
+
+
+.button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 5px 3px;
+    cursor: pointer;
+    font-size: 24px;
+    border-radius: 8px;
+    font-family: Andale Mono;
+}
+
