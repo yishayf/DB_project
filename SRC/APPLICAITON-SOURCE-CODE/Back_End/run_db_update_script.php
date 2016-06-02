@@ -12,13 +12,13 @@
 if (isset($_POST['button'])){
 
     $output = array();
-    exec('python ../db_tests/test.py', $output);
+    exec('python ../OLD_TO_DELETE/test.py', $output);
     foreach ($output as &$row){
         echo $row.'</br>';
     }
 }
 
-echo exec('python ../db_tests/test.py', $output);
+echo exec('python ../OLD_TO_DELETE/test.py', $output);
 
 ?>
 

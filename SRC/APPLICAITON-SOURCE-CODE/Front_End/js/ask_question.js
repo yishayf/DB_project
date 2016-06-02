@@ -1,10 +1,11 @@
-server_local = "http://localhost/DB_php"
+server_local = "http://localhost/OlympiData/Back_End"
 server_nova = "http://cs.tau.ac.il/~naftaly1"
-server_sharon = "http://172.16.20.204/phpTest"
-formats_http = server_sharon + "/get_question_types.php";
-firstArg_http = server_sharon + "/get_1st_arg_options_for_q_type.php/?q_type=";
-secondArg_http = server_sharon + "/get_2nd_arg_options_for_q_type.php/?q_type=";
-post_question = server_sharon + "/add_question_from_user.php/" //?q_type=num_args, arg1, arg2
+server_sharon = "http://172.16.20.204/OlympiData/Back_End"
+current_server = server_local
+formats_http = current_server + "/get_question_types.php";
+firstArg_http = current_server + "/get_1st_arg_options_for_q_type.php/?q_type=";
+secondArg_http = current_server + "/get_2nd_arg_options_for_q_type.php/?q_type=";
+post_question = current_server + "/add_question_from_user.php/" //?q_type=num_args, arg1, arg2
 
 var app = angular.module('askQuestion', []);
 

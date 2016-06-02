@@ -2,7 +2,7 @@
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
-$db = new mysqli("192.168.14.37", 'DbMysql08', 'DbMysql08', 'db_project_test');
+$db = new mysqli("localhost", 'root', '', 'db_project_test');
 $db->set_charset('utf8');
 
 //$db = new mysqli('localhost', 'DbMysql08', 'DbMysql08', 'DbMysql08', 3305);  # for nova
