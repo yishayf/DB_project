@@ -1,0 +1,97 @@
+body {
+    background-image: url(../img/OlympicDay.jpg);
+    background-color: darksalmon;
+    -webkit-background-size: cover;
+}
+
+h1 {
+    font-family: "Andale Mono";
+    font-size: 35px;
+    color:  #4CAF50;
+    text-align: center;
+}
+
+h2 {
+    font-family: "Andale Mono";
+    font-size: 25px;
+    color:  #4CAF50;
+    text-align: left;
+}
+
+h3 {
+    font-family: "Andale Mono";
+    font-size: 25px;
+    color:  #4CAF50;
+    text-align: center;
+    margin: 30px;
+}
+
+.container {
+    border-radius: 8px;
+    background-color: whitesmoke;
+    opacity: 0.95;
+    text-align: left;
+    margin: 10%;
+    padding: 3%;
+}
+
+.container[disabled] {
+    background-color: lightgray;
+}
+
+.button , #submit_button, #cancel_button{
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+    margin: 5px 3px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-family: Andale Mono;
+    align-self: center;
+    -webkit-align-self: center;
+}
+
+#submit_button[disabled] {
+    background-color: gray;
+}
+
+#cancel_button[disabled] {
+    background-color: gray;
+}
+
+
+#generatedQuestionDiv {
+    margin-top: 5%;
+    text-align: center;
+}
+
+#generatedQuestion {
+    color:  Gray;
+    font-style: italic;
+    text-align: center;
+}
+
+.buttons {
+    text-align: center;
+
+}
+
+.popup {
+    background-color: whitesmoke;
+    border: dashed;
+    border-radius: 8px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 200px;
+    width: 500px;
+    margin-top: -100px;
+    margin-left: -250px;
+    /*padding: 5%;*/
+    text-align: center;
+    padding-top: 50px;
+}
