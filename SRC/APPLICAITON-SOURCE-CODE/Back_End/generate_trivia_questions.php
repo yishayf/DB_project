@@ -93,7 +93,6 @@ function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$
     return $question;
 }
 
-
 function get_questions_args_sql_query($q_type, $num_questions){
     switch ($q_type) {
         case 1:
@@ -309,8 +308,6 @@ function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
     return $answer_array;
 }
 
-
-
 function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_questions){
 
     // get sql query for getting the q_type blank filling for num_questions
@@ -320,6 +317,7 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
     $result = run_sql_select_query($sql_args_query);
 
     if ($result->num_rows < $num_questions){
+        // TODO: add error code
         die(sprintf('ERROR: Not enough questions for question type %d', $q_type));
     }
 

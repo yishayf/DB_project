@@ -12,7 +12,7 @@ from warnings import filterwarnings
 ###############################################################################################################
 # globals initialization
 LIMIT = 10000
-SPARQL_QUERY_RETRY_COUNT = 5
+SPARQL_QUERY_RETRY_COUNT = 10
 
 # sparql connection setup
 sparql = SPARQLWrapper("http://dbpedia.org/sparql") # live.dbpedia is also an option...
@@ -64,9 +64,10 @@ def get_competition_medalists(medal_color, offset):
         "limit %s offset %s"  % (medal_color, LIMIT, offset)
 
     results = run_sparql_query(query_string)
-    for res in results:
-        tup = (res["compname"]["value"], res["personlabel"]["value"])
-        medalists.append(tup)
+    if results:
+        for res in results:
+            tup = (res["compname"]["value"], res["personlabel"]["value"])
+            medalists.append(tup)
     return medalists
 
 
@@ -135,9 +136,10 @@ def get_athletes_games_and_field(offset):
         "}" \
         "limit %s offset %s" % (LIMIT, offset)
     results = run_sparql_query(query_offset_string)
-    for res in results:
-        tup = (res["personlabel"]["value"], res["gamelabel"]["value"])
-        athlete_games_list.append(tup)
+    if results:
+        for res in results:
+            tup = (res["personlabel"]["value"], res["gamelabel"]["value"])
+            athlete_games_list.append(tup)
     return athlete_games_list
 
 
@@ -203,10 +205,10 @@ def get_olympic_games():
         "ORDER BY ?label "
     results = run_sparql_query(query_string)
     olympic_games = []
-
-    for res in results:
-        olympic_game_tup = (res["label"]["value"], res["hcn"]["value"], res["comm"]["value"])
-        olympic_games.append(olympic_game_tup)
+    if results:
+        for res in results:
+            olympic_game_tup = (res["label"]["value"], res["hcn"]["value"], res["comm"]["value"])
+            olympic_games.append(olympic_game_tup)
     return olympic_games
 
 
@@ -280,9 +282,10 @@ def get_athletes(offset):
         "limit %s offset %s" % (LIMIT, offset)
 
     results = run_sparql_query(query_offset_string)#results["results"]["bindings"]
-    for res in results:
-        tup = (res["label"]["value"], res["bds"]["value"])
-        athlete_list.append(tup)
+    if results:
+        for res in results:
+            tup = (res["label"]["value"], res["bds"]["value"])
+            athlete_list.append(tup)
 
     return athlete_list
 
@@ -310,22 +313,6 @@ def insert_athletes(athlete_tuples, con):
             con.rollback()
 
 
-def query_and_update_athletes_birth_place():
-    logging.info("Getting athletes birth place from DBPedia and updating our DB")
-    with con:
-        offset = 0;
-        while True:
-            logging.info("read %d records from DBPedia" % offset)
-            # if offset > 10000:
-            #     break
-            athlete_list_with_bp = get_athletes_birth_place(offset)
-            if athlete_list_with_bp:
-                offset += len(athlete_list_with_bp)
-                update_athletes_birth_place(athlete_list_with_bp, con)
-            else:
-                break
-
-
 def get_athletes_birth_place(offset):
     logging.info("getting athletes birth place from DBPedia")
 
@@ -343,27 +330,11 @@ def get_athletes_birth_place(offset):
         "limit %s offset %s" % (LIMIT, offset)
 
     results = run_sparql_query(query_offset_string)
-    for res in results:
-        tup = (res["label"]["value"], res["bpn"]["value"])
-        athlete_list.append(tup)
+    if results:
+        for res in results:
+            tup = (res["label"]["value"], res["bpn"]["value"])
+            athlete_list.append(tup)
     return athlete_list
-
-
-def update_athletes_birth_place(athlete_tuples, con):
-    logging.info("Updating athletes birth place in our DB")
-    for tup in athlete_tuples:
-        cur = con.cursor()
-        label = tup[0].encode('latin-1', 'ignore') // TODO: change everywhere to utf8
-        bp = tup[1].encode('latin-1', 'ignore')
-        try:
-            cur.execute("UPDATE Athlete "
-                        "set birth_place = %s "
-                        "WHERE dbp_label = %s",
-                        (bp, label))
-            con.commit()
-        except Exception as e:
-            traceback.print_exc(file=sys.stdout)
-            con.rollback()
 
 
 def query_and_update_athletes_comment():
@@ -398,9 +369,10 @@ def get_athletes_comment(offset):
         "limit %s offset %s" % (LIMIT, offset)
 
     results = run_sparql_query(query_offset_string) #results["results"]["bindings"]
-    for res in results:
-        tup = (res["label"]["value"], res["comm"]["value"])
-        athlete_list.append(tup)
+    if results:
+        for res in results:
+            tup = (res["label"]["value"], res["comm"]["value"])
+            athlete_list.append(tup)
     return athlete_list
 
 
@@ -510,23 +482,20 @@ def run_sparql_query(query):
 def main():
     logging.info("Started database update from DBPedia")
     # remove foreign keys from tables
-    # remove_foreign_keys()
+    remove_foreign_keys()
 
     # truncate tables
-    # truncate_all_dbpedia_data_tables()
+    truncate_all_dbpedia_data_tables()
 
     # restore foreign keys
-    # add_foreign_keys()
+    add_foreign_keys()
 
     # get all olympic years and insert to db
-    query_and_insert_olympic_games()  # todo: add comments for olympic game
+    query_and_insert_olympic_games()
 
     # # get and insert athletes
     query_and_insert_athletes()
-    #
-    # # get and insert athlete birth place # TODO: do we need this?
-    # ####query_and_update_athletes_birth_place()
-    #
+
     # # get and insert athlete comment
     query_and_update_athletes_comment()
     #
