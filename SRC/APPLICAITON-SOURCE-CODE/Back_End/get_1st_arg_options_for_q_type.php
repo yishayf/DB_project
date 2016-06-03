@@ -88,4 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET"){
     }
 }
 
+// close database connection
+$db->close();
+
 ?>

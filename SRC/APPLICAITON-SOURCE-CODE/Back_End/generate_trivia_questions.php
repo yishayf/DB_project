@@ -27,7 +27,12 @@ function get_question_format($q_type){
 function get_info_for_q_type($q_type, $args_row, $correct_answer){
     switch ($q_type) {
         case 1:
-            return ""; //TODO: add comments for olympic games
+            $year = $args_row['year'];
+            $season = $args_row['season'];
+            $query_format = "SELECT comment AS more_info 
+                  FROM OlympicGame WHERE year = '%s' AND season = '%s'";
+            $sql_query = sprintf($query_format, $year, $season);
+            break;
         case 2:
             $dbp_label = $args_row['dbp_label'];
             $query_format = "SELECT comment AS more_info 
@@ -376,6 +381,10 @@ shuffle($questions_arr);
 
 echo json_encode($questions_arr);
 
+// close database connection
+$db->close();
+
+
 // TODO: remove:
 //1)	Where did the (YEAR) (SEASON) Olympic games take place? V
 //    2)	How many Olympic games did (athlete) participated in?
@@ -389,6 +398,8 @@ echo json_encode($questions_arr);
 //    8)	Who won most (color) medals at the Olympic games?
 //    9)	How old is (athlete)?
 //    10)	Which athlete won a (COLOR) Olympic medal?
+
+
 ?>
 
 

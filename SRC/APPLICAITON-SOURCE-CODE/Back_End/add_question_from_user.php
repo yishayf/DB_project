@@ -65,4 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
     }
 }
 
+// close database connection
+$db->close();
+
 ?>

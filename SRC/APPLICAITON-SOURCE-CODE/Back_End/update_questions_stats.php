@@ -35,7 +35,6 @@ function update_stats($stats){
     }
 }
 
-
 // TODO: change error codes
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
@@ -44,5 +43,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
         update_stats ($stats);
     }
 }
+
+// close database connection
+$db->close();
 
 ?>
