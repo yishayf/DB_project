@@ -1,6 +1,6 @@
 //var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
-var questions_http = "http://localhost/OlympiData/Back_End/generate_trivia_questions.php";
-var post_statistics = "http://localhost/OlympiData/Back_End/update_questions_stats.php";
+var questions_http = "http://10.100.102.3/OlympiData/Back_End/generate_trivia_questions.php";
+var post_statistics = "http://10.100.102.3/OlympiData/Back_End/update_questions_stats.php";
 
 var app = angular.module('quizApp', []);
 
@@ -67,7 +67,7 @@ app.directive('quiz', function(quizFactory, $http) {
                 var ans = $('input[name=answer]:checked').val();
 
                 if(ans == scope.options[scope.answer]) {
-                    scope.score++;
+                    scope.score+=10;
                     scope.correctAns = true;
                 } else {
                     scope.correctAns = false;
