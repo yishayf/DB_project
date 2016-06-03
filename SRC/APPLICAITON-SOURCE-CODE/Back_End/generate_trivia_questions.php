@@ -375,19 +375,18 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
         $question_dict["answer"] = $place;
 
         // put the dict in the question array
-        array_push($questions_array, $question_dict); // TODO: what should we do if array is not of size 3 ???
+        array_push($questions_array, $question_dict);
     }
 }
 
 $questions_arr = array();
 
 $num_q_for_type = 1;
+$selected_qtypes = array(1,2,3,4,5);
+foreach ($selected_qtypes as $q_type){
+    add_type_x_questions_with_answers($questions_arr, $q_type, $num_q_for_type);
+}
 // TODO : handle not enough questions in client side
-//add_type_x_questions_with_answers($questions_arr, 1, $num_q_for_type);
-//add_type_x_questions_with_answers($questions_arr, 2, $num_q_for_type);
-//add_type_x_questions_with_answers($questions_arr, 3, $num_q_for_type);
-//add_type_x_questions_with_answers($questions_arr, 4, $num_q_for_type);
-add_type_x_questions_with_answers($questions_arr, 5, $num_q_for_type);
 
 shuffle($questions_arr);
 
@@ -398,19 +397,7 @@ $db->close();
 
 
 // TODO: remove:
-//1)	Where did the (YEAR) (SEASON) Olympic games take place? V
-//    2)	How many Olympic games did (athlete) participated in?
-//    3)	Which of the following was part of the (sport field) competitors at the Olympic games?
-//    4)	How many (color) medals did (athlete) win at the Olympic games?
-//    5)	Who won most medals at the (year) (season) Olympic games?
-//
-//
 //    6)	In which of the following competition type did (athlete) participated?
-//    7)	Which Athlete won a (COLOR) medal in the competition of (COMPETITION TYPE) at the (YEAR) (SEASON) Olympics?
-//    8)	Who won most (color) medals at the Olympic games?
-//    9)	How old is (athlete)?
-//    10)	Which athlete won a (COLOR) Olympic medal?
-
 
 ?>
 
