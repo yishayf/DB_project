@@ -9,12 +9,16 @@ function get_update_stats_sql_query($q_type, $is_correct, $arg1, $arg2){
     switch ($q_type){
         case 1:
             $format = "UPDATE Question_type%d SET %s = %s + 1 WHERE year = %s AND season = '%s'";
+            break;
         case 2:
             $format = "UPDATE Question_type%d SET %s = %s + 1 WHERE dbp_label = '%s'";
+            break;
         case 3:
             $format = "UPDATE Question_type%d SET %s = %s + 1 WHERE field_name = '%s'";
+            break;
         case 4:
             $format = "UPDATE Question_type%d SET %s = %s + 1 WHERE medal_color = '%s' AND dbp_label = '%s'";
+            break;
         case 5:
             $format = "UPDATE Question_type%d SET %s = %s + 1 WHERE year = %s AND season = '%s'";
     }

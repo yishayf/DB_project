@@ -1,12 +1,3 @@
-<html>
-<body>
-<form method="post">
-    <p>
-        <button name="button">Run DB update</button>
-    </p>
-</form>
-</body>
-
 <?php
 
 if (isset($_POST['button'])){
@@ -17,8 +8,5 @@ if (isset($_POST['button'])){
         echo $row.'</br>';
     }
 }
-
-//echo exec('python ../../../OLD_TO_DELETE/test.py', $output);
-
 ?>
 
