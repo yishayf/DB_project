@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<html ng-app="updateDb" ng-controller="updateDbController">
+<head>
+    <meta charset="UTF-8">
+    <title>Update DB</title>
+    <link rel="stylesheet" href="css/update_db.css" />
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
+    <script src="js/update_db.js"></script>
+</head>
+<body>
+
+
+
+<div class="container">
+    <h2>Click here to update the database with the latest data from DBpedia</h2>
+    <div class = buttons-div>
+        <button id="update_button" ng-disabled="isCurrentlyUpdating" ng-click="update()">Update</button>
+    </div>
+    <div class="updating" ng-show="isCurrentlyUpdating">
+        <img id=progressBarImage src="img/hourglass.gif">
+    </div>
+    <div class="updating" ng-show="doneUpdating">
+        <h3>Done Updating</h3>
+        <p ng-bind-html-unsafe="returnedFromUpdate"></p>
+    </div>
+
+</div>
+</body>
+</html>

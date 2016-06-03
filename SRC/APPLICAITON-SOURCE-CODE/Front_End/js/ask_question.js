@@ -1,7 +1,7 @@
 server_local = "http://localhost/OlympiData/Back_End"
 server_nova = "http://cs.tau.ac.il/~naftaly1"
-server_sharon = "http://172.16.20.204/OlympiData/Back_End"
-current_server = server_local
+server_sharon = "http://10.100.102.3/OlympiData/Back_End"
+current_server = server_sharon
 formats_http = current_server + "/get_question_types.php";
 firstArg_http = current_server + "/get_1st_arg_options_for_q_type.php/?q_type=";
 secondArg_http = current_server + "/get_2nd_arg_options_for_q_type.php/?q_type=";
@@ -22,7 +22,7 @@ app.controller('askController', function($scope, $http, $location) {
         $scope.selectedSecondArg = null;
         var questionType = $scope.questionTypeIndex;
         if ($scope.numsOfBlanks[questionType] > 1){
-            var qTypeAnswer = secondArg_http + questionType +1 + "&arg1=" + $scope.selectedFirstArg;
+            var qTypeAnswer = secondArg_http + (questionType +1) + "&arg1=" + $scope.selectedFirstArg;
             $http.get(qTypeAnswer).then(function (options) {
                 $scope.secondArgOptions = options.data;
             });
