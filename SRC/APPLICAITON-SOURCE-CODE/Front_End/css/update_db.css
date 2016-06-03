@@ -11,8 +11,15 @@ h2 {
     text-align: center;
 }
 
+.updating {
+    align-items: center;
+    align-content: center;
+    text-align: center;
+}
+
 #progressBarImage {
     align-self: center;
+    align-content: center;
 }
 
 .button, #update_button {
