@@ -78,7 +78,8 @@ li {
 
 #infoTextBox {
     border: none;
-    overflow: scroll;
+    overflow-x: hidden;
+    overflow-y: auto;
     font-family: "Andale Mono";
     padding: 7px;
     height: 145px;
