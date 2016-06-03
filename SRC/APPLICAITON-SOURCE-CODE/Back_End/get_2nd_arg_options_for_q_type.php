@@ -10,27 +10,30 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
     global $options_limit;
     switch ($q_type){
         case 1:
-            $query_format = "SELECT valid.season AS opt
-                FROM (SELECT year, season from OlympicGame WHERE
-                concat(year, season) not in (select concat(year, season) from Question_type1)) AS valid
-                WHERE valid.year = %d";
+//            $query_format = "SELECT valid.season AS opt
+//                FROM (SELECT year, season from OlympicGame WHERE
+//                concat(year, season) not in (select concat(year, season) from Question_type1)) AS valid
+//                WHERE valid.year = %d";
+            $query_format = "SELECT season AS opt
+                FROM  OlympicGame og
+                WHERE og.year = %d AND og.game_id NOT IN (SELECT game_id FROM Question_type1);";
+
             $query = sprintf($query_format, $arg1);
             break;
         case 4:
-            $query_format = "SELECT a.dbp_label AS opt
+            $query_format = "SELECT a.athlete_id AS opt
                 FROM Athlete a, (SELECT DISTINCT medal_color FROM AthleteMedals) as colors
                 WHERE colors.medal_color = '%s'
-                AND concat(colors.medal_color, a.dbp_label) not in (select concat(medal_color, dbp_label) 
+                AND concat(colors.medal_color, a.athelet_id) not in (select concat(medal_color, athelet_id) 
                                                                                 FROM Question_type4)
                 ORDER BY RAND()
                 LIMIT %d";
             $query = sprintf($query_format, $arg1, $options_limit);
             break;
         case 5:
-            $query_format = "SELECT valid.season AS opt
-                FROM (SELECT year, season from OlympicGame WHERE
-                concat(year, season) not in (select concat(year, season) from Question_type5)) AS valid
-                WHERE valid.year = %d";
+            $query_format = "SELECT season AS opt
+                FROM  OlympicGame og
+                WHERE og.year = %d AND og.game_id NOT IN (SELECT game_id FROM Question_type1);";
             $query = sprintf($query_format, $arg1);
             break;
     }

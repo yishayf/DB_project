@@ -63,33 +63,38 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
     return $info;
 }
 
-function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$arg2){
+function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$arg2, &$id){
     // get the question format for q_type
     $question_format = get_question_format($q_type);
 
     // build the question
     switch ($q_type) {
         case 1:
+            $id = $args_row['id'];
             $arg1 = $args_row['year'];
             $arg2 = $args_row['season'];
             $question = sprintf($question_format, $arg1, $arg2);
             break;
         case 2:
+            $id = $args_row['id'];
             $arg1 = $args_row['dbp_label'];
             $arg2 = null;
             $question = sprintf($question_format, $arg1);
             break;
         case 3:
+            $id = $args_row['id'];
             $arg1 = $args_row['field_name'];
             $arg2 = null;
             $question = sprintf($question_format, $arg1);
             break;
         case 4:
+            $id = $args_row['id'];
             $arg1 = $args_row['medal_color'];
             $arg2 = $args_row['dbp_label'];
             $question = sprintf($question_format, $arg1, $arg2);
             break;
         case 5:
+            $id = $args_row['id'];
             $arg1 = $args_row['year'];
             $arg2 = $args_row['season'];
             $question = sprintf($question_format, $arg1, $arg2);
@@ -101,32 +106,37 @@ function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$
 function get_questions_args_sql_query($q_type, $num_questions){
     switch ($q_type) {
         case 1:
-            $sql_query_format = "SELECT year, season, num_correct, num_wrong
-                FROM Question_type1
+            $sql_query_format = "SELECT q1.game_id AS id, og.year, og.season, q1.num_correct, q1.num_wrong
+                FROM Question_type1 q1, OlympicGame og
+                WHERE q1.game_id = og.game_id
                 ORDER BY RAND()
                 LIMIT %d";
             break;
         case 2:
-            $sql_query_format = "SELECT dbp_label, num_correct, num_wrong
-                FROM Question_type2
+            $sql_query_format = "SELECT q2.athlete_id AS id, a.dbp_label, q2.num_correct, q2.num_wrong
+                FROM Question_type2 q2, Athlete a
+                WHERE q2.athlete_id = a.athlete_id
                 ORDER BY RAND()
                 LIMIT %d";
             break;
         case 3:
-            $sql_query_format = "SELECT field_name, num_correct, num_wrong
-                FROM Question_type3
+            $sql_query_format = "SELECT q3.field_id AS id, f.field_name, q3.num_correct, q3.num_wrong
+                FROM Question_type3 q3, OlympicSportField f
+                WHERE q3.field_id = f.field_id
                 ORDER BY RAND()
                 LIMIT %d";
             break;
         case 4:
-            $sql_query_format = "SELECT medal_color, dbp_label, num_correct, num_wrong
-                FROM Question_type4
+            $sql_query_format = "SELECT q4.medal_color, q4.athlete_id AS id, a.dbp_label, q4.num_correct, q4.num_wrong
+                FROM Question_type4 q4, Athlete a
+                WHERE a.athlete_id = q4.athlete_id
                 ORDER BY RAND()
                 LIMIT %d";
             break;
         case 5:
-            $sql_query_format = "SELECT year, season, num_correct, num_wrong
-                FROM Question_type5
+            $sql_query_format = "SELECT q5.game_id AS id, og.year, og.season, q5.num_correct, q5.num_wrong
+                FROM Question_type5 q5, OlympicGame og
+                WHERE q5.game_id = og.game_id
                 ORDER BY RAND()
                 LIMIT %d";
             break;
@@ -326,13 +336,14 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
         die(sprintf('ERROR: Not enough questions for question type %d', $q_type));
     }
 
+    $id = null;
     $arg1 = null;
     $arg2 = null;
     while ($args_row = $result->fetch_assoc()){
         $question_dict = array();
 
         // build the question
-        $question = build_question_from_args_and_update_args($q_type, $args_row, $arg1, $arg2);
+        $question = build_question_from_args_and_update_args($q_type, $args_row, $arg1, $arg2, $id);
 
         // add to question dict
         $question_dict["question"] = $question;
@@ -341,6 +352,7 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
         $question_dict["q_type"] = $q_type;
         $question_dict["arg1"] = $arg1;
         $question_dict["arg2"] = $arg2;
+        $question_dict["id"] = $id;
 
         // put num correct and num wrong in dict
         $question_dict["num_correct"] = $args_row['num_correct'];
@@ -371,10 +383,10 @@ $questions_arr = array();
 
 $num_q_for_type = 1;
 // TODO : handle not enough questions in client side
-add_type_x_questions_with_answers($questions_arr, 1, $num_q_for_type);
-add_type_x_questions_with_answers($questions_arr, 2, $num_q_for_type);
-add_type_x_questions_with_answers($questions_arr, 3, $num_q_for_type);
-//add_type_x_questions_with_answers($questions_arr, 4, $num_q_for_type);
+//add_type_x_questions_with_answers($questions_arr, 1, $num_q_for_type);
+//add_type_x_questions_with_answers($questions_arr, 2, $num_q_for_type);
+//add_type_x_questions_with_answers($questions_arr, 3, $num_q_for_type);
+add_type_x_questions_with_answers($questions_arr, 4, $num_q_for_type);
 //add_type_x_questions_with_answers($questions_arr, 5, $num_q_for_type);
 
 shuffle($questions_arr);

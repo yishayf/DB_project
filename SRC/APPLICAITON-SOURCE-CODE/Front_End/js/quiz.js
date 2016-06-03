@@ -45,6 +45,7 @@ app.directive('quiz', function(quizFactory, $http) {
                         scope.correctRatio = Math.round(100*parseInt(q.num_correct)/denominator);
                         scope.arg1 = q.arg1;
                         scope.arg2 = q.arg2;
+                        scope.idval = q.id;
                         scope.format = q.q_type;
                         scope.info =  q.more_info; //TODO ((q.more_info == "") ? null :
                     } else {
@@ -80,8 +81,9 @@ app.directive('quiz', function(quizFactory, $http) {
                 } else {
                     correct = 0;
                 }
-
-                scope.history.push({'q_type':scope.format, 'arg1':scope.arg1, 'arg2':scope.arg2, 'correct':correct}) ;
+                console.log(scope.idval);
+                console.log(scope.arg1);
+                scope.history.push({'q_type':scope.format, 'arg1':scope.arg1, 'arg2':scope.arg2, 'id':scope.idval, 'correct':correct}) ;
                 scope.answerMode = false;
             };
 
