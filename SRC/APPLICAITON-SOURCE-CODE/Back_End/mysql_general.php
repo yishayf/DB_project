@@ -2,11 +2,11 @@
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
+// open db connection
 $db = new mysqli("localhost", 'root', '', 'db_project_test');
 $db->set_charset('utf8');
 
 //$db = new mysqli('localhost', 'DbMysql08', 'DbMysql08', 'DbMysql08', 3305);  # for nova
-// TODO: handle problem connecting to mysql!!!!
 
 function run_sql_select_query($sql_query){
     global $db;

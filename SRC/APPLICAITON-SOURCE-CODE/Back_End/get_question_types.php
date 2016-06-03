@@ -25,4 +25,5 @@ insert_question_type($question_types, 5, "Who won most medals at the [YEAR] [SEA
 insert_question_type($question_types, 6, "~~NOT WORKING~~ In which of the following competition type did [ATHLETE] participated in?", 2, array('color', 'name'));
 
 echo json_encode($question_types);
+
 ?>
