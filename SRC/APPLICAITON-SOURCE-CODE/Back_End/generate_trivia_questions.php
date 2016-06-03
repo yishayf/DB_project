@@ -386,8 +386,8 @@ $num_q_for_type = 1;
 //add_type_x_questions_with_answers($questions_arr, 1, $num_q_for_type);
 //add_type_x_questions_with_answers($questions_arr, 2, $num_q_for_type);
 //add_type_x_questions_with_answers($questions_arr, 3, $num_q_for_type);
-add_type_x_questions_with_answers($questions_arr, 4, $num_q_for_type);
-//add_type_x_questions_with_answers($questions_arr, 5, $num_q_for_type);
+//add_type_x_questions_with_answers($questions_arr, 4, $num_q_for_type);
+add_type_x_questions_with_answers($questions_arr, 5, $num_q_for_type);
 
 shuffle($questions_arr);
 

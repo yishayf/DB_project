@@ -21,10 +21,10 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
             $query = sprintf($query_format, $arg1);
             break;
         case 4:
-            $query_format = "SELECT a.athlete_id AS opt
+            $query_format = "SELECT a.dbp_label AS opt
                 FROM Athlete a, (SELECT DISTINCT medal_color FROM AthleteMedals) as colors
                 WHERE colors.medal_color = '%s'
-                AND concat(colors.medal_color, a.athelet_id) not in (select concat(medal_color, athelet_id) 
+                AND concat(colors.medal_color, a.athlete_id) not in (select concat(medal_color, athlete_id) 
                                                                                 FROM Question_type4)
                 ORDER BY RAND()
                 LIMIT %d";
@@ -33,7 +33,7 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
         case 5:
             $query_format = "SELECT season AS opt
                 FROM  OlympicGame og
-                WHERE og.year = %d AND og.game_id NOT IN (SELECT game_id FROM Question_type1);";
+                WHERE og.year = %d AND og.game_id NOT IN (SELECT game_id FROM Question_type5);";
             $query = sprintf($query_format, $arg1);
             break;
     }
