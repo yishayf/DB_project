@@ -1,6 +1,6 @@
 //var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
-var questions_http = "http://10.100.102.3/OlympiData/Back_End/generate_trivia_questions.php";
-var post_statistics = "http://10.100.102.3/OlympiData/Back_End/update_questions_stats.php";
+var questions_http = "http://localhost/OlympiData/Back_End/generate_trivia_questions.php";
+var post_statistics = "http://localhost/OlympiData/Back_End/update_questions_stats.php";
 
 var app = angular.module('quizApp', []);
 
@@ -84,6 +84,7 @@ app.directive('quiz', function(quizFactory, $http) {
                 console.log(scope.idval);
                 console.log(scope.arg1);
                 scope.history.push({'q_type':scope.format, 'arg1':scope.arg1, 'arg2':scope.arg2, 'id':scope.idval, 'correct':correct}) ;
+                console.log(scope.history);
                 scope.answerMode = false;
             };
 
@@ -98,9 +99,8 @@ app.directive('quiz', function(quizFactory, $http) {
                     headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                     transformRequest: transform}).then(function(r) {
                     console.log("Statistics sent succesfully");
-                    console.log(r);
+                    console.log(r.data);
                 });
-
             }
 
             var transform = function(data){

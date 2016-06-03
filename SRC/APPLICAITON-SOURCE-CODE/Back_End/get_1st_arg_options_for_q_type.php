@@ -50,7 +50,8 @@ function get_sql_query_for_args_by_q_type($q_type){
 //                WHERE og.year = valid.year;";
             $format = "SELECT DISTINCT og.year AS opt
             FROM OlympicGame og
-            WHERE og.game_id NOT IN (SELECT game_id FROM Question_type5);";
+            WHERE og.game_id NOT IN (SELECT game_id FROM Question_type5)
+            AND og.game_id IN (SELECT DISTINCT game_id from AthleteMedals);";
             break;
     }
     return sprintf($format, $options_limit);
