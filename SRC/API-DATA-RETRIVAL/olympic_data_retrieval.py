@@ -21,7 +21,7 @@ sparql = SPARQLWrapper("http://dbpedia.org/sparql")  # live.dbpedia is also an o
 sparql.setTimeout(300)
 
 # MySQL connection setup
-# filterwarnings('ignore', category=mdb.Warning) # supress warnings from MySQL
+filterwarnings('ignore', category=mdb.Warning) # supress warnings from MySQL
 con = mdb.connect('localhost', 'root', '', 'db_project_test') # unix_socket = '/opt/lampp/var/mysql/mysql.sock')
 # con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
 
