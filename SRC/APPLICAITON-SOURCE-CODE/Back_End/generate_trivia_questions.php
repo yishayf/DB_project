@@ -66,6 +66,28 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
     return $info;
 }
 
+function get_info_title_for_q_type($q_type, $args_row, $correct_answer){
+    switch ($q_type) {
+        case 1:
+            $format = "%d %s Olympics";
+            $year = $args_row['year'];
+            $season = $args_row['season'];
+            $title = sprintf($format, $year, $season);
+            return $title;
+        case 2:
+            return $args_row['dbp_label'];
+            break;
+        case 3:
+            return $correct_answer;
+        case 4:
+            return $args_row['dbp_label'];
+        case 5:
+            return $correct_answer;
+        case 6:
+            return $args_row['dbp_label'];
+    }
+}
+
 function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$arg2, &$id){
     // get the question format for q_type
     $question_format = get_question_format($q_type);
@@ -391,8 +413,9 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 
         // get info:
         $info = get_info_for_q_type($q_type, $args_row, $correct_answer);
+        $info_title = get_info_title_for_q_type($q_type, $args_row, $correct_answer);
         $question_dict["more_info"] = $info;
-
+        $question_dict["more_info_title"] = $info_title;
         // put the correct answer in the answer array in a random place
         $place = mt_rand(0, 3);
         $correct_answer_str = explode("(", $correct_answer, 2)[0];
@@ -408,7 +431,7 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 $questions_arr = array();
 
 $num_q_for_type = 1;
-$selected_qtypes = array(6);//1,2,3,4,5);
+$selected_qtypes = array(2,3,4,5);
 foreach ($selected_qtypes as $q_type){
     add_type_x_questions_with_answers($questions_arr, $q_type, $num_q_for_type);
 }
