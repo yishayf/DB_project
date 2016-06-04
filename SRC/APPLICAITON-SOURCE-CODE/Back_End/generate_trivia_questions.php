@@ -105,7 +105,8 @@ function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$
             $id = $args_row['id'];
             $arg1 = $args_row['dbp_label'];
             $arg2 = null;
-            $question = sprintf($question_format, $arg1);
+            $arg1_text = explode("(", $arg1, 2)[0];
+            $question = sprintf($question_format, $arg1_text);
             break;
 
     }
@@ -341,7 +342,8 @@ function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
     }
     $result = run_sql_select_query($sql_query);
     while ($row = $result->fetch_assoc()) {
-        array_push($answer_array, $row['wrong_answer']);
+        $wrong_answer_str = explode("(", $row['wrong_answer'], 2)[0];
+        array_push($answer_array, $wrong_answer_str);
     }
     return $answer_array;
 }
@@ -393,7 +395,8 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 
         // put the correct answer in the answer array in a random place
         $place = mt_rand(0, 3);
-        array_splice($answer_array, $place, 0, $correct_answer);
+        $correct_answer_str = explode("(", $correct_answer, 2)[0];
+        array_splice($answer_array, $place, 0, $correct_answer_str);
         $question_dict["options"] = $answer_array;
         $question_dict["answer"] = $place;
 
