@@ -20,7 +20,7 @@ function get_question_format($q_type){
         case 5:
             return 'Who won most medals at the %s %s olympic games?';
         case 6:
-            return 'In which of the following competition type did %s participated?';
+            return 'In which of the following competition type did %s win a medal?';
     }
 }
 
@@ -56,7 +56,10 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
             break;
         case 6:
             $id = $args_row['id'];
-            return "";
+            $query_format = "SELECT comment AS more_info 
+                  FROM Athlete WHERE athlete_id = %d";
+            $sql_query = sprintf($query_format, $id);
+            break;
     }
     $result = run_sql_select_query($sql_query);
     $info = $result->fetch_assoc()['more_info'];
@@ -66,7 +69,6 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
 function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$arg2, &$id){
     // get the question format for q_type
     $question_format = get_question_format($q_type);
-
     // build the question
     switch ($q_type) {
         case 1:
@@ -99,6 +101,13 @@ function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$
             $arg2 = $args_row['season'];
             $question = sprintf($question_format, $arg1, $arg2);
             break;
+        case 6:
+            $id = $args_row['id'];
+            $arg1 = $args_row['dbp_label'];
+            $arg2 = null;
+            $question = sprintf($question_format, $arg1);
+            break;
+
     }
     return $question;
 }
@@ -137,6 +146,13 @@ function get_questions_args_sql_query($q_type, $num_questions){
             $sql_query_format = "SELECT q5.game_id AS id, og.year, og.season, q5.num_correct, q5.num_wrong
                 FROM Question_type5 q5, OlympicGame og
                 WHERE q5.game_id = og.game_id
+                ORDER BY RAND()
+                LIMIT %d";
+            break;
+        case 6:
+            $sql_query_format = "SELECT q6.athlete_id AS id, a.dbp_label, q6.num_correct, q6.num_wrong
+                FROM Question_type6 q6, Athlete a
+                WHERE q6.athlete_id = a.athlete_id
                 ORDER BY RAND()
                 LIMIT %d";
             break;
@@ -182,7 +198,13 @@ function get_correct_answer_sql_query_format($q_type){
                                                             GROUP BY(am.athlete_id)) AS temp)
                             ORDER BY RAND()
                             LIMIT 1) AS maxAthleteForGame
-                    Where a.athlete_id =  maxAthleteForGame.athlete_id";
+                    Where a.athlete_id =  maxAthleteForGame.athlete_id;";
+        case 6:
+            return "SELECT DISTINCT c.competition_name
+                    FROM CompetitionType c, AthleteMedals am 
+                    WHERE am.athlete_id = %d 
+                    AND am.competition_id = c.competition_id
+                    LIMIT 1;";
     }
 }
 
@@ -234,6 +256,15 @@ function get_wrong_answer_sql_query_format($q_type){
                                                                             GROUP BY(am.athlete_id)) AS temp)) 
                 ORDER BY RAND()
                 LIMIT 3";
+        case 6:
+            return "SELECT DISTINCT c.competition_name AS wrong_answer
+                    FROM CompetitionType c
+                    WHERE c.competition_id NOT IN (SELECT DISTINCT c.competition_id
+                                                    FROM CompetitionType c, AthleteMedals am 
+                                                    WHERE am.athlete_id = %d
+                                                    AND am.competition_id = c.competition_id)
+                    ORDER BY RAND()
+                    LIMIT 3;";
     }
 }
 
@@ -271,6 +302,12 @@ function get_correct_answer($q_type, $args_row){
             $result = run_sql_select_query($sql_query);
             $correct_answer = $result->fetch_assoc()['dbp_label'];
             return $correct_answer;
+        case 6:
+            $athlete_id = $args_row['id'];
+            $sql_query = sprintf($correct_answer_sql_query_format, $athlete_id);
+            $result = run_sql_select_query($sql_query);
+            $correct_answer = $result->fetch_assoc()['competition_name'];
+            return $correct_answer;
     }
 }
 
@@ -296,6 +333,10 @@ function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
         case 5:
             $game_id = $args_row['id'];
             $sql_query = sprintf($wrong_answer_sql_query_format, $game_id, $game_id);
+            break;
+        case 6:
+            $athlete_id = $args_row['id'];
+            $sql_query = sprintf($wrong_answer_sql_query_format, $athlete_id);
             break;
     }
     $result = run_sql_select_query($sql_query);
@@ -364,7 +405,7 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 $questions_arr = array();
 
 $num_q_for_type = 1;
-$selected_qtypes = array(5);//1,2,3,4,5);
+$selected_qtypes = array(6);//1,2,3,4,5);
 foreach ($selected_qtypes as $q_type){
     add_type_x_questions_with_answers($questions_arr, $q_type, $num_q_for_type);
 }
@@ -376,10 +417,6 @@ echo json_encode($questions_arr);
 
 // close database connection
 $db->close();
-
-
-// TODO: remove:
-//    6)	In which of the following competition type did (athlete) participated?
 
 ?>
 

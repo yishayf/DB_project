@@ -25,7 +25,9 @@ function get_sql_query_for_args_by_q_type($q_type){
 //                WHERE dbp_label not in (SELECT dbp_label FROM Question_type2)
 //                ORDER BY RAND()
 //                LIMIT %d;";
-            $format = "SELECT dbp_label AS opt
+            /* Any athlete will surely have a sport field, becaue we selected only atheltes that participated
+            in some sport field in the olympic */
+            $format = "SELECT a.dbp_label AS opt
             FROM Athlete a
             WHERE a.athlete_id NOT IN (SELECT athlete_id FROM Question_type2)
             ORDER BY RAND()
@@ -53,6 +55,13 @@ function get_sql_query_for_args_by_q_type($q_type){
             WHERE og.game_id NOT IN (SELECT game_id FROM Question_type5)
             AND og.game_id IN (SELECT DISTINCT game_id from AthleteMedals);";
             break;
+        case 6:
+            $format = "SELECT DISTINCT a.dbp_label AS opt
+            FROM Athlete a, AthleteMedals am
+            WHERE a.athlete_id = am.athlete_id
+            AND a.athlete_id NOT IN (SELECT athlete_id FROM Question_type6)
+            ORDER BY RAND()
+            LIMIT %d;";
     }
     return sprintf($format, $options_limit);
 }

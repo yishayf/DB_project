@@ -28,6 +28,9 @@ function get_insert_query_by_q_type($q_type){
 //            return "INSERT INTO Question_type%d (year, season) VALUES (%d, '%s')";
             return "INSERT INTO Question_type%d (game_id)
                       SELECT game_id FROM OlympicGame WHERE year = %d AND season = '%s';";
+        case 6:
+            return "INSERT INTO Question_type%d (athlete_id)  
+                      SELECT athlete_id FROM Athlete WHERE dbp_label  = '%s';";
     }
 }
 
