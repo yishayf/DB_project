@@ -1,7 +1,7 @@
 -- DBPedia data tables
 
 CREATE TABLE `OlympicGame` (
- `game_id` int(11) NOT NULL AUTO_INCREMENT,
+ `game_id` int(11) NOT NULL,
  `year` varchar(4) NOT NULL,
  `season` varchar(6) NOT NULL,
  `City` varchar(100) DEFAULT NULL,
@@ -10,15 +10,15 @@ CREATE TABLE `OlympicGame` (
  UNIQUE KEY `year` (`year`,`season`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-
 CREATE TABLE `Athlete` (
- `athlete_id` int(11) NOT NULL AUTO_INCREMENT,
+ `athlete_id` int(11) NOT NULL,
  `dbp_label` varchar(100) NOT NULL,
  `birth_date` date DEFAULT NULL,
  `comment` text,
+ `image_url` text,
  PRIMARY KEY (`athlete_id`),
  UNIQUE KEY `unique_label` (`dbp_label`),
- KEY `dbp_label` (`dbp_label`),
+ KEY `dbp_label` (`dbp_label`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
