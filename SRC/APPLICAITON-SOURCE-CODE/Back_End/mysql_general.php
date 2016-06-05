@@ -40,14 +40,23 @@ function execute_sql_update_statement(&$stmt){
 function execute_sql_insert_statement(&$stmt){
     global $db;
     if(!$stmt->execute()){
-        $stmt->close();
         http_response_code(500);
+        $stmt->close();
         die('There was an error running the query [' . $db->error . ']');
     }
     $stmt->store_result();
     return TRUE;
 }
 
+
+function prepare_stmt($stmt_text){
+    global $db;
+    if (!$stmt = $db->prepare($stmt_text)){
+        http_response_code(500);
+        die("Error:preparing query failed: (" . $stmt->errno . ") " . $db->error);
+    }
+    return $stmt;
+}
 
 /*
  * Utility function to automatically bind columns from selects in prepared statements to

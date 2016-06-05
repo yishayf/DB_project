@@ -1,8 +1,9 @@
-//var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
-var questions_http = "http://10.100.102.3/OlympiData/Back_End/generate_trivia_questions.php";
-var post_statistics = "http://10.100.102.3/OlympiData/Back_End/update_questions_stats.php";
-
+server_nova = "../Back_End";
+server_local = "http://localhost/OlympiData/Back_End";
+server_sharon = "http://10.100.102.3/OlympiData/Back_End";
+current_server = server_local;
 var app = angular.module('quizApp', []);
+//var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
 
 app.directive('quiz', function(quizFactory, $http) {
 
@@ -14,8 +15,11 @@ app.directive('quiz', function(quizFactory, $http) {
 
 
             scope.start = function() {
+                scope.showErrorMessage = false;
+                scope.errorMessage = null;
                 scope.history = [];
                 scope.id = 0;
+                scope.checkGetQuestions();
                 scope.getQuestion().then(function() {
                     scope.quizOver = false;
                     scope.inProgress = true;
@@ -28,6 +32,18 @@ app.directive('quiz', function(quizFactory, $http) {
                 scope.start();
 
 
+            }
+
+            scope.checkGetQuestions = function(){
+                quizFactory.checkGetStatus(scope);
+            }
+
+            scope.setError = function (errStr) {
+                scope.errorMessage = errStr;
+            }
+
+            scope.doShowErrorMessage = function () {
+                scope.showErrorMessage = true;
             }
 
             scope.getQuestion = function() {
@@ -147,6 +163,18 @@ app.factory('quizFactory', function($http) {
                  }
 
             });
+        },
+        checkGetStatus: function(scope){
+            fQuestions.then(
+                function (data) {
+                    console.log(data.data);
+                },
+                function (data) {
+                    console.log(data.data);
+                    scope.setError(data.data);
+                    scope.doShowErrorMessage();
+                }
+            )
         }
     };
 });

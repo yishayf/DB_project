@@ -23,11 +23,10 @@ function get_question_format($q_type){
 }
 
 function get_info_for_q_type($q_type, $args_row, $correct_answer){
-    global $db;
     switch ($q_type) {
         case 1:
             $id = $args_row['id'];
-            $stmt = $db->prepare("SELECT comment AS more_info 
+            $stmt = prepare_stmt("SELECT comment AS more_info 
                   FROM OlympicGame WHERE game_id = ?;");
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
@@ -36,7 +35,7 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
             break;
         case 2:
             $id = $args_row['id'];
-            $stmt = $db->prepare("SELECT comment AS more_info 
+            $stmt = prepare_stmt("SELECT comment AS more_info 
                   FROM Athlete WHERE athlete_id = ?;");
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
@@ -44,7 +43,7 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
             }
             break;
         case 3:
-            $stmt = $db->prepare("SELECT comment AS more_info 
+            $stmt = prepare_stmt("SELECT comment AS more_info 
                   FROM Athlete WHERE dbp_label = ?;");
             if (!$stmt->bind_param("s", $correct_answer)) {
                 http_response_code(500);
@@ -53,7 +52,7 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
             break;
         case 4:
             $id = $args_row['id'];
-            $stmt = $db->prepare("SELECT comment AS more_info 
+            $stmt = prepare_stmt("SELECT comment AS more_info 
                   FROM Athlete WHERE athlete_id = ?;");
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
@@ -61,7 +60,7 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
             }
             break;
         case 5:
-            $stmt = $db->prepare("SELECT comment AS more_info 
+            $stmt = prepare_stmt("SELECT comment AS more_info 
                   FROM Athlete WHERE dbp_label = ?;");
             if (!$stmt->bind_param("s", $correct_answer)) {
                 http_response_code(500);
@@ -70,7 +69,7 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
             break;
         case 6:
             $id = $args_row['id'];
-            $stmt = $db->prepare("SELECT comment AS more_info 
+            $stmt = prepare_stmt("SELECT comment AS more_info 
                   FROM Athlete WHERE athlete_id = ?;");
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
@@ -109,13 +108,12 @@ function get_info_title_for_q_type($q_type, $args_row, $correct_answer){
 }
 
 function get_image_url_q_type($q_type, $args_row, $correct_answer){
-    global $db;
     switch ($q_type) {
         case 1:
             return "";
         case 2:
             $id = $args_row['id'];
-            $stmt = $db->prepare("SELECT image_url AS image 
+            $stmt = prepare_stmt("SELECT image_url AS image 
                   FROM Athlete WHERE athlete_id = ?;");
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
@@ -123,7 +121,7 @@ function get_image_url_q_type($q_type, $args_row, $correct_answer){
             }
             break;
         case 3:
-            $stmt = $db->prepare("SELECT image_url AS image 
+            $stmt = prepare_stmt("SELECT image_url AS image 
                   FROM Athlete WHERE dbp_label = ?;");
             if (!$stmt->bind_param("s", $correct_answer)) {
                 http_response_code(500);
@@ -132,7 +130,7 @@ function get_image_url_q_type($q_type, $args_row, $correct_answer){
             break;
         case 4:
             $id = $args_row['id'];
-            $stmt = $db->prepare("SELECT image_url AS image 
+            $stmt = prepare_stmt("SELECT image_url AS image 
                   FROM Athlete WHERE athlete_id = ?;");
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
@@ -140,7 +138,7 @@ function get_image_url_q_type($q_type, $args_row, $correct_answer){
             }
             break;
         case 5:
-            $stmt = $db->prepare("SELECT image_url AS image 
+            $stmt = prepare_stmt("SELECT image_url AS image 
                   FROM Athlete WHERE dbp_label = ?;");
             if (!$stmt->bind_param("s", $correct_answer)) {
                 http_response_code(500);
@@ -149,7 +147,7 @@ function get_image_url_q_type($q_type, $args_row, $correct_answer){
             break;
         case 6:
             $id = $args_row['id'];
-            $stmt = $db->prepare("SELECT image_url AS image 
+            $stmt = prepare_stmt("SELECT image_url AS image 
                   FROM Athlete WHERE athlete_id = ?;");
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
@@ -214,45 +212,44 @@ function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$
 }
 
 function get_questions_args_sql_query($q_type, $num_questions){
-    global $db;
     switch ($q_type) {
         case 1:
-            $stmt = $db->prepare("SELECT q1.game_id AS id, og.year, og.season, q1.num_correct, q1.num_wrong
+            $stmt = prepare_stmt("SELECT q1.game_id AS id, og.year, og.season, q1.num_correct, q1.num_wrong
                 FROM Question_type1 q1, OlympicGame og
                 WHERE q1.game_id = og.game_id
                 ORDER BY RAND()
                 LIMIT ?");
             break;
         case 2:
-            $stmt = $db->prepare("SELECT q2.athlete_id AS id, a.dbp_label, q2.num_correct, q2.num_wrong
+            $stmt = prepare_stmt("SELECT q2.athlete_id AS id, a.dbp_label, q2.num_correct, q2.num_wrong
                 FROM Question_type2 q2, Athlete a
                 WHERE q2.athlete_id = a.athlete_id
                 ORDER BY RAND()
                 LIMIT ?");
             break;
         case 3:
-            $stmt = $db->prepare("SELECT q3.field_id AS id, f.field_name, q3.num_correct, q3.num_wrong
+            $stmt = prepare_stmt("SELECT q3.field_id AS id, f.field_name, q3.num_correct, q3.num_wrong
                 FROM Question_type3 q3, OlympicSportField f
                 WHERE q3.field_id = f.field_id
                 ORDER BY RAND()
                 LIMIT ?");
             break;
         case 4:
-            $stmt = $db->prepare("SELECT q4.medal_color, q4.athlete_id AS id, a.dbp_label, q4.num_correct, q4.num_wrong
+            $stmt = prepare_stmt("SELECT q4.medal_color, q4.athlete_id AS id, a.dbp_label, q4.num_correct, q4.num_wrong
                 FROM Question_type4 q4, Athlete a
                 WHERE a.athlete_id = q4.athlete_id
                 ORDER BY RAND()
                 LIMIT ?");
             break;
         case 5:
-            $stmt = $db->prepare("SELECT q5.game_id AS id, og.year, og.season, q5.num_correct, q5.num_wrong
+            $stmt = prepare_stmt("SELECT q5.game_id AS id, og.year, og.season, q5.num_correct, q5.num_wrong
                 FROM Question_type5 q5, OlympicGame og
                 WHERE q5.game_id = og.game_id
                 ORDER BY RAND()
                 LIMIT ?");
             break;
         case 6:
-            $stmt = $db->prepare("SELECT q6.athlete_id AS id, a.dbp_label, q6.num_correct, q6.num_wrong
+            $stmt = prepare_stmt("SELECT q6.athlete_id AS id, a.dbp_label, q6.num_correct, q6.num_wrong
                 FROM Question_type6 q6, Athlete a
                 WHERE q6.athlete_id = a.athlete_id
                 ORDER BY RAND()
@@ -374,9 +371,8 @@ function get_wrong_answer_sql_query_format($q_type){
 }
 
 function get_correct_answer($q_type, $args_row){
-    global $db;
     $correct_answer_sql_query_format = get_correct_answer_sql_query_format($q_type);
-    $stmt = $db->prepare($correct_answer_sql_query_format);
+    $stmt = prepare_stmt($correct_answer_sql_query_format);
 
     switch ($q_type) {
         case 1:
@@ -456,9 +452,8 @@ function get_correct_answer($q_type, $args_row){
 }
 
 function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
-    global $db;
     $wrong_answer_sql_query_format = get_wrong_answer_sql_query_format($q_type);
-    $stmt = $db->prepare($wrong_answer_sql_query_format);
+    $stmt = prepare_stmt($wrong_answer_sql_query_format);
 
     $answer_array = array();
     switch ($q_type) {

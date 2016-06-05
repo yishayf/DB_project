@@ -62,4 +62,12 @@
     <button id=closeInfo ng-click=doneInfo()>Cool!</button>
 </div>
 
+<div class='popup' ng-show='showErrorMessage'>
+    <h3> Error getting trivia questions </h3>
+    <p id="errorTextBox" ng-bind-html-unsafe="errorMessage"></p>
+    <a href="welcome_page.html" class="button">Back to home page</a>
 </div>
+
+</div>
+
+

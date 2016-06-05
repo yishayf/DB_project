@@ -131,3 +131,16 @@ li {
     /*padding-top: 50px;*/
 
 }
+
+#errorTextBox {
+    border: none;
+    background-color:white;
+    text-align: left;
+    overflow-x: hidden;
+    overflow-y: auto;
+    /*padding-bottom: 50px;*/
+    margin-bottom: 50px;
+    height: 100px;
+    margin-left: 5%;
+    margin-right: 5%;
+}

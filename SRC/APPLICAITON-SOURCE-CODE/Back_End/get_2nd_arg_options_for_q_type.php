@@ -7,11 +7,10 @@ require_once 'mysql_general.php';
 $options_limit = 1000;
 
 function get_sql_query_for_args_by_q_type($q_type, $arg1){
-    global $db;
     global $options_limit;
     switch ($q_type){
         case 1:
-            $stmt = $db->prepare("SELECT season AS opt
+            $stmt = prepare_stmt("SELECT season AS opt
                 FROM  OlympicGame og
                 WHERE og.year = ? AND og.game_id NOT IN (SELECT game_id FROM Question_type1);");
             if (!$stmt->bind_param("i", $arg1)) {
@@ -20,7 +19,7 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
             }
             break;
         case 4:
-            $stmt = $db->prepare("SELECT a.dbp_label AS opt
+            $stmt = prepare_stmt("SELECT a.dbp_label AS opt
                 FROM Athlete a, (SELECT DISTINCT medal_color FROM AthleteMedals) as colors
                 WHERE colors.medal_color = ?
                 AND concat(colors.medal_color, a.athlete_id) not in (select concat(medal_color, athlete_id) 
@@ -36,7 +35,7 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
             }
             break;
         case 5:
-            $stmt = $db->prepare("SELECT season AS opt
+            $stmt = prepare_stmt("SELECT season AS opt
                 FROM  OlympicGame og
                 WHERE og.year = ? AND og.game_id NOT IN (SELECT game_id FROM Question_type5);");
             if (!$stmt->bind_param("i", $arg1)) {

@@ -6,13 +6,12 @@ require_once 'mysql_general.php';
 
 
 function get_update_stats_sql_query($q_type, $is_correct, $arg1, $arg2, $id){
-    global $db;
     $column = $is_correct ? 'num_correct' : 'num_wrong';
 
     switch ($q_type){
         case 1:
             $format = sprintf("UPDATE Question_type1 SET %s = %s + 1 WHERE game_id = ?", $column, $column);
-            $stmt = $db->prepare($format);
+            $stmt = prepare_stmt($format);
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
@@ -20,7 +19,7 @@ function get_update_stats_sql_query($q_type, $is_correct, $arg1, $arg2, $id){
             break;
         case 2:
             $format = sprintf("UPDATE Question_type2 SET %s = %s + 1 WHERE athlete_id = ?", $column, $column);
-            $stmt = $db->prepare($format);
+            $stmt = prepare_stmt($format);
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
@@ -28,7 +27,7 @@ function get_update_stats_sql_query($q_type, $is_correct, $arg1, $arg2, $id){
             break;
         case 3:
             $format = sprintf("UPDATE Question_type3 SET %s = %s + 1 WHERE field_id = ?", $column, $column);
-            $stmt = $db->prepare($format);
+            $stmt = prepare_stmt($format);
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
@@ -36,7 +35,7 @@ function get_update_stats_sql_query($q_type, $is_correct, $arg1, $arg2, $id){
             break;
         case 4:
             $format = sprintf("UPDATE Question_type4 SET %s = %s + 1 WHERE medal_color = ? AND athlete_id = ?", $column, $column);
-            $stmt = $db->prepare($format);
+            $stmt = prepare_stmt($format);
             if (!$stmt->bind_param("si", $arg1, $id)) {
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
@@ -44,7 +43,7 @@ function get_update_stats_sql_query($q_type, $is_correct, $arg1, $arg2, $id){
             break;
         case 5:
             $format = sprintf("UPDATE Question_type5 SET %s = %s + 1 WHERE game_id = ?", $column, $column);
-            $stmt = $db->prepare($format);
+            $stmt = prepare_stmt($format);
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
@@ -52,7 +51,7 @@ function get_update_stats_sql_query($q_type, $is_correct, $arg1, $arg2, $id){
             break;
         case 6:
             $format = sprintf("UPDATE Question_type6 SET %s = %s + 1 WHERE athlete_id = ?", $column, $column);
-            $stmt = $db->prepare($format);
+            $stmt = prepare_stmt($format);
             if (!$stmt->bind_param("i", $id)) {
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);

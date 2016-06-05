@@ -1,7 +1,7 @@
-server_local = "http://localhost/OlympiData/Back_End"
-server_nova = "http://cs.tau.ac.il/~naftaly1"
-server_sharon = "http://10.100.102.3/OlympiData/Back_End"
-current_server = server_sharon
+server_nova = "../Back_End";
+server_local = "http://localhost/OlympiData/Back_End";
+server_sharon = "http://10.100.102.3/OlympiData/Back_End";
+current_server = server_local;
 formats_http = current_server + "/get_question_types.php";
 firstArg_http = current_server + "/get_1st_arg_options_for_q_type.php/?q_type=";
 secondArg_http = current_server + "/get_2nd_arg_options_for_q_type.php/?q_type=";
@@ -26,6 +26,7 @@ app.controller('askController', function($scope, $http, $location) {
             $http.get(qTypeAnswer).then(function (options) {
                 $scope.secondArgOptions = options.data;
             }, function (data) {
+                console.log(data.data);
                 $scope.errorMessage = data.data;
                 $scope.showErrorMessage = true;
             });
@@ -56,6 +57,7 @@ app.controller('askController', function($scope, $http, $location) {
             console.log("Correct");
             $scope.firstArgOptions = options.data;
         }, function (data) {
+            console.log(data.data);
             $scope.errorMessage = data.data;
             $scope.showErrorMessage = true;
         });
@@ -95,13 +97,18 @@ app.controller('askController', function($scope, $http, $location) {
         var arg1 = $scope.selectedFirstArg;
         var arg2 = $scope.selectedSecondArg;
         var requestData = {"q_type":qtype, "num_args":numArgs, "arg1":arg1, "arg2":arg2};
-        console.log(requestData);
+            console.log(requestData);
         $scope.allArgsSelected  = false; //disable submit button
         $http.post(post_question, requestData, {
             headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
             transformRequest: transform}).then(function(r) {
             console.log("Submit succeded");
+            console.log(r.data);
             $scope.showPopop();
+        }, function (r) {
+            console.log("Submit not succeded");
+            $scope.errorMessage = r.data;
+            $scope.showErrorMessage = true;
         });
     }
 

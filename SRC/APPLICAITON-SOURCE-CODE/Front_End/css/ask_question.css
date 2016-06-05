@@ -96,10 +96,12 @@ h3 {
 
 #errorTextBox {
     border: none;
+    background-color:white;
+    text-align: left;
     overflow-x: hidden;
     overflow-y: auto;
-    /*padding: 7px;*/
-    margin-bottom: 20px;
+    /*padding-bottom: 50px;*/
+    margin-bottom: 50px;
     height: 100px;
     margin-left: 5%;
     margin-right: 5%;
