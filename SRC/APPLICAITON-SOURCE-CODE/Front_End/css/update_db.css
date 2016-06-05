@@ -2,10 +2,12 @@ body {
     background-image: url(../img/OlympicDay.jpg);
     background-color: darksalmon;
     -webkit-background-size: cover;
+    font-family: 'Roboto Slab', serif;
 }
 
 h2 {
-    font-family: "Andale Mono";
+    /*font-family: "Andale Mono";*/
+    font-family: 'Roboto Slab', serif;
     font-size: 30px;
     color:  #4CAF50;
     text-align: center;
@@ -24,7 +26,8 @@ h2 {
 
 .button, #update_button {
 
-    font-family: "Andale Mono";
+    /*font-family: "Andale Mono";*/
+    font-family: 'Roboto Slab', serif;
     background-color: #4CAF50;
     border: none;
     color: white;
