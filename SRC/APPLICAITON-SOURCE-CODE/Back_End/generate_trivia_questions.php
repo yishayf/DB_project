@@ -379,7 +379,7 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
     $result = run_sql_select_query($sql_args_query);
 
     if ($result->num_rows < $num_questions){
-        // TODO: add error code
+        http_response_code(510);
         die(sprintf('ERROR: Not enough questions for question type %d', $q_type));
     }
 
@@ -430,13 +430,14 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 
 $questions_arr = array();
 
-$num_q_for_type = 1;
-$selected_qtypes = array(2,3,4,5);
+// get 2 Q's for 5 of the q_types
+$num_q_for_type = 2;
+$selected_qtypes = array(1,2,3,4,5,6);
+shuffle($selected_qtypes);
+array_pop($selected_qtypes);
 foreach ($selected_qtypes as $q_type){
     add_type_x_questions_with_answers($questions_arr, $q_type, $num_q_for_type);
 }
-// TODO : handle not enough questions in client side
-
 shuffle($questions_arr);
 
 echo json_encode($questions_arr);

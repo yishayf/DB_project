@@ -6,7 +6,7 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 if (isset($_POST['button'])){
 
     $output = array();
-    exec('python ../../../OLD_TO_DELETE/test.py', $output);
+    exec('python ../admin/olympic_data_retrieval.php', $output);
     foreach ($output as &$row){
         echo $row.'</br>';
     }

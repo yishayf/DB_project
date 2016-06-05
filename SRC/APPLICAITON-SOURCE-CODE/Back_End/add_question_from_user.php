@@ -8,24 +8,20 @@ require_once 'mysql_general.php';
 function get_insert_query_by_q_type($q_type){
     switch ($q_type){
         case 1:
-//            return "INSERT INTO Question_type%d (year, season) VALUES (%d, '%s')";
             return "INSERT INTO Question_type%d (game_id)
                       SELECT game_id FROM OlympicGame WHERE year = %d AND season = '%s';";
         case 2:
             return "INSERT INTO Question_type%d (athlete_id)  
                       SELECT athlete_id FROM Athlete WHERE dbp_label  = '%s';";
         case 3:
-//            return "INSERT INTO Question_type%d (field_name) VALUES ('%s')";
             return "INSERT INTO Question_type%d (field_id)
                       SELECT field_id FROM OlympicSportField WHERE field_name = '%s';";
         case 4:
-//            return "INSERT INTO Question_type%d (medal_color, dbp_label) VALUES ('%s', '%s')";
             return "INSERT INTO Question_type%d (athlete_id, medal_color) 
                       SELECT a.athlete_id, '%s'
                       FROM Athlete a
                       WHERE a.dbp_label = '%s';";
         case 5:
-//            return "INSERT INTO Question_type%d (year, season) VALUES (%d, '%s')";
             return "INSERT INTO Question_type%d (game_id)
                       SELECT game_id FROM OlympicGame WHERE year = %d AND season = '%s';";
         case 6:
@@ -42,7 +38,6 @@ function add_question_by_type($q_type, $arg1, $arg2=null){
 }
 
 
-// TODO: change error codes
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
     if (!empty($_POST["q_type"]) && !empty($_POST["num_args"])) {

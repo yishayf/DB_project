@@ -10,10 +10,6 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
     global $options_limit;
     switch ($q_type){
         case 1:
-//            $query_format = "SELECT valid.season AS opt
-//                FROM (SELECT year, season from OlympicGame WHERE
-//                concat(year, season) not in (select concat(year, season) from Question_type1)) AS valid
-//                WHERE valid.year = %d";
             $query_format = "SELECT season AS opt
                 FROM  OlympicGame og
                 WHERE og.year = %d AND og.game_id NOT IN (SELECT game_id FROM Question_type1);";
@@ -59,7 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "GET"){
         echo json_encode($options_arr);
     }
 }
-
 
 // close database connection
 $db->close();

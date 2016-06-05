@@ -4,9 +4,16 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 
 // open db connection
 $db = new mysqli("localhost", 'root', '', 'db_project_test');
+//$db = new mysqli('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08');  # for nova
+//$db = new mysqli('localhost', 'DbMysql08', 'DbMysql08', 'DbMysql08', 3305);  # for nova local
+
+// Check connection
+if ($conn->connect_error) {
+    http_response_code(500);
+    die("Connection failed: " . $conn->connect_error);
+}
 $db->set_charset('utf8');
 
-//$db = new mysqli('localhost', 'DbMysql08', 'DbMysql08', 'DbMysql08', 3305);  # for nova
 
 function run_sql_select_query($sql_query){
     global $db;
@@ -23,22 +30,19 @@ function run_sql_insert_query($sql_query){
         return true;
     }
     else {
-        echo nl2br($db->errno."\r\n");
-        echo nl2br('There was an error running the query [' . $db->error . ']')."\r\n";
-        return false;
+        http_response_code(500);
+        die('There was an error running the query [' . $db->error . ']');
     }
 }
 
-// TODO: code duplication
 function run_sql_update_query($sql_query){
     global $db;
     if($db->query($sql_query) === TRUE){
         return true;
     }
     else {
-        echo nl2br($db->errno."\r\n");
-        echo nl2br('There was an error running the query [' . $db->error . ']')."\r\n";
-        return false;
+        http_response_code(500);
+        die('There was an error running the query [' . $db->error . ']');
     }
 }
 
