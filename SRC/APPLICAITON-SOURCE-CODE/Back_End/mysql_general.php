@@ -8,9 +8,9 @@ $db = new mysqli("localhost", 'root', '', 'db_project_test');
 //$db = new mysqli('localhost', 'DbMysql08', 'DbMysql08', 'DbMysql08', 3305);  # for nova local
 
 // Check connection
-if ($conn->connect_error) {
+if ($db->connect_error) {
     http_response_code(500);
-    die("Connection failed: " . $conn->connect_error);
+    die("Connection failed: " . $db->connect_error);
 }
 $db->set_charset('utf8');
 
