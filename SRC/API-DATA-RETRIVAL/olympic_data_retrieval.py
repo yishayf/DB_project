@@ -462,6 +462,8 @@ def run_sparql_query(query):
 
 
 def add_two_questions_for_type():
+    logging.info("Adding questions to different q_types if needed")
+
     for i in range(6):
         q_type = i+1
         count = check_q_count_for_q(q_type)

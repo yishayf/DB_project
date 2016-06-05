@@ -4,7 +4,7 @@ CREATE TABLE `OlympicGame` (
  `game_id` int(11) NOT NULL,
  `year` varchar(4) NOT NULL,
  `season` varchar(6) NOT NULL,
- `City` varchar(100) DEFAULT NULL,
+ `city` varchar(100) DEFAULT NULL,
  `comment` text,
  PRIMARY KEY (`game_id`),
  UNIQUE KEY `year` (`year`,`season`)
