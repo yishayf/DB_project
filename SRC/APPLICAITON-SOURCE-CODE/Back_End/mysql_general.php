@@ -3,11 +3,14 @@ header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
 // open db connection
-//$db = new mysqli('localhost', 'DbMysql08', 'DbMysql08', 'DbMysql08', 3305);  # for nova
 $db = new mysqli("localhost", 'root', '', 'db_project_test');
-if ($db->connect_errno) {
+//$db = new mysqli('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08');  # for nova
+//$db = new mysqli('localhost', 'DbMysql08', 'DbMysql08', 'DbMysql08', 3305);  # for nova local
+
+// Check connection
+if ($db->connect_error) {
     http_response_code(500);
-    echo "Error: Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+    die("Connection failed: " . $db->connect_error);
 }
 $db->set_charset('utf8');
 
@@ -25,7 +28,6 @@ function execute_sql_statement(&$stmt){
 
 
 function execute_sql_update_statement(&$stmt){
-    echo "in update";
     global $db;
     if(!$stmt->execute()){
         $stmt->close();
@@ -33,7 +35,6 @@ function execute_sql_update_statement(&$stmt){
         die('There was an error running the query [' . $db->error . ']');
     }
     $stmt->store_result();
-    return TRUE;
 }
 
 function execute_sql_insert_statement(&$stmt){
@@ -61,7 +62,6 @@ function bind_result_array($stmt)
         $result[$field->name] = NULL;
         $params[] = &$result[$field->name];
     }
-
     call_user_func_array(array($stmt, 'bind_result'), $params);
     return $result;
 }

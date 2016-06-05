@@ -46,10 +46,19 @@
 </div>
 
 <div class='popup' ng-show='infoPopupRunning'>
-    <div id="infoTextBox">
-        <h3> {{infoTitle}} </h3>
-        {{info}}
-    </div>
+    <h3> {{infoTitle}} </h3>
+    <table>
+        <tr>
+            <td>
+                <div id="infoTextBox">
+                    {{info}}
+                </div>
+            </td>
+            <td>
+                <img src="{{image}}" ng-show="hasPicture" style="width:150px;padding-right:20px;">
+            </td>
+        </tr>
+    </table>
     <button id=closeInfo ng-click=doneInfo()>Cool!</button>
 </div>
 

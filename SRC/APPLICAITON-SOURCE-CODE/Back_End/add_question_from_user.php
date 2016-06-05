@@ -63,15 +63,12 @@ function get_insert_query_by_q_type($q_type, $arg1, $arg2){
 }
 
 
-
-
 function add_question_by_type($q_type, $arg1, $arg2=null){
     $stmt = get_insert_query_by_q_type($q_type, $arg1, $arg2);
-    return execute_sql_insert_statement($stmt);
+    execute_sql_insert_statement($stmt);
 }
 
 
-// TODO: change error codes
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
     if (!empty($_POST["q_type"]) && !empty($_POST["num_args"])) {
@@ -80,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
         if ($num_args == 1 && !empty($_POST["arg1"])){
             $arg1 = $_POST["arg1"];
-            $result = add_question_by_type($q_type, $arg1);
+            add_question_by_type($q_type, $arg1);
         }
         else if ($num_args == 2 && !empty($_POST["arg1"]) && !empty($_POST["arg2"])){
             $arg1 = $_POST["arg1"];

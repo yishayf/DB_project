@@ -1,6 +1,6 @@
 //var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
-var questions_http = "http://localhost/OlympiData/Back_End/generate_trivia_questions.php";
-var post_statistics = "http://localhost/OlympiData/Back_End/update_questions_stats.php";
+var questions_http = "http://10.100.102.3/OlympiData/Back_End/generate_trivia_questions.php";
+var post_statistics = "http://10.100.102.3/OlympiData/Back_End/update_questions_stats.php";
 
 var app = angular.module('quizApp', []);
 
@@ -49,15 +49,29 @@ app.directive('quiz', function(quizFactory, $http) {
                         scope.format = q.q_type;
                         scope.info =  q.more_info; //TODO ((q.more_info == "") ? null :
                         scope.infoTitle = q.more_info_title;
+                        scope.image = q.image_url;
                         console.log(scope.infoT);
+                        console.log(scope.image);
                     } else {
                         scope.quizOver = true;
+                        // update game statistics
+                        console.log(scope.history);
+                        $http.post(post_statistics, {'stats': scope.history}, {
+                            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                            transformRequest: transform}).then(function(r) {
+                            console.log("Statistics sent succesfully");
+                            console.log(r.data);
+                        });
                     }
                 });
             };
 
             scope.moreInfo = function() {
+                scope.hasPicture = true;
                 scope.infoPopupRunning = true;
+                if (scope.image == ""){
+                    scope.hasPicture = false;
+                }
             }
 
             scope.doneInfo = function() {
@@ -96,13 +110,13 @@ app.directive('quiz', function(quizFactory, $http) {
             }
 
             scope.done = function() {
-                console.log(scope.history);
-                $http.post(post_statistics, {'stats': scope.history}, {
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-                    transformRequest: transform}).then(function(r) {
-                    console.log("Statistics sent succesfully");
-                    console.log(r.data);
-                });
+                // console.log(scope.history);
+                // $http.post(post_statistics, {'stats': scope.history}, {
+                //     headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                //     transformRequest: transform}).then(function(r) {
+                //     console.log("Statistics sent succesfully");
+                //     console.log(r.data);
+                // });
             }
 
             var transform = function(data){

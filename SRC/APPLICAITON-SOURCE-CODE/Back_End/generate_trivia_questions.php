@@ -109,6 +109,46 @@ function get_info_title_for_q_type($q_type, $args_row, $correct_answer){
     }
 }
 
+
+function get_image_url_q_type($q_type, $args_row, $correct_answer){
+    switch ($q_type) {
+        case 1:
+            return "";
+        case 2:
+            $id = $args_row['id'];
+            $query_format = "SELECT image_url AS image 
+                  FROM Athlete WHERE athlete_id = %d";
+            $sql_query = sprintf($query_format, $id);
+            break;
+        case 3:
+            $query_format = "SELECT image_url AS image 
+                  FROM Athlete WHERE dbp_label = '%s'";
+            $sql_query = sprintf($query_format, $correct_answer);
+            break;
+        case 4:
+            $id = $args_row['id'];
+            $query_format = "SELECT image_url AS image 
+                  FROM Athlete WHERE athlete_id = %d";
+            $sql_query = sprintf($query_format, $id);
+            break;
+        case 5:
+            $query_format = "SELECT image_url AS image 
+                  FROM Athlete WHERE dbp_label = '%s'";
+            $sql_query = sprintf($query_format, $correct_answer);
+            break;
+        case 6:
+            $id = $args_row['id'];
+            $query_format = "SELECT image_url AS image 
+                  FROM Athlete WHERE athlete_id = %d";
+            $sql_query = sprintf($query_format, $id);
+            break;
+    }
+    $result = run_sql_select_query($sql_query);
+    $image_url = $result->fetch_assoc()['image'];
+    return $image_url;
+}
+
+
 function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$arg2, &$id){
     // get the question format for q_type
     $question_format = get_question_format($q_type);
@@ -492,8 +532,10 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
         // get info:
         $info = get_info_for_q_type($q_type, $args_row, $correct_answer);
         $info_title = get_info_title_for_q_type($q_type, $args_row, $correct_answer);
+        $image_url = get_image_url_q_type($q_type, $args_row, $correct_answer);
         $question_dict["more_info"] = $info;
         $question_dict["more_info_title"] = $info_title;
+        $question_dict["image_url"] = $image_url;
         // put the correct answer in the answer array in a random place
         $place = mt_rand(0, 3);
         $correct_answer_str = explode("(", $correct_answer, 2)[0];
@@ -508,12 +550,14 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 
 $questions_arr = array();
 
-$num_q_for_type = 1;
+// get 2 Q's for 5 of the q_types
+$num_q_for_type = 2;
 $selected_qtypes = array(1,2,3,4,5,6);
+shuffle($selected_qtypes);
+array_pop($selected_qtypes);
 foreach ($selected_qtypes as $q_type){
     add_type_x_questions_with_answers($questions_arr, $q_type, $num_q_for_type);
 }
-// TODO : handle not enough questions in client side
 
 shuffle($questions_arr);
 
