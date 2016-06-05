@@ -8,8 +8,10 @@ import re
 import logging
 from warnings import filterwarnings
 
-
 ###############################################################################################################
+# setup logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+
 # globals initialization
 LIMIT = 10000
 SPARQL_QUERY_RETRY_COUNT = 10
@@ -17,13 +19,24 @@ TEST_MODE = False
 
 
 # sparql connection setup
-sparql = SPARQLWrapper("http://dbpedia.org/sparql")  # live.dbpedia is also an option...
+try:
+    sparql = SPARQLWrapper("http://dbpedia.org/sparql")  # live.dbpedia is also an option...
+except:
+    logging.warning("sparql connection failed")
+    traceback.print_exc(file=sys.stdout)
+    sys.exit(1)
+
 sparql.setTimeout(300)
 
 # MySQL connection setup
 filterwarnings('ignore', category=mdb.Warning) # supress warnings from MySQL
-con = mdb.connect('localhost', 'root', '', 'db_project_test') # local
-# con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
+try:
+    con = mdb.connect('localhost', 'root', '', 'db_project_test') # local
+    # con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
+except:
+    logging.warning("mysql connection failed")
+    traceback.print_exc(file=sys.stdout)
+    sys.exit(1)
 
 ################################################################################################################
 
@@ -548,10 +561,6 @@ def main():
     add_two_questions_for_type()
 
     logging.info("Done!")
-
-
-# setup logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 # run main function
 main()

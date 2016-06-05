@@ -6,7 +6,14 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 if (isset($_POST['button'])){
 
     $output = array();
-    exec('python ../admin/olympic_data_retrieval.php', $output);
+    $status;
+    exec('python ../admin/olympic_data_retrieval.py', $output, $status);
+    if (!$status){
+        echo "Update was successful </br>";
+    }
+    else{
+        echo "Error while running update script </br>";
+    }
     foreach ($output as &$row){
         echo $row.'</br>';
     }
