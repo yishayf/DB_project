@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="askQuestion" ng-controller="askController">
 <head>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css'>
     <meta charset="utf-8" />
     <title>addQuestion</title>
     <link rel="stylesheet" href="css/ask_question.css" />
@@ -51,6 +52,12 @@
 <div class='popup' ng-show = 'showPopUp'>
     <h3> Question was submited! </h3>
     <a href="ask_question.html" class="button">Ask another question</a>
+    <a href="welcome_page.html" class="button">Back to home page</a>
+</div>
+
+<div class='popup' ng-show = 'showErrorMessage'>
+    <h3> Error running sql query </h3>
+    <p id="errorTextBox" ng-bind-html-unsafe="errorMessage"></p>
     <a href="welcome_page.html" class="button">Back to home page</a>
 </div>
 

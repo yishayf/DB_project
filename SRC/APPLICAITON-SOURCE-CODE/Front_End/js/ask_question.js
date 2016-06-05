@@ -11,7 +11,7 @@ var app = angular.module('askQuestion', []);
 
 app.controller('askController', function($scope, $http, $location) {
 
-
+    $scope.showErrorMessage = false;
     $scope.createFormatsDropDown = function() {
         $http.get(formats_http).then(function (d) {
             $scope.parseJason(d.data);
@@ -25,6 +25,9 @@ app.controller('askController', function($scope, $http, $location) {
             var qTypeAnswer = secondArg_http + (questionType +1) + "&arg1=" + $scope.selectedFirstArg;
             $http.get(qTypeAnswer).then(function (options) {
                 $scope.secondArgOptions = options.data;
+            }, function (data) {
+                $scope.errorMessage = data.data;
+                $scope.showErrorMessage = true;
             });
         }
         $scope.updateAllArgsSelected();
@@ -50,7 +53,11 @@ app.controller('askController', function($scope, $http, $location) {
         var questionType = $scope.questionTypeIndex;
         var qTypeAnswer = firstArg_http + (parseInt(questionType) + 1);
         $http.get(qTypeAnswer).then(function (options) {
+            console.log("Correct");
             $scope.firstArgOptions = options.data;
+        }, function (data) {
+            $scope.errorMessage = data.data;
+            $scope.showErrorMessage = true;
         });
     }
         
