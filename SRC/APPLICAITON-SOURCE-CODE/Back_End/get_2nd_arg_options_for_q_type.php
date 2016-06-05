@@ -7,43 +7,48 @@ require_once 'mysql_general.php';
 $options_limit = 1000;
 
 function get_sql_query_for_args_by_q_type($q_type, $arg1){
+    global $db;
     global $options_limit;
     switch ($q_type){
         case 1:
-//            $query_format = "SELECT valid.season AS opt
-//                FROM (SELECT year, season from OlympicGame WHERE
-//                concat(year, season) not in (select concat(year, season) from Question_type1)) AS valid
-//                WHERE valid.year = %d";
-            $query_format = "SELECT season AS opt
+            $stmt = $db->prepare("SELECT season AS opt
                 FROM  OlympicGame og
-                WHERE og.year = %d AND og.game_id NOT IN (SELECT game_id FROM Question_type1);";
-
-            $query = sprintf($query_format, $arg1);
+                WHERE og.year = ? AND og.game_id NOT IN (SELECT game_id FROM Question_type1);");
+            if (!$stmt->bind_param("i", $arg1)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
             break;
         case 4:
-            $query_format = "SELECT a.dbp_label AS opt
+            $stmt = $db->prepare("SELECT a.dbp_label AS opt
                 FROM Athlete a, (SELECT DISTINCT medal_color FROM AthleteMedals) as colors
-                WHERE colors.medal_color = '%s'
+                WHERE colors.medal_color = ?
                 AND concat(colors.medal_color, a.athlete_id) not in (select concat(medal_color, athlete_id) 
                                                                                 FROM Question_type4)
                 ORDER BY RAND()
-                LIMIT %d";
-            $query = sprintf($query_format, $arg1, $options_limit);
+                LIMIT ?");
+            if (!$stmt->bind_param("si", $arg1, $options_limit)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
             break;
         case 5:
-            $query_format = "SELECT season AS opt
+            $stmt = $db->prepare("SELECT season AS opt
                 FROM  OlympicGame og
-                WHERE og.year = %d AND og.game_id NOT IN (SELECT game_id FROM Question_type5);";
-            $query = sprintf($query_format, $arg1);
+                WHERE og.year = ? AND og.game_id NOT IN (SELECT game_id FROM Question_type5);");
+            if (!$stmt->bind_param("i", $arg1)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
             break;
     }
-    return $query;
+    return $stmt;
 }
 
 
 function get_2nd_arg_options_by_q_type($q_type, $arg1){
-    $sql_query = get_sql_query_for_args_by_q_type($q_type, $arg1);
-    $result = run_sql_select_query($sql_query);
+    $stmt = get_sql_query_for_args_by_q_type($q_type, $arg1);
+    $result = execute_sql_statement($stmt);
     $res_array = array();
     while ($row = $result->fetch_assoc()) {
         array_push($res_array, $row['opt']);

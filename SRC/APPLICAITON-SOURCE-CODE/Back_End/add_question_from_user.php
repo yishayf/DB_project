@@ -5,40 +5,69 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 require_once 'mysql_general.php';
 
 
-function get_insert_query_by_q_type($q_type){
+function get_insert_query_by_q_type($q_type, $arg1, $arg2){
+    global $db;
     switch ($q_type){
         case 1:
-//            return "INSERT INTO Question_type%d (year, season) VALUES (%d, '%s')";
-            return "INSERT INTO Question_type%d (game_id)
-                      SELECT game_id FROM OlympicGame WHERE year = %d AND season = '%s';";
+            $stmt = $db->prepare("INSERT INTO Question_type1 (game_id)
+                      SELECT game_id FROM OlympicGame WHERE year = ? AND season = ?;");
+            if (!$stmt->bind_param("is", $arg1, $arg2)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
+            break;
         case 2:
-            return "INSERT INTO Question_type%d (athlete_id)  
-                      SELECT athlete_id FROM Athlete WHERE dbp_label  = '%s';";
+            $stmt = $db->prepare("INSERT INTO Question_type2 (athlete_id)  
+                      SELECT athlete_id FROM Athlete WHERE dbp_label  = ?;");
+            if (!$stmt->bind_param("s", $arg1)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
+            break;
         case 3:
-//            return "INSERT INTO Question_type%d (field_name) VALUES ('%s')";
-            return "INSERT INTO Question_type%d (field_id)
-                      SELECT field_id FROM OlympicSportField WHERE field_name = '%s';";
+            $stmt = $db->prepare("INSERT INTO Question_type3 (field_id)
+                      SELECT field_id FROM OlympicSportField WHERE field_name = ?;");
+            if (!$stmt->bind_param("s", $arg1)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
+            break;
         case 4:
-//            return "INSERT INTO Question_type%d (medal_color, dbp_label) VALUES ('%s', '%s')";
-            return "INSERT INTO Question_type%d (athlete_id, medal_color) 
-                      SELECT a.athlete_id, '%s'
+            $stmt = $db->prepare("INSERT INTO Question_type4 (athlete_id, medal_color) 
+                      SELECT a.athlete_id, ?
                       FROM Athlete a
-                      WHERE a.dbp_label = '%s';";
+                      WHERE a.dbp_label = ?;");
+            if (!$stmt->bind_param("ss", $arg1, $arg2)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
+            break;
         case 5:
-//            return "INSERT INTO Question_type%d (year, season) VALUES (%d, '%s')";
-            return "INSERT INTO Question_type%d (game_id)
-                      SELECT game_id FROM OlympicGame WHERE year = %d AND season = '%s';";
+            $stmt = $db->prepare("INSERT INTO Question_type5 (game_id)
+                      SELECT game_id FROM OlympicGame WHERE year = ? AND season = ?;");
+            if (!$stmt->bind_param("is", $arg1, $arg2)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
+            break;
         case 6:
-            return "INSERT INTO Question_type%d (athlete_id)  
-                      SELECT athlete_id FROM Athlete WHERE dbp_label  = '%s';";
+            $stmt = $db->prepare("INSERT INTO Question_type6 (athlete_id)  
+                      SELECT athlete_id FROM Athlete WHERE dbp_label = ?;");
+            if (!$stmt->bind_param("s", $arg1)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
+            break;
     }
+    return $stmt;
 }
 
 
+
+
 function add_question_by_type($q_type, $arg1, $arg2=null){
-    $insert_query_format = get_insert_query_by_q_type($q_type);
-    $insert_query = sprintf($insert_query_format, $q_type, $arg1, $arg2);
-    return run_sql_insert_query($insert_query);
+    $stmt = get_insert_query_by_q_type($q_type, $arg1, $arg2);
+    return execute_sql_insert_statement($stmt);
 }
 
 
