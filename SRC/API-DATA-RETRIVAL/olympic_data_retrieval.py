@@ -76,13 +76,13 @@ def insert_olympic_games(olympic_game_tuples):
         year = game_label_arr[0]
         season = game_label_arr[1]
         city = get_host_city(host_city_text)
-        run_mysql_query("INSERT IGNORE INTO OlympicGame (game_id, year, season) "
+        run_mysql_insert_query("INSERT IGNORE INTO OlympicGame (game_id, year, season) "
                         "VALUES (%s, %s, %s)",
-                        (wiki_id, year, season))
-        run_mysql_query("UPDATE OlympicGame "
+                               (wiki_id, year, season))
+        run_mysql_insert_query("UPDATE OlympicGame "
                         "set comment = %s, city = %s "
                         "WHERE game_id = %s",
-                        (comment, city, wiki_id))
+                               (comment, city, wiki_id))
 
 
 def get_host_city(text_from_dbp):
@@ -145,13 +145,13 @@ def insert_athletes(athlete_tuples):
         label = tup[1].encode('latin-1', 'ignore')
         bd = tup[2].encode('latin-1', 'ignore')
 
-        run_mysql_query("INSERT IGNORE INTO Athlete (athlete_id, dbp_label) "
+        run_mysql_insert_query("INSERT IGNORE INTO Athlete (athlete_id, dbp_label) "
                         "VALUES (%s, %s)",
-                        (athlete_id, label))
-        run_mysql_query("UPDATE Athlete "
+                               (athlete_id, label))
+        run_mysql_insert_query("UPDATE Athlete "
                         "set birth_date = %s "
                         "WHERE athlete_id = %s",
-                        (bd, athlete_id))
+                               (bd, athlete_id))
 
 
 def query_and_update_athletes_comment_and_image():
@@ -206,10 +206,10 @@ def update_athletes_comment_and_image(athlete_tuples):
         athlete_id = tup[0]
         comment = tup[1].encode('latin-1', 'ignore')
         image_url = tup[2].encode('latin-1', 'ignore')
-        run_mysql_query("UPDATE Athlete "
+        run_mysql_insert_query("UPDATE Athlete "
                         "set comment = %s, image_url = %s"
                         "WHERE athlete_id = %s",
-                        (comment, image_url, athlete_id))
+                               (comment, image_url, athlete_id))
 
 
 # get athletes olympic sport field information
@@ -266,23 +266,23 @@ def insert_athletes_games_and_field(athlete_game_tuple):
         season = match.group(3)
 
         # insert into sport field
-        run_mysql_query("INSERT IGNORE INTO OlympicSportField (field_name) VALUES (%s)",
-                        [field])
+        run_mysql_insert_query("INSERT IGNORE INTO OlympicSportField (field_name) VALUES (%s)",
+                               [field])
 
         # insert into athlete column - this will fail if athlete is not found
         # field is necessarily found because we already have it from previous query
-        run_mysql_query("INSERT IGNORE INTO AthleteOlympicSportFields (athlete_id, field_id) "
+        run_mysql_insert_query("INSERT IGNORE INTO AthleteOlympicSportFields (athlete_id, field_id) "
                         "SELECT a.athlete_id, f.field_id "
                         "FROM Athlete a, OlympicSportField f "
                         "WHERE a.athlete_id = %s AND f.field_name = %s ",
-                        (athlete_id, field))
+                               (athlete_id, field))
 
         # insert into game and field columns - this will fail if athlete is not found
-        run_mysql_query("INSERT IGNORE INTO AthleteGames (athlete_id, game_id, field_id) "
+        run_mysql_insert_query("INSERT IGNORE INTO AthleteGames (athlete_id, game_id, field_id) "
                         "SELECT a.athlete_id, g.game_id, f.field_id "
                         "FROM Athlete a, OlympicGame g, OlympicSportField f "
                         "WHERE a.athlete_id = %s AND g.year = %s AND g.season = %s AND f.field_name = %s",
-                        (athlete_id, year, season, field))
+                               (athlete_id, year, season, field))
 
 
 # get athlete competitions and medals info
@@ -346,15 +346,15 @@ def insert_to_competition_type_and_athlete_medals(medals_tuples, medal_color):
         field_and_comp = comp_field + "_" + comp_name if comp_name else comp_field
 
         # insert into competition type
-        run_mysql_query("INSERT IGNORE INTO CompetitionType (competition_name) VALUES (%s)",
-                        [field_and_comp])
+        run_mysql_insert_query("INSERT IGNORE INTO CompetitionType (competition_name) VALUES (%s)",
+                               [field_and_comp])
 
         # insert into athlete medals
-        run_mysql_query("INSERT IGNORE INTO AthleteMedals (athlete_id, game_id, competition_id, medal_color) "
+        run_mysql_insert_query("INSERT IGNORE INTO AthleteMedals (athlete_id, game_id, competition_id, medal_color) "
                         "SELECT a.athlete_id, g.game_id, c.competition_id, %s "
                         "FROM Athlete a, OlympicGame g,  CompetitionType c "
                         "WHERE a.athlete_id = %s AND g.year = %s AND g.season = %s AND c.competition_name = %s",
-                        (medal_color, athlete_id, year, season, field_and_comp))
+                               (medal_color, athlete_id, year, season, field_and_comp))
 
 
 # def remove_foreign_keys():
@@ -412,10 +412,10 @@ def insert_to_competition_type_and_athlete_medals(medals_tuples, medal_color):
 
 def run_mysql_queries_lst(mysql_query_lst):
     for query in mysql_query_lst:
-        run_mysql_query(query)
+        run_mysql_insert_query(query)
 
 
-def run_mysql_query(my_sql_query, params=None):
+def run_mysql_insert_query(my_sql_query, params=None):
     with con:
         cur = con.cursor()
         try:
@@ -427,6 +427,21 @@ def run_mysql_query(my_sql_query, params=None):
         except:
             traceback.print_exc(file=sys.stdout)
             con.rollback()
+
+
+def run_mysql_select_query(my_sql_query, params=None):
+    with con:
+        cur = con.cursor()
+        try:
+            if params:
+                cur.execute(my_sql_query, params)
+            else:
+                cur.execute(my_sql_query)
+            return cur
+        except:
+            traceback.print_exc(file=sys.stdout)
+            con.rollback()
+            return None
 
 
 def run_sparql_query(query):
@@ -444,6 +459,61 @@ def run_sparql_query(query):
     # if we got here there are no more reties
     logging.error("sparql query failed, no more retries!\n"
                   "The Query was:\n%s" % query)
+
+
+def add_two_questions_for_type():
+    for i in range(6):
+        q_type = i+1
+        count = check_q_count_for_q(q_type)
+        num_needed = max(2-count, 0)
+        add_questions_for_qtype(q_type, num_needed)
+
+
+def check_q_count_for_q(q_type):
+    cursor = run_mysql_select_query("SELECT count(*) FROM Question_type%d" % q_type)
+    row = cursor.fetchone()
+    return row[0]
+
+
+def add_questions_for_qtype(q_type, num_needed):
+    if q_type == 1:
+        run_mysql_insert_query("INSERT INTO Question_type%d (game_id) "
+                               "SELECT game_id "
+                               "FROM OlympicGame "
+                               "WHERE game_id NOT IN (SELECT game_id FROM Question_type%d)"
+                               "AND city != ''"
+                               "LIMIT %d" % (q_type, q_type, num_needed))
+    elif q_type == 2:
+        run_mysql_insert_query("INSERT INTO Question_type%d (athlete_id) "
+                               "SELECT athlete_id "
+                               "FROM Athlete "
+                               "WHERE athlete_id NOT IN (SELECT athlete_id FROM Question_type%d)"
+                               "LIMIT %d" % (q_type, q_type, num_needed))
+    elif q_type == 3:
+        run_mysql_insert_query("INSERT INTO Question_type%d (field_id) "
+                               "SELECT field_id "
+                               "FROM OlympicSportField "
+                               "WHERE field_id NOT IN (SELECT field_id FROM Question_type%d)"
+                               "LIMIT %d" % (q_type, q_type, num_needed))
+    elif q_type == 4:
+        run_mysql_insert_query("INSERT INTO Question_type%d (athlete_id, medal_color) "
+                               "SELECT a.athlete_id, colors.medal_color "
+                               "FROM Athlete a, (SELECT DISTINCT medal_color FROM AthleteMedals) as colors "
+                               "                WHERE concat(colors.medal_color, a.athlete_id) NOT IN "
+                               "(SELECT concat(medal_color, athlete_id) FROM Question_type%d) "
+                               "LIMIT %d" % (q_type, q_type, num_needed))
+    elif q_type == 5:
+        run_mysql_insert_query("INSERT INTO Question_type%d (game_id) "
+                               "SELECT game_id "
+                               "FROM OlympicGame "
+                               "WHERE game_id NOT IN (SELECT game_id FROM Question_type%d)"
+                               "LIMIT %d" % (q_type, q_type, num_needed))
+    elif q_type == 6:
+        run_mysql_insert_query("INSERT INTO Question_type%d (athlete_id) "
+                               "SELECT DISTINCT athlete_id "
+                               "FROM AthleteMedals "
+                               "WHERE athlete_id NOT IN (SELECT athlete_id FROM Question_type%d)"
+                               "LIMIT %d" % (q_type, q_type, num_needed))
 
 
 def main():
@@ -472,11 +542,14 @@ def main():
     # get and insert athlete medals and their competitions
     query_and_insert_athlete_competitions_medals()
 
+    # add two new questions for every question type if there aren't any yet
+    add_two_questions_for_type()
+
     logging.info("Done!")
 
 
 # setup logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 # run main function
 main()
