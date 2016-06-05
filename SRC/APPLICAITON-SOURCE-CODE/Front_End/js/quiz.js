@@ -49,7 +49,9 @@ app.directive('quiz', function(quizFactory, $http) {
                         scope.format = q.q_type;
                         scope.info =  q.more_info; //TODO ((q.more_info == "") ? null :
                         scope.infoTitle = q.more_info_title;
+                        scope.image = q.image_url;
                         console.log(scope.infoT);
+                        console.log(scope.image);
                     } else {
                         scope.quizOver = true;
                         // update game statistics
@@ -65,7 +67,11 @@ app.directive('quiz', function(quizFactory, $http) {
             };
 
             scope.moreInfo = function() {
+                scope.hasPicture = true;
                 scope.infoPopupRunning = true;
+                if (scope.image == ""){
+                    scope.hasPicture = false;
+                }
             }
 
             scope.doneInfo = function() {
