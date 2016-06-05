@@ -326,8 +326,10 @@ function get_correct_answer($q_type, $args_row){
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
             }
-            $result = execute_sql_statement($stmt);
-            $correct_answer = $result->fetch_assoc()['city'];
+            execute_sql_statement($stmt);
+            $row = bind_result_array($stmt);
+            $stmt->fetch();
+            $correct_answer = $row['city'];
             return $correct_answer;
         case 2:
             $athlete_id = $args_row['id'];
@@ -335,8 +337,10 @@ function get_correct_answer($q_type, $args_row){
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
             }
-            $result = execute_sql_statement($stmt);
-            $correct_answer = $result->fetch_assoc()['num_games'];
+            execute_sql_statement($stmt);
+            $row = bind_result_array($stmt);
+            $stmt->fetch();
+            $correct_answer = $row['num_games'];
             return $correct_answer;
         case 3:
             $field_id = $args_row['id'];
@@ -436,23 +440,22 @@ function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
 }
 
 function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_questions){
-    global $db;
     // get sql query for getting the q_type blank filling for num_questions
-    $sql_args_query = get_questions_args_sql_query($q_type, $num_questions);
-
+    $sql_args_stmt = get_questions_args_sql_query($q_type, $num_questions);
     // run the query for getting the questions args
-    $result = execute_sql_statement($sql_args_query);
-    if ($result->num_rows < $num_questions){
-        // TODO: add error code
+    execute_sql_statement($sql_args_stmt);
+    if ($sql_args_stmt->num_rows < $num_questions){
+        http_response_code(500);
         die(sprintf('ERROR: Not enough questions for question type %d', $q_type));
     }
 
     $id = null;
     $arg1 = null;
     $arg2 = null;
-    while ($args_row = $result->fetch_assoc()){
+    $args_row = bind_result_array($sql_args_stmt);
+    while ($sql_args_stmt->fetch()){
         $question_dict = array();
-
+        print_r($args_row);
         // build the question
         $question = build_question_from_args_and_update_args($q_type, $args_row, $arg1, $arg2, $id);
 
