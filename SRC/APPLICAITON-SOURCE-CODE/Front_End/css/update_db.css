@@ -2,12 +2,10 @@ body {
     background-image: url(../img/OlympicDay.jpg);
     background-color: darksalmon;
     -webkit-background-size: cover;
-    font-family: 'Roboto Slab', serif;
+    font-family: 'Droid Sans Mono' ;
 }
 
 h2 {
-    /*font-family: "Andale Mono";*/
-    font-family: 'Roboto Slab', serif;
     font-size: 30px;
     color:  #4CAF50;
     text-align: center;
@@ -26,8 +24,7 @@ h2 {
 
 .button, #update_button {
 
-    /*font-family: "Andale Mono";*/
-    font-family: 'Roboto Slab', serif;
+    font-family: 'Droid Sans Mono';
     background-color: #4CAF50;
     border: none;
     color: white;
@@ -57,54 +54,3 @@ h2 {
 #update_button[disabled]{
     background-color: gray;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*body {*/
-    /*background-image: url(../img/OlympicDay.jpg);*/
-    /*background-color: darksalmon;*/
-    /*-webkit-background-size: cover;*/
-/*}*/
-
-
-
-/*.button, #update_button {*/
-
-    /*font-family: "Andale Mono";*/
-    /*background-color: #4CAF50;*/
-    /*background-size: cover;*/
-    /*border: none;*/
-    /*color: white;*/
-    /*padding: 16px 32px;*/
-    /*text-align: center;*/
-    /*text-decoration: none;*/
-    /*display: inline-block;*/
-    /*font-size: 16px;*/
-    /*margin: 4px 2px;*/
-    /*border-radius: 8px;*/
-/*}*/
-
-/*#update_button[disabled] {*/
-    /*background-color: gray;*/
-/*}*/
-
-/*h2 {*/
-    /*font-family: "Andale Mono";*/
-    /*background-color: #4CAF50;*/
-    /*font-size: 30px;*/
-    /*color:  white;*/
-    /*text-align: center;*/
-/*}*/

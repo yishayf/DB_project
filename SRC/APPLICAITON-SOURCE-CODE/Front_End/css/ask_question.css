@@ -2,24 +2,22 @@ body {
     background-image: url(../img/OlympicDay.jpg);
     background-color: darksalmon;
     -webkit-background-size: cover;
+    font-family: 'Droid Sans Mono' ;
 }
 
 h1 {
-    font-family: "Andale Mono";
     font-size: 35px;
     color:  #4CAF50;
     text-align: center;
 }
 
 h2 {
-    font-family: "Andale Mono";
     font-size: 25px;
     color:  #4CAF50;
     text-align: left;
 }
 
 h3 {
-    font-family: "Andale Mono";
     font-size: 25px;
     color:  #4CAF50;
     text-align: center;
@@ -50,7 +48,6 @@ h3 {
     margin: 5px 3px;
     cursor: pointer;
     border-radius: 8px;
-    font-family: Andale Mono;
     align-self: center;
     -webkit-align-self: center;
 }
@@ -101,7 +98,6 @@ h3 {
     border: none;
     overflow-x: hidden;
     overflow-y: auto;
-    font-family: "Andale Mono";
     /*padding: 7px;*/
     margin-bottom: 20px;
     height: 100px;
