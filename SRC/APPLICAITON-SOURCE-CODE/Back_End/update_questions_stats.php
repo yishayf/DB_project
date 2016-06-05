@@ -24,7 +24,9 @@ function get_update_stats_sql_query($q_type, $is_correct, $arg1, $arg2, $id){
         case 5:
             $format = "UPDATE Question_type%d SET %s = %s + 1 WHERE game_id = %d";
             return sprintf($format, $q_type, $column, $column, $id);
-
+        case 6:
+            $format = "UPDATE Question_type%d SET %s = %s + 1 WHERE athlete_id = %d";
+            return sprintf($format, $q_type, $column, $column, $id);
     }
 }
 
@@ -40,7 +42,6 @@ function update_stats($stats){
     }
 }
 
-// TODO: change error codes
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
     if (!empty($_POST["stats"])) {

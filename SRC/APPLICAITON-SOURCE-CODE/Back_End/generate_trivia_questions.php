@@ -20,7 +20,7 @@ function get_question_format($q_type){
         case 5:
             return 'Who won most medals at the %s %s olympic games?';
         case 6:
-            return 'In which of the following competition type did %s participated?';
+            return 'In which of the following competition type did %s win a medal?';
     }
 }
 
@@ -56,17 +56,41 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
             break;
         case 6:
             $id = $args_row['id'];
-            return "";
+            $query_format = "SELECT comment AS more_info 
+                  FROM Athlete WHERE athlete_id = %d";
+            $sql_query = sprintf($query_format, $id);
+            break;
     }
     $result = run_sql_select_query($sql_query);
     $info = $result->fetch_assoc()['more_info'];
     return $info;
 }
 
+function get_info_title_for_q_type($q_type, $args_row, $correct_answer){
+    switch ($q_type) {
+        case 1:
+            $format = "%d %s Olympics";
+            $year = $args_row['year'];
+            $season = $args_row['season'];
+            $title = sprintf($format, $year, $season);
+            return $title;
+        case 2:
+            return $args_row['dbp_label'];
+            break;
+        case 3:
+            return $correct_answer;
+        case 4:
+            return $args_row['dbp_label'];
+        case 5:
+            return $correct_answer;
+        case 6:
+            return $args_row['dbp_label'];
+    }
+}
+
 function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$arg2, &$id){
     // get the question format for q_type
     $question_format = get_question_format($q_type);
-
     // build the question
     switch ($q_type) {
         case 1:
@@ -99,6 +123,14 @@ function build_question_from_args_and_update_args($q_type, $args_row, &$arg1, &$
             $arg2 = $args_row['season'];
             $question = sprintf($question_format, $arg1, $arg2);
             break;
+        case 6:
+            $id = $args_row['id'];
+            $arg1 = $args_row['dbp_label'];
+            $arg2 = null;
+            $arg1_text = explode("(", $arg1, 2)[0];
+            $question = sprintf($question_format, $arg1_text);
+            break;
+
     }
     return $question;
 }
@@ -137,6 +169,13 @@ function get_questions_args_sql_query($q_type, $num_questions){
             $sql_query_format = "SELECT q5.game_id AS id, og.year, og.season, q5.num_correct, q5.num_wrong
                 FROM Question_type5 q5, OlympicGame og
                 WHERE q5.game_id = og.game_id
+                ORDER BY RAND()
+                LIMIT %d";
+            break;
+        case 6:
+            $sql_query_format = "SELECT q6.athlete_id AS id, a.dbp_label, q6.num_correct, q6.num_wrong
+                FROM Question_type6 q6, Athlete a
+                WHERE q6.athlete_id = a.athlete_id
                 ORDER BY RAND()
                 LIMIT %d";
             break;
@@ -182,7 +221,13 @@ function get_correct_answer_sql_query_format($q_type){
                                                             GROUP BY(am.athlete_id)) AS temp)
                             ORDER BY RAND()
                             LIMIT 1) AS maxAthleteForGame
-                    Where a.athlete_id =  maxAthleteForGame.athlete_id";
+                    Where a.athlete_id =  maxAthleteForGame.athlete_id;";
+        case 6:
+            return "SELECT DISTINCT c.competition_name
+                    FROM CompetitionType c, AthleteMedals am 
+                    WHERE am.athlete_id = %d 
+                    AND am.competition_id = c.competition_id
+                    LIMIT 1;";
     }
 }
 
@@ -234,6 +279,15 @@ function get_wrong_answer_sql_query_format($q_type){
                                                                             GROUP BY(am.athlete_id)) AS temp)) 
                 ORDER BY RAND()
                 LIMIT 3";
+        case 6:
+            return "SELECT DISTINCT c.competition_name AS wrong_answer
+                    FROM CompetitionType c
+                    WHERE c.competition_id NOT IN (SELECT DISTINCT c.competition_id
+                                                    FROM CompetitionType c, AthleteMedals am 
+                                                    WHERE am.athlete_id = %d
+                                                    AND am.competition_id = c.competition_id)
+                    ORDER BY RAND()
+                    LIMIT 3;";
     }
 }
 
@@ -271,6 +325,12 @@ function get_correct_answer($q_type, $args_row){
             $result = run_sql_select_query($sql_query);
             $correct_answer = $result->fetch_assoc()['dbp_label'];
             return $correct_answer;
+        case 6:
+            $athlete_id = $args_row['id'];
+            $sql_query = sprintf($correct_answer_sql_query_format, $athlete_id);
+            $result = run_sql_select_query($sql_query);
+            $correct_answer = $result->fetch_assoc()['competition_name'];
+            return $correct_answer;
     }
 }
 
@@ -297,10 +357,15 @@ function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
             $game_id = $args_row['id'];
             $sql_query = sprintf($wrong_answer_sql_query_format, $game_id, $game_id);
             break;
+        case 6:
+            $athlete_id = $args_row['id'];
+            $sql_query = sprintf($wrong_answer_sql_query_format, $athlete_id);
+            break;
     }
     $result = run_sql_select_query($sql_query);
     while ($row = $result->fetch_assoc()) {
-        array_push($answer_array, $row['wrong_answer']);
+        $wrong_answer_str = explode("(", $row['wrong_answer'], 2)[0];
+        array_push($answer_array, $wrong_answer_str);
     }
     return $answer_array;
 }
@@ -314,7 +379,7 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
     $result = run_sql_select_query($sql_args_query);
 
     if ($result->num_rows < $num_questions){
-        // TODO: add error code
+        http_response_code(510);
         die(sprintf('ERROR: Not enough questions for question type %d', $q_type));
     }
 
@@ -348,11 +413,13 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 
         // get info:
         $info = get_info_for_q_type($q_type, $args_row, $correct_answer);
+        $info_title = get_info_title_for_q_type($q_type, $args_row, $correct_answer);
         $question_dict["more_info"] = $info;
-
+        $question_dict["more_info_title"] = $info_title;
         // put the correct answer in the answer array in a random place
         $place = mt_rand(0, 3);
-        array_splice($answer_array, $place, 0, $correct_answer);
+        $correct_answer_str = explode("(", $correct_answer, 2)[0];
+        array_splice($answer_array, $place, 0, $correct_answer_str);
         $question_dict["options"] = $answer_array;
         $question_dict["answer"] = $place;
 
@@ -363,23 +430,20 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
 
 $questions_arr = array();
 
-$num_q_for_type = 1;
-$selected_qtypes = array(5);//1,2,3,4,5);
+// get 2 Q's for 5 of the q_types
+$num_q_for_type = 2;
+$selected_qtypes = array(1,2,3,4,5,6);
+shuffle($selected_qtypes);
+array_pop($selected_qtypes);
 foreach ($selected_qtypes as $q_type){
     add_type_x_questions_with_answers($questions_arr, $q_type, $num_q_for_type);
 }
-// TODO : handle not enough questions in client side
-
 shuffle($questions_arr);
 
 echo json_encode($questions_arr);
 
 // close database connection
 $db->close();
-
-
-// TODO: remove:
-//    6)	In which of the following competition type did (athlete) participated?
 
 ?>
 

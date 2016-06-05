@@ -48,6 +48,8 @@ app.directive('quiz', function(quizFactory, $http) {
                         scope.idval = q.id;
                         scope.format = q.q_type;
                         scope.info =  q.more_info; //TODO ((q.more_info == "") ? null :
+                        scope.infoTitle = q.more_info_title;
+                        console.log(scope.infoT);
                     } else {
                         scope.quizOver = true;
                         // update game statistics

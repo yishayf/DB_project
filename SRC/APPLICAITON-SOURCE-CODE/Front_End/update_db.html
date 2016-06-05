@@ -22,9 +22,10 @@
     <div class="updating" ng-show="isCurrentlyUpdating">
         <img id=progressBarImage src="img/hourglass.gif">
     </div>
-    <div class="updating" ng-show="doneUpdating">
-        <h3>Done Updating</h3>
-        <p ng-bind-html-unsafe="returnedFromUpdate"></p>
+    <div class="updating" ng-hide="isCurrentlyUpdating" ng-show="doneUpdating" >
+        <h3>Done Running update script</h3>
+        <h3 align="left">Log output:</h3>
+        <p style="background-color:white;" align=left ng-bind-html-unsafe="returnedFromUpdate"></p>
     </div>
 
 </div>

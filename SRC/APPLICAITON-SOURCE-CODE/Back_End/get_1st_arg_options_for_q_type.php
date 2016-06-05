@@ -10,31 +10,21 @@ function get_sql_query_for_args_by_q_type($q_type){
     global $options_limit;
     switch ($q_type){
         case 1:
-//            $format = "SELECT DISTINCT og.year AS opt
-//                FROM OlympicGame og, (SELECT year, season from OlympicGame WHERE
-//                concat(year, season) not in (select concat(year, season) from Question_type1)) AS valid
-//                WHERE og.year = valid.year AND og.City != ''";
             $format = "SELECT DISTINCT og.year AS opt
             FROM OlympicGame og
             WHERE og.game_id NOT IN (SELECT game_id FROM Question_type1) 
             AND og.city != '';";
             break;
         case 2:
-//            $format = "SELECT dbp_label AS opt
-//                FROM Athlete
-//                WHERE dbp_label not in (SELECT dbp_label FROM Question_type2)
-//                ORDER BY RAND()
-//                LIMIT %d;";
-            $format = "SELECT dbp_label AS opt
+            /* Any athlete will surely have a sport field, becaue we selected only atheltes that participated
+            in some sport field in the olympic */
+            $format = "SELECT a.dbp_label AS opt
             FROM Athlete a
             WHERE a.athlete_id NOT IN (SELECT athlete_id FROM Question_type2)
             ORDER BY RAND()
             LIMIT %d;";
             break;
         case 3;
-//            $format = "SELECT field_name AS opt
-//                FROM OlympicSportField
-//                WHERE field_name NOT IN (SELECT field_name FROM Question_type3);";
             $format = "SELECT field_name AS opt
                 FROM OlympicSportField
                 WHERE field_id NOT IN (SELECT field_id FROM Question_type3);";
@@ -44,15 +34,18 @@ function get_sql_query_for_args_by_q_type($q_type){
                 FROM AthleteMedals;";
             break;
         case 5:
-//            $format = "SELECT DISTINCT og.year AS opt
-//                FROM OlympicGame og, (SELECT year, season from OlympicGame WHERE
-//                concat(year, season) not in (select concat(year, season) from Question_type5)) AS valid
-//                WHERE og.year = valid.year;";
             $format = "SELECT DISTINCT og.year AS opt
             FROM OlympicGame og
             WHERE og.game_id NOT IN (SELECT game_id FROM Question_type5)
             AND og.game_id IN (SELECT DISTINCT game_id from AthleteMedals);";
             break;
+        case 6:
+            $format = "SELECT DISTINCT a.dbp_label AS opt
+            FROM Athlete a, AthleteMedals am
+            WHERE a.athlete_id = am.athlete_id
+            AND a.athlete_id NOT IN (SELECT athlete_id FROM Question_type6)
+            ORDER BY RAND()
+            LIMIT %d;";
     }
     return sprintf($format, $options_limit);
 }
