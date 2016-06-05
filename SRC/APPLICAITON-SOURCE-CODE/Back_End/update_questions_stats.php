@@ -71,6 +71,7 @@ function update_stats($stats){
         $is_correct = $q_info["correct"];
         $stmt = get_update_stats_sql_query($q_type, $is_correct, $arg1, $arg2, $id);
         execute_sql_update_statement($stmt);
+        $stmt->close();
     }
 }
 

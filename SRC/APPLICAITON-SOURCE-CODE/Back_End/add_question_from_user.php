@@ -66,6 +66,7 @@ function get_insert_query_by_q_type($q_type, $arg1, $arg2){
 function add_question_by_type($q_type, $arg1, $arg2=null){
     $stmt = get_insert_query_by_q_type($q_type, $arg1, $arg2);
     execute_sql_insert_statement($stmt);
+    $stmt->close();
 }
 
 

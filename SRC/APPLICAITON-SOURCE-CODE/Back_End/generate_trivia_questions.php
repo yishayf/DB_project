@@ -1,7 +1,5 @@
 <?php
 
-// TOdO change sprintf to something more secure
-// TODO: handle errors on client side
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
@@ -84,6 +82,7 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
     $row = bind_result_array($stmt);
     $stmt->fetch();
     $info = $row['more_info'];
+    $stmt->close();
     return $info;
 }
 
@@ -109,43 +108,61 @@ function get_info_title_for_q_type($q_type, $args_row, $correct_answer){
     }
 }
 
-
 function get_image_url_q_type($q_type, $args_row, $correct_answer){
+    global $db;
     switch ($q_type) {
         case 1:
             return "";
         case 2:
             $id = $args_row['id'];
-            $query_format = "SELECT image_url AS image 
-                  FROM Athlete WHERE athlete_id = %d";
-            $sql_query = sprintf($query_format, $id);
+            $stmt = $db->prepare("SELECT image_url AS image 
+                  FROM Athlete WHERE athlete_id = ?;");
+            if (!$stmt->bind_param("i", $id)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
             break;
         case 3:
-            $query_format = "SELECT image_url AS image 
-                  FROM Athlete WHERE dbp_label = '%s'";
-            $sql_query = sprintf($query_format, $correct_answer);
+            $stmt = $db->prepare("SELECT image_url AS image 
+                  FROM Athlete WHERE dbp_label = ?;");
+            if (!$stmt->bind_param("s", $correct_answer)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
             break;
         case 4:
             $id = $args_row['id'];
-            $query_format = "SELECT image_url AS image 
-                  FROM Athlete WHERE athlete_id = %d";
-            $sql_query = sprintf($query_format, $id);
+            $stmt = $db->prepare("SELECT image_url AS image 
+                  FROM Athlete WHERE athlete_id = ?;");
+            if (!$stmt->bind_param("i", $id)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
             break;
         case 5:
-            $query_format = "SELECT image_url AS image 
-                  FROM Athlete WHERE dbp_label = '%s'";
-            $sql_query = sprintf($query_format, $correct_answer);
+            $stmt = $db->prepare("SELECT image_url AS image 
+                  FROM Athlete WHERE dbp_label = ?;");
+            if (!$stmt->bind_param("s", $correct_answer)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
             break;
         case 6:
             $id = $args_row['id'];
-            $query_format = "SELECT image_url AS image 
-                  FROM Athlete WHERE athlete_id = %d";
-            $sql_query = sprintf($query_format, $id);
+            $stmt = $db->prepare("SELECT image_url AS image 
+                  FROM Athlete WHERE athlete_id = ?;");
+            if (!$stmt->bind_param("i", $id)) {
+                http_response_code(500);
+                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
             break;
     }
-    $result = run_sql_select_query($sql_query);
-    $image_url = $result->fetch_assoc()['image'];
-    return $image_url;
+    execute_sql_statement($stmt);
+    $row = bind_result_array($stmt);
+    $stmt->fetch();
+    $image = $row['image'];
+    $stmt->close();
+    return $image;
 }
 
 
@@ -372,6 +389,7 @@ function get_correct_answer($q_type, $args_row){
             $row = bind_result_array($stmt);
             $stmt->fetch();
             $correct_answer = $row['city'];
+            $stmt->close();
             return $correct_answer;
         case 2:
             $athlete_id = $args_row['id'];
@@ -383,6 +401,7 @@ function get_correct_answer($q_type, $args_row){
             $row = bind_result_array($stmt);
             $stmt->fetch();
             $correct_answer = $row['num_games'];
+            $stmt->close();
             return $correct_answer;
         case 3:
             $field_id = $args_row['id'];
@@ -394,6 +413,7 @@ function get_correct_answer($q_type, $args_row){
             $row = bind_result_array($stmt);
             $stmt->fetch();
             $correct_answer = $row['dbp_label'];
+            $stmt->close();
             return $correct_answer;
         case 4:
             $athlete_id = $args_row['id'];
@@ -406,6 +426,7 @@ function get_correct_answer($q_type, $args_row){
             $row = bind_result_array($stmt);
             $stmt->fetch();
             $correct_answer = $row['cnt'];
+            $stmt->close();
             return $correct_answer;
         case 5:
             $game_id = $args_row['id'];
@@ -417,6 +438,7 @@ function get_correct_answer($q_type, $args_row){
             $row = bind_result_array($stmt);
             $stmt->fetch();
             $correct_answer = $row['dbp_label'];
+            $stmt->close();
             return $correct_answer;
         case 6:
             $athlete_id = $args_row['id'];
@@ -428,6 +450,7 @@ function get_correct_answer($q_type, $args_row){
             $row = bind_result_array($stmt);
             $stmt->fetch();
             $correct_answer = $row['competition_name'];
+            $stmt->close();
             return $correct_answer;
     }
 }
@@ -488,6 +511,7 @@ function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
         $wrong_answer_str = explode("(", $row['wrong_answer'], 2)[0];
         array_push($answer_array, $wrong_answer_str);
     }
+    $stmt->close();
     return $answer_array;
 }
 
@@ -546,12 +570,13 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
         // put the dict in the question array
         array_push($questions_array, $question_dict);
     }
+    $sql_args_stmt->close();
 }
 
 $questions_arr = array();
 
 // get 2 Q's for 5 of the q_types
-$num_q_for_type = 2;
+$num_q_for_type = 1;
 $selected_qtypes = array(1,2,3,4,5,6);
 shuffle($selected_qtypes);
 array_pop($selected_qtypes);

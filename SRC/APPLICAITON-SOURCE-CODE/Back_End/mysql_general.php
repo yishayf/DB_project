@@ -52,6 +52,7 @@ function execute_sql_insert_statement(&$stmt){
 /*
  * Utility function to automatically bind columns from selects in prepared statements to
  * an array
+ * CREDIT: https://gunjanpatidar.wordpress.com/2010/10/03/bind_result-to-array-with-mysqli-prepared-statements/
  */
 function bind_result_array($stmt)
 {

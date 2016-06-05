@@ -107,7 +107,9 @@ def get_host_city(text_from_dbp):
             text_parts.append(rspl[0])
         else:
             text_parts.append(rspl[1])
-    return ', '.join(text_parts)
+    city = ', '.join(text_parts)
+    city = city.replace('_', ' ')
+    return city
 
 
 # get olympic athletes info
@@ -356,7 +358,7 @@ def insert_to_competition_type_and_athlete_medals(medals_tuples, medal_color):
         year = match.group(2)
         season = match.group(3)
         comp_name = match.group(5)
-        field_and_comp = comp_field + "_" + comp_name if comp_name else comp_field
+        field_and_comp = comp_field + " - " + comp_name if comp_name else comp_field
 
         # insert into competition type
         run_mysql_insert_query("INSERT IGNORE INTO CompetitionType (competition_name) VALUES (%s)",
@@ -545,22 +547,22 @@ def main():
     # get all olympic years and insert to db
     query_and_insert_olympic_games()
 
-    # get and insert athletes
-    query_and_insert_athletes()
-
-    # get and insert athlete comment
-    query_and_update_athletes_comment_and_image()
-
-    # get and insert athlete games and sport field
-    query_and_insert_athlete_field_and_games()
-
-    # get and insert athlete medals and their competitions
-    query_and_insert_athlete_competitions_medals()
-
-    # add two new questions for every question type if there aren't any yet
-    add_two_questions_for_type()
-
-    logging.info("Done!")
+    # # get and insert athletes
+    # query_and_insert_athletes()
+    #
+    # # get and insert athlete comment
+    # query_and_update_athletes_comment_and_image()
+    #
+    # # get and insert athlete games and sport field
+    # query_and_insert_athlete_field_and_games()
+    #
+    # # get and insert athlete medals and their competitions
+    # query_and_insert_athlete_competitions_medals()
+    #
+    # # add two new questions for every question type if there aren't any yet
+    # add_two_questions_for_type()
+    #
+    # logging.info("Done!")
 
 # run main function
 main()

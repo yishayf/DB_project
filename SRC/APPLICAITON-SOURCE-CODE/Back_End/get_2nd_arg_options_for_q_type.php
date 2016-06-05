@@ -24,10 +24,13 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
                 FROM Athlete a, (SELECT DISTINCT medal_color FROM AthleteMedals) as colors
                 WHERE colors.medal_color = ?
                 AND concat(colors.medal_color, a.athlete_id) not in (select concat(medal_color, athlete_id) 
-                                                                                FROM Question_type4)
-                ORDER BY RAND()
-                LIMIT ?");
-            if (!$stmt->bind_param("si", $arg1, $options_limit)) {
+                                                                                FROM Question_type4)  
+                ORDER BY a.dbp_label ASC;
+                ");
+//                ORDER BY RAND()
+//                LIMIT ?");
+//            if (!$stmt->bind_param("si", $arg1, $options_limit)) {
+            if (!$stmt->bind_param("s", $arg1)) {
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
             }
@@ -55,6 +58,7 @@ function get_2nd_arg_options_by_q_type($q_type, $arg1){
     while ($sql_stmt->fetch()) {
         array_push($res_array, $row['opt']);
     }
+    $sql_stmt->close();
     return $res_array;
 }
 

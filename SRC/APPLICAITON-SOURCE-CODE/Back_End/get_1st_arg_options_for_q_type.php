@@ -22,12 +22,13 @@ function get_sql_query_for_args_by_q_type($q_type){
             $stmt = $db->prepare("SELECT a.dbp_label AS opt
             FROM Athlete a
             WHERE a.athlete_id NOT IN (SELECT athlete_id FROM Question_type2)
-            ORDER BY RAND()
-            LIMIT ?;");
-            if (!$stmt->bind_param("i", $options_limit)) {
-                http_response_code(500);
-                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
-            }
+            ");
+//            ORDER BY RAND()
+//            LIMIT ?;");
+//            if (!$stmt->bind_param("i", $options_limit)) {
+//                http_response_code(500);
+//                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+//            }
             break;
         case 3;
             $stmt = $db->prepare("SELECT field_name AS opt
@@ -49,12 +50,14 @@ function get_sql_query_for_args_by_q_type($q_type){
             FROM Athlete a, AthleteMedals am
             WHERE a.athlete_id = am.athlete_id
             AND a.athlete_id NOT IN (SELECT athlete_id FROM Question_type6)
-            ORDER BY RAND()
-            LIMIT ?;");
-            if (!$stmt->bind_param("i", $options_limit)) {
-                http_response_code(500);
-                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
-            }
+            ORDER BY a.dbp_label ASC;
+            ");
+//            ORDER BY RAND()
+//            LIMIT ?;");
+//            if (!$stmt->bind_param("i", $options_limit)) {
+//                http_response_code(500);
+//                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+//            }
             break;
     }
     return $stmt;
@@ -69,6 +72,7 @@ function get_1st_arg_options_by_q_type($q_type){
     while ($sql_stmt->fetch()) {
         array_push($res_array, $row['opt']);
     }
+    $sql_stmt->close();
     return $res_array;
 }
 
