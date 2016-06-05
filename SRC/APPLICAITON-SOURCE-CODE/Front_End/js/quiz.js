@@ -50,6 +50,14 @@ app.directive('quiz', function(quizFactory, $http) {
                         scope.info =  q.more_info; //TODO ((q.more_info == "") ? null :
                     } else {
                         scope.quizOver = true;
+                        // update game statistics
+                        console.log(scope.history);
+                        $http.post(post_statistics, {'stats': scope.history}, {
+                            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                            transformRequest: transform}).then(function(r) {
+                            console.log("Statistics sent succesfully");
+                            console.log(r.data);
+                        });
                     }
                 });
             };
@@ -94,13 +102,13 @@ app.directive('quiz', function(quizFactory, $http) {
             }
 
             scope.done = function() {
-                console.log(scope.history);
-                $http.post(post_statistics, {'stats': scope.history}, {
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-                    transformRequest: transform}).then(function(r) {
-                    console.log("Statistics sent succesfully");
-                    console.log(r.data);
-                });
+                // console.log(scope.history);
+                // $http.post(post_statistics, {'stats': scope.history}, {
+                //     headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                //     transformRequest: transform}).then(function(r) {
+                //     console.log("Statistics sent succesfully");
+                //     console.log(r.data);
+                // });
             }
 
             var transform = function(data){
