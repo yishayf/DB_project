@@ -47,10 +47,12 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
 
 
 function get_2nd_arg_options_by_q_type($q_type, $arg1){
-    $stmt = get_sql_query_for_args_by_q_type($q_type, $arg1);
-    $result = execute_sql_statement($stmt);
+    $sql_stmt = get_sql_query_for_args_by_q_type($q_type, $arg1);
+    execute_sql_statement($sql_stmt);
+    $row = bind_result_array($sql_stmt);
+
     $res_array = array();
-    while ($row = $result->fetch_assoc()) {
+    while ($sql_stmt->fetch()) {
         array_push($res_array, $row['opt']);
     }
     return $res_array;

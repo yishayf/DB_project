@@ -33,6 +33,7 @@ function execute_sql_update_statement(&$stmt){
         die('There was an error running the query [' . $db->error . ']');
     }
     $stmt->store_result();
+    return TRUE;
 }
 
 function execute_sql_insert_statement(&$stmt){
@@ -43,6 +44,7 @@ function execute_sql_insert_statement(&$stmt){
         die('There was an error running the query [' . $db->error . ']');
     }
     $stmt->store_result();
+    return TRUE;
 }
 
 

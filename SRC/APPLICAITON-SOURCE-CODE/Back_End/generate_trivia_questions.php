@@ -80,8 +80,10 @@ function get_info_for_q_type($q_type, $args_row, $correct_answer){
             }
             break;
     }
-    $result = execute_sql_statement($stmt);
-    $info = $result->fetch_assoc()['more_info'];
+    execute_sql_statement($stmt);
+    $row = bind_result_array($stmt);
+    $stmt->fetch();
+    $info = $row['more_info'];
     return $info;
 }
 
@@ -348,8 +350,10 @@ function get_correct_answer($q_type, $args_row){
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
             }
-            $result = execute_sql_statement($stmt);
-            $correct_answer = $result->fetch_assoc()['dbp_label'];
+            execute_sql_statement($stmt);
+            $row = bind_result_array($stmt);
+            $stmt->fetch();
+            $correct_answer = $row['dbp_label'];
             return $correct_answer;
         case 4:
             $athlete_id = $args_row['id'];
@@ -358,8 +362,10 @@ function get_correct_answer($q_type, $args_row){
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
             }
-            $result = execute_sql_statement($stmt);
-            $correct_answer = $result->fetch_assoc()['cnt'];
+            execute_sql_statement($stmt);
+            $row = bind_result_array($stmt);
+            $stmt->fetch();
+            $correct_answer = $row['cnt'];
             return $correct_answer;
         case 5:
             $game_id = $args_row['id'];
@@ -367,8 +373,10 @@ function get_correct_answer($q_type, $args_row){
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
             }
-            $result = execute_sql_statement($stmt);
-            $correct_answer = $result->fetch_assoc()['dbp_label'];
+            execute_sql_statement($stmt);
+            $row = bind_result_array($stmt);
+            $stmt->fetch();
+            $correct_answer = $row['dbp_label'];
             return $correct_answer;
         case 6:
             $athlete_id = $args_row['id'];
@@ -376,8 +384,10 @@ function get_correct_answer($q_type, $args_row){
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
             }
-            $result = execute_sql_statement($stmt);
-            $correct_answer = $result->fetch_assoc()['competition_name'];
+            execute_sql_statement($stmt);
+            $row = bind_result_array($stmt);
+            $stmt->fetch();
+            $correct_answer = $row['competition_name'];
             return $correct_answer;
     }
 }
@@ -431,8 +441,10 @@ function get_wrong_answers_arr($q_type, $args_row, $correct_answer){
             }
             break;
     }
-    $result = execute_sql_statement($stmt);
-    while ($row = $result->fetch_assoc()) {
+
+    execute_sql_statement($stmt);
+    $row = bind_result_array($stmt);
+    while ($stmt->fetch()) {
         $wrong_answer_str = explode("(", $row['wrong_answer'], 2)[0];
         array_push($answer_array, $wrong_answer_str);
     }
@@ -455,7 +467,6 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
     $args_row = bind_result_array($sql_args_stmt);
     while ($sql_args_stmt->fetch()){
         $question_dict = array();
-        print_r($args_row);
         // build the question
         $question = build_question_from_args_and_update_args($q_type, $args_row, $arg1, $arg2, $id);
 

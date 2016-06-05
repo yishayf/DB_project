@@ -86,20 +86,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             $arg1 = $_POST["arg1"];
             $arg2 = $_POST["arg2"];
             echo $arg1;
-            $result = add_question_by_type($q_type, $arg1, $arg2);
+            add_question_by_type($q_type, $arg1, $arg2);
         }
         else {
             http_response_code(400);
             die("Error: invalid arguments");
-        }
-
-        if ($result){
-            http_response_code(200);
-        }
-        else{
-            // problem running query
-            http_response_code(500);
-            die("Error: error running query");
         }
     }
     else {
