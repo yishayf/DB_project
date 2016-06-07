@@ -73,7 +73,9 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
         case 1:
             $stmt = prepare_stmt("SELECT season AS opt
                 FROM  OlympicGame og
-                WHERE og.year = ? AND og.game_id NOT IN (SELECT game_id FROM Question_type1);");
+                WHERE og.year = ? AND 
+                og.city != '' AND 
+                og.game_id NOT IN (SELECT game_id FROM Question_type1);");
             if (!$stmt->bind_param("i", $arg1)) {
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
