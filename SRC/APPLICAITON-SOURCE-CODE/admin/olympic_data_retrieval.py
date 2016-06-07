@@ -19,24 +19,14 @@ TEST_MODE = False
 
 
 # sparql connection setup
-try:
-    sparql = SPARQLWrapper("http://dbpedia.org/sparql")  # live.dbpedia is also an option...
-except:
-    logging.warning("sparql connection failed")
-    traceback.print_exc(file=sys.stdout)
-    sys.exit(1)
-
+sparql = SPARQLWrapper("http://dbpedia.org/sparql")  # live.dbpedia is also an option...
 sparql.setTimeout(300)
 
 # MySQL connection setup
 filterwarnings('ignore', category=mdb.Warning) # suppress warnings from MySQL
-try:
-    con = mdb.connect('localhost', 'root', '', 'db_project_test') # local
-    # con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
-except:
-    logging.warning("mysql connection failed")
-    traceback.print_exc(file=sys.stdout)
-    sys.exit(1)
+con = mdb.connect('localhost', 'root', '', 'db_project_test') # local
+# con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
+
 
 ################################################################################################################
 
@@ -372,59 +362,6 @@ def insert_to_competition_type_and_athlete_medals(medals_tuples, medal_color):
                                (medal_color, athlete_id, year, season, field_and_comp))
 
 
-# def remove_foreign_keys():
-#     logging.info("Removing Foreign keys before table trancation")
-#     drop_queries = [
-#         "ALTER TABLE AthleteGames DROP FOREIGN KEY ahtleteidconst;",
-#         "ALTER TABLE AthleteGames DROP FOREIGN KEY gameidconst;",
-#         "ALTER TABLE AthleteGames DROP FOREIGN KEY fieldidconst1;",
-#         "ALTER TABLE AthleteOlympicSportFields DROP FOREIGN KEY athleteidconst;",
-#         "ALTER TABLE AthleteOlympicSportFields DROP FOREIGN KEY fieldidconst;"
-#         "ALTER TABLE AthleteMedals DROP FOREIGN KEY athleteidconst2;",
-#         "ALTER TABLE AthleteMedals DROP FOREIGN KEY compidconst;",
-#         "ALTER TABLE AthleteMedals DROP FOREIGN KEY gameidconst1;"
-#     ]
-#     run_mysql_queries_lst(drop_queries)
-#
-#
-# def add_foreign_keys():
-#     logging.info("Adding foreign keys")
-#     # add foreign keys for the needed tables
-#     foreign_keys_add_queries = [
-#         "ALTER TABLE `AthleteGames` ADD CONSTRAINT `ahtleteidconst` FOREIGN KEY(`athlete_id`) "
-#         "REFERENCES `db_project_test`. `Athlete`(`athlete_id`) ON DELETE CASCADE ON UPDATE CASCADE; ",
-#         "ALTER TABLE `AthleteGames` ADD CONSTRAINT `gameidconst` FOREIGN KEY(`game_id`) "
-#         "REFERENCES `db_project_test`. `OlympicGame`(`game_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
-#         "ALTER TABLE `AthleteGames` ADD CONSTRAINT `fieldidconst1` FOREIGN KEY (`field_id`) "
-#         "REFERENCES `db_project_test`.`OlympicSportField`(`field_id`) ON DELETE RESTRICT ON UPDATE RESTRICT;",
-#         "ALTER TABLE `AthleteOlympicSportFields` ADD CONSTRAINT `athleteidconst` FOREIGN KEY (`athlete_id`) "
-#         "REFERENCES `db_project_test`.`Athlete`(`athlete_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
-#         "ALTER TABLE `AthleteOlympicSportFields` ADD CONSTRAINT `fieldidconst` FOREIGN KEY(`field_id`) "
-#         "REFERENCES `db_project_test`. `OlympicSportField`(`field_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
-#         "ALTER TABLE `AthleteMedals` ADD CONSTRAINT `athleteidconst2` FOREIGN KEY (`athlete_id`) "
-#         "REFERENCES `db_project_test`.`Athlete`(`athlete_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
-#         "ALTER TABLE `AthleteMedals` ADD CONSTRAINT `gameidconst1` FOREIGN KEY (`game_id`) "
-#         "REFERENCES `db_project_test`.`OlympicGame`(`game_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
-#         "ALTER TABLE `AthleteMedals` ADD CONSTRAINT `compidconst` FOREIGN KEY (`competition_id`) "
-#         "REFERENCES `db_project_test`.`CompetitionType`(`competition_id`) ON DELETE CASCADE ON UPDATE CASCADE;"
-#     ]
-#     run_mysql_queries_lst(foreign_keys_add_queries)
-#
-#
-# def truncate_all_dbpedia_data_tables():
-#     logging.info("Truncation all tables containing data from DBPedia")
-#     queries_lst = [
-#         "TRUNCATE TABLE OlympicGame",
-#         "TRUNCATE TABLE Athlete;",
-#         "TRUNCATE TABLE OlympicSportField",
-#         "TRUNCATE TABLE AthleteOlympicSportFields",
-#         "TRUNCATE TABLE AthleteGames",
-#         "TRUNCATE TABLE CompetitionType",
-#         "TRUNCATE TABLE AthleteMedals"
-#     ]
-#     run_mysql_queries_lst(queries_lst)
-
-
 def run_mysql_queries_lst(mysql_query_lst):
     for query in mysql_query_lst:
         run_mysql_insert_query(query)
@@ -535,14 +472,6 @@ def add_questions_for_qtype(q_type, num_needed):
 
 def main():
     logging.info("Started database update from DBPedia")
-    # # remove foreign keys from tables
-    # remove_foreign_keys()
-    #
-    # # truncate tables
-    # truncate_all_dbpedia_data_tables()
-    #
-    # # restore foreign keys
-    # add_foreign_keys()
 
     # get all olympic years and insert to db
     query_and_insert_olympic_games()

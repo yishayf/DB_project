@@ -19,24 +19,14 @@ TEST_MODE = False
 
 
 # sparql connection setup
-try:
-    sparql = SPARQLWrapper("http://dbpedia.org/sparql")  # live.dbpedia is also an option...
-except:
-    logging.warning("sparql connection failed")
-    traceback.print_exc(file=sys.stdout)
-    sys.exit(1)
-
+sparql = SPARQLWrapper("http://dbpedia.org/sparql")  # live.dbpedia is also an option...
 sparql.setTimeout(300)
 
 # MySQL connection setup
 filterwarnings('ignore', category=mdb.Warning) # suppress warnings from MySQL
-try:
-    con = mdb.connect('localhost', 'root', '', 'db_project_test') # local
-    # con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
-except:
-    logging.warning("mysql connection failed")
-    traceback.print_exc(file=sys.stdout)
-    sys.exit(1)
+con = mdb.connect('localhost', 'root', '', 'db_project_test') # local
+# con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
+
 
 ################################################################################################################
 
