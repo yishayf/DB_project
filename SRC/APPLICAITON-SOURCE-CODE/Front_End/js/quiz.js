@@ -4,7 +4,7 @@ server_sharon = "http://10.100.102.3/OlympiData/Back_End";
 current_server = server_local;
 var app = angular.module('quizApp', []);
 questions_http = current_server + "/generate_trivia_questions.php";
-post_statistics = current_server + "update_questions_stats.php";
+post_statistics = current_server + "/update_questions_stats.php";
 //var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
 
 app.directive('quiz', function(quizFactory, $http) {

@@ -29,7 +29,7 @@ except:
 sparql.setTimeout(300)
 
 # MySQL connection setup
-filterwarnings('ignore', category=mdb.Warning) # supress warnings from MySQL
+filterwarnings('ignore', category=mdb.Warning) # suppress warnings from MySQL
 try:
     con = mdb.connect('localhost', 'root', '', 'db_project_test') # local
     # con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
@@ -547,22 +547,22 @@ def main():
     # get all olympic years and insert to db
     query_and_insert_olympic_games()
 
-    # # get and insert athletes
-    # query_and_insert_athletes()
-    #
-    # # get and insert athlete comment
-    # query_and_update_athletes_comment_and_image()
-    #
-    # # get and insert athlete games and sport field
-    # query_and_insert_athlete_field_and_games()
-    #
-    # # get and insert athlete medals and their competitions
-    # query_and_insert_athlete_competitions_medals()
-    #
-    # # add two new questions for every question type if there aren't any yet
-    # add_two_questions_for_type()
-    #
-    # logging.info("Done!")
+    # get and insert athletes
+    query_and_insert_athletes()
+
+    # get and insert athlete comment
+    query_and_update_athletes_comment_and_image()
+
+    # get and insert athlete games and sport field
+    query_and_insert_athlete_field_and_games()
+
+    # get and insert athlete medals and their competitions
+    query_and_insert_athlete_competitions_medals()
+
+    # add two new questions for every question type if there aren't any yet
+    add_two_questions_for_type()
+
+    logging.info("Done!")
 
 # run main function
 main()

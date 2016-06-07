@@ -7,7 +7,7 @@ if (isset($_POST['button'])){
 
     $output = array();
     $status;
-    exec('python ../admin/olympic_data_retrieval.py', $output, $status);
+    exec('python ../admin/olympic_data_retrieval.py 2>&1', $output, $status);
     if (!$status){
         echo "Update was successful </br>";
     }
