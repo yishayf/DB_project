@@ -1,6 +1,3 @@
-<!--<div class="buttons-div" ng-show="!inProgress">-->
-    <!--<button class="button" ng-click="start()">Ready, Set, Go!</button>-->
-<!--</div>-->
 <div class="container" ng-disabled="infoPopupRunning">
 
 <div id="loading" ng-show="!inProgress">
@@ -10,11 +7,14 @@
 
 
 <div class="quiz-area" ng-show="inProgress" >
-    <div id="score">
-        Score: {{score}}
-    </div>
 
     <div ng-show="!quizOver">
+        <div id="question_num">
+            Question: {{id+1}} / {{numQuestions}}
+        </div>
+        <div id="score">
+            Score: {{score}}
+        </div>
         <h2 id="question">{{question}}</h2>
         <ul id="options">
             <li ng-repeat="option in options">

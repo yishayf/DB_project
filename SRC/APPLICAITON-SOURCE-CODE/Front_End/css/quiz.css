@@ -36,6 +36,11 @@ li {
     padding-right: 8%;
 }
 
+#question_num {
+    text-align: end;
+    padding-right: 8%;
+}
+
 #progressBarImage {
     align-self: center;
 }

@@ -16,15 +16,18 @@ app.directive('quiz', function(quizFactory, $http) {
 
 
             scope.start = function() {
+                scope.numQuestions = 0;
                 scope.showErrorMessage = false;
                 scope.errorMessage = null;
                 scope.history = [];
                 scope.id = 0;
                 scope.checkGetQuestions();
+                scope.checkNumQuestions();
                 scope.getQuestion().then(function() {
                     scope.quizOver = false;
                     scope.inProgress = true;
-                });
+                }
+                );
             };
 
             scope.reset = function() {
@@ -33,6 +36,14 @@ app.directive('quiz', function(quizFactory, $http) {
                 scope.start();
 
 
+            }
+
+            scope.checkNumQuestions = function(){
+                quizFactory.updateNumQuestions(scope);
+            }
+
+            scope.setNumberOfQuestions = function(numQ){
+                scope.numQuestions = numQ;
             }
 
             scope.checkGetQuestions = function(){
@@ -174,6 +185,17 @@ app.factory('quizFactory', function($http) {
                     console.log(data.data);
                     scope.setError(data.data);
                     scope.doShowErrorMessage();
+                }
+            )
+        },
+        updateNumQuestions: function(scope){
+            fQuestions.then(
+                function (questions) {
+                    questions = questions.data;
+                    scope.setNumberOfQuestions(questions.length);
+                },
+                function (data) {
+                    scope.setNumberOfQuestions(0);
                 }
             )
         }
