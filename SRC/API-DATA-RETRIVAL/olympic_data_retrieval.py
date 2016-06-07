@@ -24,8 +24,8 @@ sparql.setTimeout(300)
 
 # MySQL connection setup
 filterwarnings('ignore', category=mdb.Warning) # suppress warnings from MySQL
-con = mdb.connect('localhost', 'root', '', 'db_project_test') # local
-# con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
+# con = mdb.connect('localhost', 'root', '', 'db_project_test') # local
+con = mdb.connect('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08') # for nova
 
 
 ################################################################################################################

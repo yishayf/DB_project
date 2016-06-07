@@ -1,7 +1,6 @@
 server_nova = "../Back_End";
 server_local = "http://localhost/OlympiData/Back_End";
-server_sharon = "http://10.100.102.3/OlympiData/Back_End";
-current_server = server_local;
+current_server = server_nova;
 formats_http = current_server + "/get_question_types.php";
 firstArg_http = current_server + "/get_1st_arg_options_for_q_type.php/?q_type=";
 secondArg_http = current_server + "/get_2nd_arg_options_for_q_type.php/?q_type=";

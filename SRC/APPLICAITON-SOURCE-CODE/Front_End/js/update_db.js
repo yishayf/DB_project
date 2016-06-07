@@ -1,7 +1,6 @@
 server_nova = "../Back_End"
 server_local = "http://localhost/OlympiData/Back_End"
-server_sharon = "http://10.100.102.3/OlympiData/Back_End"
-current_server = server_local
+current_server = server_nova
 post_update = current_server + "/run_db_update_script.php"
 
 var app = angular.module('updateDb', []);

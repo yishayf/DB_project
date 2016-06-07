@@ -1,7 +1,6 @@
 server_nova = "../Back_End";
 server_local = "http://localhost/OlympiData/Back_End";
-server_sharon = "http://10.100.102.3/OlympiData/Back_End";
-current_server = server_local;
+current_server = server_nova;
 var app = angular.module('quizApp', []);
 questions_http = current_server + "/generate_trivia_questions.php";
 post_statistics = current_server + "/update_questions_stats.php";
