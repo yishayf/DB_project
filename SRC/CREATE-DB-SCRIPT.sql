@@ -81,9 +81,9 @@ CREATE TABLE `AthleteMedals` (
 -- Questions tables
 
 CREATE TABLE `Question_type1` (
- `num_wrong` int(11) NOT NULL DEFAULT '0',
- `num_correct` int(11) NOT NULL DEFAULT '0',
  `game_id` int(11) NOT NULL,
+ `num_correct` int(11) NOT NULL DEFAULT '0',
+ `num_wrong` int(11) NOT NULL DEFAULT '0',
  PRIMARY KEY (`game_id`),
  KEY `game_id` (`game_id`),
  CONSTRAINT `gameid_q1_const` FOREIGN KEY (`game_id`) REFERENCES `OlympicGame` (`game_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -91,18 +91,18 @@ CREATE TABLE `Question_type1` (
 
 
 CREATE TABLE `Question_type2` (
- `num_wrong` int(11) NOT NULL DEFAULT '0',
- `num_correct` int(11) NOT NULL DEFAULT '0',
  `athlete_id` int(11) NOT NULL,
+ `num_correct` int(11) NOT NULL DEFAULT '0',
+ `num_wrong` int(11) NOT NULL DEFAULT '0',
  PRIMARY KEY (`athlete_id`),
  CONSTRAINT `athleteid_q2_const` FOREIGN KEY (`athlete_id`) REFERENCES `Athlete` (`athlete_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='question in the form: How many Olympic games did [OLYMPIC ATHLETE] participate in?';
 
 
 CREATE TABLE `Question_type3` (
- `num_wrong` int(11) NOT NULL DEFAULT '0',
- `num_correct` int(11) NOT NULL DEFAULT '0',
  `field_id` int(11) NOT NULL,
+ `num_correct` int(11) NOT NULL DEFAULT '0',
+ `num_wrong` int(11) NOT NULL DEFAULT '0',
  PRIMARY KEY (`field_id`),
  CONSTRAINT `fieldid_q3_const` FOREIGN KEY (`field_id`) REFERENCES `OlympicSportField` (`field_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='question in the form: Which of the following was part of the [OLYMPIC SPORT FIELD] competitors at the Olympic games?';
@@ -111,26 +111,26 @@ CREATE TABLE `Question_type3` (
 CREATE TABLE `Question_type4` (
  `athlete_id` int(11) NOT NULL,
  `medal_color` varchar(6) NOT NULL,
- `num_wrong` int(11) NOT NULL DEFAULT '0',
  `num_correct` int(11) NOT NULL DEFAULT '0',
+ `num_wrong` int(11) NOT NULL DEFAULT '0',
  PRIMARY KEY (`athlete_id`,`medal_color`),
  CONSTRAINT `athleteid_q4_const` FOREIGN KEY (`athlete_id`) REFERENCES `Athlete` (`athlete_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='question in the form: How many [MEDAL COLOR] medals did [OLYMPIC ATHLETE] win at the olympic games?';
 
 
 CREATE TABLE `Question_type5` (
- `num_wrong` int(11) NOT NULL DEFAULT '0',
- `num_correct` int(11) NOT NULL DEFAULT '0',
  `game_id` int(11) NOT NULL,
+ `num_correct` int(11) NOT NULL DEFAULT '0',
+ `num_wrong` int(11) NOT NULL DEFAULT '0',
  PRIMARY KEY (`game_id`),
  CONSTRAINT `gameid_q5_const` FOREIGN KEY (`game_id`) REFERENCES `OlympicGame` (`game_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='question in the form: Who won most medals at the [YEAR] [SEASON] olympic games?';
 
 
 CREATE TABLE `Question_type6` (
- `num_wrong` int(11) NOT NULL DEFAULT '0',
- `num_correct` int(11) NOT NULL DEFAULT '0',
  `athlete_id` int(11) NOT NULL,
+ `num_correct` int(11) NOT NULL DEFAULT '0',
+ `num_wrong` int(11) NOT NULL DEFAULT '0',
  PRIMARY KEY (`athlete_id`),
  KEY `athlete_id` (`athlete_id`),
  CONSTRAINT `gameid_q6_const` FOREIGN KEY (`athlete_id`) REFERENCES `Athlete` (`athlete_id`)
