@@ -5,8 +5,8 @@ header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
 // open db connection
-//$db = new mysqli("localhost", 'root', '', 'db_project_test');
-$db = new mysqli('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08');  # for nova
+$db = new mysqli("localhost", 'root', '', 'db_project_test');
+//$db = new mysqli('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08');  # for nova
 //$db = new mysqli('localhost', 'DbMysql08', 'DbMysql08', 'DbMysql08', 3305);  # for nova local
 
 // Check connection
@@ -381,8 +381,8 @@ function get_wrong_answer_sql_query_format($q_type){
                 LIMIT 3";
         case 2:
             return "select DISTINCT count(athlete_id) AS wrong_answer
-                FROM (SELECT DISTINCT game_id, athlete_id
-                    FROM AthleteGames) as bla
+                FROM (SELECT game_id, athlete_id
+                    FROM AthleteGames) as temp
                 group by athlete_id
                 HAVING count(athlete_id) != ?
                 LIMIT 3";

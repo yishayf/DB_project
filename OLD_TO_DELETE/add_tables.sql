@@ -49,11 +49,9 @@ CREATE TABLE `AthleteOlympicSportFields` (
 CREATE TABLE `AthleteGames` (
  `game_id` int(11) NOT NULL,
  `athlete_id` int(11) NOT NULL,
- `field_id` int(11) NOT NULL,
- PRIMARY KEY (`game_id`,`athlete_id`,`field_id`),
+ PRIMARY KEY (`game_id`,`athlete_id`),
  KEY `game_id` (`game_id`),
  KEY `athlete_id` (`athlete_id`),
- KEY `field_id` (`field_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `AthleteMedals` (

@@ -52,13 +52,10 @@ CREATE TABLE `AthleteOlympicSportFields` (
 CREATE TABLE `AthleteGames` (
  `game_id` int(11) NOT NULL,
  `athlete_id` int(11) NOT NULL,
- `field_id` int(11) NOT NULL,
- PRIMARY KEY (`game_id`,`athlete_id`,`field_id`),
+ PRIMARY KEY (`game_id`,`athlete_id`),
  KEY `game_id` (`game_id`),
  KEY `athlete_id` (`athlete_id`),
- KEY `field_id` (`field_id`),
  CONSTRAINT `ahtleteidconst1` FOREIGN KEY (`athlete_id`) REFERENCES `Athlete` (`athlete_id`) ON DELETE CASCADE ON UPDATE CASCADE,
- CONSTRAINT `fieldidconst1` FOREIGN KEY (`field_id`) REFERENCES `OlympicSportField` (`field_id`),
  CONSTRAINT `gameidconst` FOREIGN KEY (`game_id`) REFERENCES `OlympicGame` (`game_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

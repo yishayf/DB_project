@@ -283,11 +283,11 @@ def insert_athletes_games_and_field(athlete_game_tuple):
                                (athlete_id, field))
 
         # insert into game and field columns - this will fail if athlete is not found
-        run_mysql_insert_query("INSERT IGNORE INTO AthleteGames (athlete_id, game_id, field_id) "
-                        "SELECT a.athlete_id, g.game_id, f.field_id "
-                        "FROM Athlete a, OlympicGame g, OlympicSportField f "
-                        "WHERE a.athlete_id = %s AND g.year = %s AND g.season = %s AND f.field_name = %s",
-                               (athlete_id, year, season, field))
+        run_mysql_insert_query("INSERT IGNORE INTO AthleteGames (athlete_id, game_id) "
+                        "SELECT a.athlete_id, g.game_id "
+                        "FROM Athlete a, OlympicGame g "
+                        "WHERE a.athlete_id = %s AND g.year = %s AND g.season = %s",
+                               (athlete_id, year, season))
 
 
 # get athlete competitions and medals info
