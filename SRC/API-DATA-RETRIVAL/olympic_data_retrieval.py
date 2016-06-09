@@ -405,8 +405,8 @@ def run_sparql_query(query):
             results = results["results"]["bindings"]
             return results
         except:
-            logging.warning("sparql query failed, retrying")
             traceback.print_exc(file=sys.stdout)
+            logging.warning("sparql query failed, retrying")
             continue
     # if we got here there are no more reties
     logging.error("sparql query failed, no more retries!\n"
