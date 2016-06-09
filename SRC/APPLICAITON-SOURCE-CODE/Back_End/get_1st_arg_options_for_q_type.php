@@ -6,8 +6,6 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 require_once 'mysql_general.php';
 /////////////////////////////////////////////////////////////////////////////////////
 
-$options_limit = 100;
-
 function get_sql_query_for_args_by_q_type($q_type){
     global $options_limit;
     switch ($q_type){
@@ -24,12 +22,6 @@ function get_sql_query_for_args_by_q_type($q_type){
             FROM Athlete a
             WHERE a.athlete_id NOT IN (SELECT athlete_id FROM Question_type2)
             ");
-//            ORDER BY RAND()
-//            LIMIT ?;");
-//            if (!$stmt->bind_param("i", $options_limit)) {
-//                http_response_code(500);
-//                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
-//            }
             break;
         case 3;
             $stmt = prepare_stmt("SELECT field_name AS opt
@@ -53,17 +45,12 @@ function get_sql_query_for_args_by_q_type($q_type){
             AND a.athlete_id NOT IN (SELECT athlete_id FROM Question_type6)
             ORDER BY a.dbp_label ASC;
             ");
-//            ORDER BY RAND()
-//            LIMIT ?;");
-//            if (!$stmt->bind_param("i", $options_limit)) {
-//                http_response_code(500);
-//                die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
-//            }
             break;
     }
     return $stmt;
 }
 
+// get the first argument options for the specified question type
 function get_1st_arg_options_by_q_type($q_type){
     $sql_stmt = get_sql_query_for_args_by_q_type($q_type);
     execute_sql_statement($sql_stmt);
@@ -77,6 +64,7 @@ function get_1st_arg_options_by_q_type($q_type){
     return $res_array;
 }
 
+// parse http get params
 if ($_SERVER["REQUEST_METHOD"] == "GET"){
     if (!empty($_GET["q_type"])) {
         $q_type = $_GET["q_type"];

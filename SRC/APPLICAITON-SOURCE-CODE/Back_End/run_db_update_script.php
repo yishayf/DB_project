@@ -7,6 +7,7 @@ if (isset($_POST['button'])){
 
     $output = array();
     $status;
+    // execute the script
     exec('python ../admin/olympic_data_retrieval.py 2>&1', $output, $status);
     if (!$status){
         echo "Update was successful </br>";
@@ -14,6 +15,7 @@ if (isset($_POST['button'])){
     else{
         echo "Error while running update script </br>";
     }
+    // echo the output of the script
     foreach ($output as &$row){
         echo $row.'</br>';
     }

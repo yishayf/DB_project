@@ -63,14 +63,14 @@ function get_insert_query_by_q_type($q_type, $arg1, $arg2){
     return $stmt;
 }
 
-
+// add the question according to the parameters that the user chose
 function add_question_by_type($q_type, $arg1, $arg2=null){
     $stmt = get_insert_query_by_q_type($q_type, $arg1, $arg2);
     execute_sql_insert_or_update_statement($stmt);
     $stmt->close();
 }
 
-
+// parse http POST params
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
     if (!empty($_POST["q_type"]) && !empty($_POST["num_args"])) {

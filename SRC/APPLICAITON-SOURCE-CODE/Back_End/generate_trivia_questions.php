@@ -570,9 +570,9 @@ function add_type_x_questions_with_answers(&$questions_array, $q_type, $num_ques
     $sql_args_stmt->close();
 }
 
-$questions_arr = array();
 
 // get 2 Q's for 5 of the q_types
+$questions_arr = array();
 $num_q_for_type = 2;
 $selected_qtypes = array(1,2,3,4,5,6);
 shuffle($selected_qtypes);

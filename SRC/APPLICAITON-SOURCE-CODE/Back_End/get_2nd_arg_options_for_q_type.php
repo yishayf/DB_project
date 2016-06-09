@@ -7,10 +7,8 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 require_once 'mysql_general.php';
 /////////////////////////////////////////////////////////////////////////////////////
 
-$options_limit = 1000;
 
 function get_sql_query_for_args_by_q_type($q_type, $arg1){
-    global $options_limit;
     switch ($q_type){
         case 1:
             $stmt = prepare_stmt("SELECT season AS opt
@@ -31,9 +29,6 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
                                                                                 FROM Question_type4)  
                 ORDER BY a.dbp_label ASC;
                 ");
-//                ORDER BY RAND()
-//                LIMIT ?");
-//            if (!$stmt->bind_param("si", $arg1, $options_limit)) {
             if (!$stmt->bind_param("s", $arg1)) {
                 http_response_code(500);
                 die("Error: Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
@@ -52,7 +47,7 @@ function get_sql_query_for_args_by_q_type($q_type, $arg1){
     return $stmt;
 }
 
-
+// get the first argument options for the specified question type
 function get_2nd_arg_options_by_q_type($q_type, $arg1){
     $sql_stmt = get_sql_query_for_args_by_q_type($q_type, $arg1);
     execute_sql_statement($sql_stmt);
@@ -66,6 +61,7 @@ function get_2nd_arg_options_by_q_type($q_type, $arg1){
     return $res_array;
 }
 
+// parse http get params
 if ($_SERVER["REQUEST_METHOD"] == "GET"){
     if (!empty($_GET["q_type"]) && !empty($_GET['arg1'])) {
         $q_type = $_GET["q_type"];

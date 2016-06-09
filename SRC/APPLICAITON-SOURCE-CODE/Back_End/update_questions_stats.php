@@ -63,6 +63,8 @@ function get_update_stats_sql_query($q_type, $is_correct, $arg1, $arg2, $id){
     return $stmt;
 }
 
+
+// update user statistics about correct/wrong answers
 function update_stats($stats){
     foreach ($stats as &$q_info) {
         $q_type = $q_info["q_type"];
@@ -76,10 +78,11 @@ function update_stats($stats){
     }
 }
 
+// parse http POST params
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
     if (!empty($_POST["stats"])) {
-        $stats = $_POST["stats"];//json_decode($_POST["stats"], true); //
+        $stats = $_POST["stats"];
         update_stats ($stats);
     }
 }

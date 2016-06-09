@@ -1,8 +1,7 @@
 <?php
 // open db connection
-//$db = new mysqli("localhost", 'root', '', 'db_project_test');
+//$db = new mysqli("localhost", 'root', '', 'db_project_test'); # local
 $db = new mysqli('mysqlsrv.cs.tau.ac.il', 'DbMysql08', 'DbMysql08', 'DbMysql08');  # for nova
-//$db = new mysqli('localhost', 'DbMysql08', 'DbMysql08', 'DbMysql08', 3305);  # for nova local
 
 // Check connection
 if ($db->connect_error) {
@@ -11,6 +10,7 @@ if ($db->connect_error) {
 }
 $db->set_charset('utf8');
 
+// execute an sql select statement
 function execute_sql_statement(&$stmt){
     global $db;
     if(!$stmt->execute()){
@@ -22,6 +22,7 @@ function execute_sql_statement(&$stmt){
     $stmt->store_result();
 }
 
+// execute an sql insert/update statement
 function execute_sql_insert_or_update_statement(&$stmt){
     global $db;
     if(!$stmt->execute()){
@@ -34,7 +35,7 @@ function execute_sql_insert_or_update_statement(&$stmt){
     return TRUE;
 }
 
-
+// prepare a statement
 function prepare_stmt($stmt_text){
     global $db;
     if (!$stmt = $db->prepare($stmt_text)){
