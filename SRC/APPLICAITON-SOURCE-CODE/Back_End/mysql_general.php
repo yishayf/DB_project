@@ -57,6 +57,4 @@ function bind_result_array($stmt){
     call_user_func_array(array($stmt, 'bind_result'), $params);
     return $result;
 }
-
 ?>
-

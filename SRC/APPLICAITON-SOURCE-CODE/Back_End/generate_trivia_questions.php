@@ -647,7 +647,3 @@ echo json_encode($questions_arr);
 $db->close();
 
 ?>
-
-
-
-
