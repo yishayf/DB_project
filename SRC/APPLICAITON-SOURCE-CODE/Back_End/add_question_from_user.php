@@ -84,7 +84,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
         else if ($num_args == 2 && !empty($_POST["arg1"]) && !empty($_POST["arg2"])){
             $arg1 = $_POST["arg1"];
             $arg2 = $_POST["arg2"];
-            echo $arg1;
             add_question_by_type($q_type, $arg1, $arg2);
         }
         else {
