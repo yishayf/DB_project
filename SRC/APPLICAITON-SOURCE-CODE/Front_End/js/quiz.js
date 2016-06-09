@@ -1,9 +1,9 @@
 server_nova = "../Back_End";
 server_local = "http://localhost/OlympiData/Back_End";
 current_server = server_nova;
-var app = angular.module('quizApp', []);
 questions_http = current_server + "/generate_trivia_questions.php";
 post_statistics = current_server + "/update_questions_stats.php";
+var app = angular.module('quizApp', []);
 //var questions_http = "http://cs.tau.ac.il/~nogalavi1/mockAnswerDifferentFormat.php";
 
 app.directive('quiz', function(quizFactory, $http) {

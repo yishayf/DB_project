@@ -435,19 +435,22 @@ def add_questions_for_qtype(q_type, num_needed):
                                "SELECT game_id "
                                "FROM OlympicGame "
                                "WHERE game_id NOT IN (SELECT game_id FROM Question_type%d)"
-                               "AND city != ''"
+                               "AND city != '' "
+                               "ORDER BY RAND() "
                                "LIMIT %d" % (q_type, q_type, num_needed))
     elif q_type == 2:
         run_mysql_insert_query("INSERT INTO Question_type%d (athlete_id) "
                                "SELECT athlete_id "
                                "FROM Athlete "
-                               "WHERE athlete_id NOT IN (SELECT athlete_id FROM Question_type%d)"
+                               "WHERE athlete_id NOT IN (SELECT athlete_id FROM Question_type%d) "
+                               "ORDER BY RAND() "
                                "LIMIT %d" % (q_type, q_type, num_needed))
     elif q_type == 3:
         run_mysql_insert_query("INSERT INTO Question_type%d (field_id) "
                                "SELECT field_id "
                                "FROM OlympicSportField "
-                               "WHERE field_id NOT IN (SELECT field_id FROM Question_type%d)"
+                               "WHERE field_id NOT IN (SELECT field_id FROM Question_type%d) "
+                               "ORDER BY RAND() "
                                "LIMIT %d" % (q_type, q_type, num_needed))
     elif q_type == 4:
         run_mysql_insert_query("INSERT INTO Question_type%d (athlete_id, medal_color) "
@@ -455,18 +458,21 @@ def add_questions_for_qtype(q_type, num_needed):
                                "FROM Athlete a, (SELECT DISTINCT medal_color FROM AthleteMedals) as colors "
                                "                WHERE concat(colors.medal_color, a.athlete_id) NOT IN "
                                "(SELECT concat(medal_color, athlete_id) FROM Question_type%d) "
+                               "ORDER BY RAND() "
                                "LIMIT %d" % (q_type, q_type, num_needed))
     elif q_type == 5:
         run_mysql_insert_query("INSERT INTO Question_type%d (game_id) "
                                "SELECT game_id "
                                "FROM OlympicGame "
-                               "WHERE game_id NOT IN (SELECT game_id FROM Question_type%d)"
+                               "WHERE game_id NOT IN (SELECT game_id FROM Question_type%d) "
+                               "ORDER BY RAND() "
                                "LIMIT %d" % (q_type, q_type, num_needed))
     elif q_type == 6:
         run_mysql_insert_query("INSERT INTO Question_type%d (athlete_id) "
                                "SELECT DISTINCT athlete_id "
                                "FROM AthleteMedals "
-                               "WHERE athlete_id NOT IN (SELECT athlete_id FROM Question_type%d)"
+                               "WHERE athlete_id NOT IN (SELECT athlete_id FROM Question_type%d) "
+                               "ORDER BY RAND() "
                                "LIMIT %d" % (q_type, q_type, num_needed))
 
 
