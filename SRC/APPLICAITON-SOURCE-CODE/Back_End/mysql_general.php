@@ -14,9 +14,10 @@ $db->set_charset('utf8');
 function execute_sql_statement(&$stmt){
     global $db;
     if(!$stmt->execute()){
+        $errStr =  $db->error;
         $stmt->close();
         http_response_code(500);
-        die('There was an error running the query [' . $db->error . ']');
+        die('There was an error running the query [' . $errStr . ']');
     }
     $stmt->store_result();
 }
@@ -24,9 +25,10 @@ function execute_sql_statement(&$stmt){
 function execute_sql_insert_or_update_statement(&$stmt){
     global $db;
     if(!$stmt->execute()){
-        http_response_code(500);
+        $errStr =  $db->error;
         $stmt->close();
-        die('There was an error running the query [' . $db->error . ']');
+        http_response_code(500);
+        die('There was an error running the query [' . $errStr . ']');
     }
     $stmt->store_result();
     return TRUE;
